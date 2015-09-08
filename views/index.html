@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Use correct character set. -->
+  <meta charset="utf-8">
+  <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>Acquire</title>
+  <style>
+      @import url(../public/stylesheets/cubism.css);
+      @import url(../public/javascripts/milstd2525/renderer.css);
+      @import url(../public/javascripts/Cesium/Widgets/widgets.css);
+      @import url(../public/stylesheets/style.css);
+      @import url(../public/stylesheets/bootstrap.min.css);
+  </style>
+  <!--link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'-->
+</head>
+<body onload="start()" id="body">
+    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+    <div id="hidden" style="display: none;"></div>
+    <div id="cesiumContainer"></div>
+    <div id="scOverlay"></div>
+    <div id="baOne" class="backAng"></div>
+    <!--div id="baTwo" class="backAng"></div-->
+    <!--div id="hidden" style="display: none;"/-->
+    <div id="menuCont">
+        <img id="logo" src="../public/images/logo.png" />
+    </div>
+    <div id="menu">
+        <ul class="no-js">
+            <li class="dropdown">
+                <a href="#" id="fileButton" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    File
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="fileButton">
+                    <li><a href="#" id="openScenario" onclick="openScenario()">Open Scenario</a></li>
+                    <li><a href="#" id="saveScenario" onclick="saveScenario()">Save Scenario</a></li>
+                    <li><a href="#" id="clearScenario" data-toggle="modal" data-target="#clearConfirmModal">Clear Scenario</a></li>
+                    <li role="separator" class="bb divider"></li>
+                    <li><a href="#" id="refreshData" onclick="refreshData()">Refresh Current</a></li>
+                    <li><a href="#" id="importFile" onclick="importFile()">Import File</a></li>
+                    <li><a href="javascript:;" id="screenCapture" onclick="screenshotDiag()">Screen Capture</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" id="algorithmButton" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    Algorithms
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="algorithmButton">
+                    <li><a href="#" id="optimizeParticleSwarm" data-toggle="modal" data-target="#optimizeModal">Optimize</a></li>
+                    <li><a href="#" id="optimizeParticleSwarm" onclick='startOptimization("PARTICLE_SWARM")'>Particle Swarm</a></li>
+                    <li><a href="#" id="optimizeEvolutionary" onclick='startOptimization("EVOLUTIONARY")'>Evolutionary</a></li>
+                    <li><a href="#" id="optimizeGreedy" onclick='startOptimization("GREEDY")'>Greedy</a></li>
+                    <li><a href="#" id="optimizeStadium" onclick='startOptimization("STADIUM")'>Stadium</a></li>
+                    <li role="separator" class="bb divider"></li>
+                    <li><a href="#" id="stopOptimization" onclick="stopOptimization()">Stop Optimization</a></li>
+                    <li role="separator" class="bb divider"></li>
+                    <li><a href="#" id="evaluateScenario" onclick="evaluateScenario()">Evaluate Laydown</a></li>
+                </ul>
+            </li>
+            <!--li><a href="javascript:;" class ="bl nondd" id="pause" onclick="pauseGraph();">PAUSE</a></li>
+            <li><a href="javascript:;" class ="bl nondd" id="play" onclick="playGraph();">PLAY</a></li-->
+        </ul>
+    </div>
+    <div class="modal fade" id="optimizeModal" tabindex="-1" role="dialog" aria-labelledby="optimizeModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="optimizeModalLabel">Modal title</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">Email address</label>
+                            <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">Password</label>
+                            <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputFile">File input</label>
+                            <input type="file" id="exampleInputFile">
+                            <p class="help-block">Example block-level help text here.</p>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox"> Check me out
+                            </label>
+                        </div>
+                    </form>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" data-dismiss="modal">Optimize</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="clearConfirmModal" tabindex="-1" role="dialog" aria-labelledby="clearConfirmLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="clearConfirmLabel" style="color:black">Are you sure?</h4>
+                </div>
+                <div class="modal-body">
+                    <h2 style="color:black">Are you sure you want to clear all data? Unsaved changes will be lost.</h2>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="clearData()">Yes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="leftHide" style="left: -22.75em">
+        <div id="tabContainer">
+            <div id="tabs">
+                <ul>
+                    <li id="tabHeader_1" class="bl">Scene</li>
+                    <li id="tabHeader_2">Create</li>
+                </ul>
+            </div>
+            <div id="tabscontent">
+                <div class="tabpage" id="tabpage_1">
+                    <div id="leftBar">
+                        <h4>Scene Entities</h4>
+                        <div class="bdrCont">
+                            <div class="entityOutput">
+                                <div id="entityTitle">
+                                    <p>Entities</p>
+                                    <table><tr>
+                                        <th><h5>ID</h5></th>
+                                        <th><h5 class="fr">Visibility</h5></th>
+                                    </tr></table>
+                                </div>
+                                <ul id="entityList"></ul>
+                                <div id="weaponTitle">
+                                    <p>Weapons</p>
+                                    <table><tr>
+                                        <th><h5>ID</h5></th>
+                                        <th><h5 class="fr">Volume Visibility</h5></th>
+                                    </tr></table>
+                                </div>
+                                <ul id="weaponList"></ul>
+                                <div id="sensorTitle">
+                                    <p>Sensors</p>
+                                    <table><tr>
+                                        <th><h5>ID</h5></th>
+                                        <th><h5 class="fr">Volume Visibility</h5></th>
+                                    </tr></table>
+                                </div>
+                                <ul id="sensorList"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tabpage" id="tabpage_2">
+                    <h4>Areas</h4>
+                    <div class="bdrCont">
+                        <form onsubmit="createAsset();return false">
+                            <div id="toolbar" class="form-group">
+                                <label for="name">Name:</label>
+                                <input type="text" class="form-control spaced-bottom" id="name" size="30" required/>
+                                <label for="owner">Affiliation:</label>
+                                <select class="form-control spaced-bottom" id="owner">
+                                    <option value="FRIEND">Friend</option>
+                                    <option value="HOSTILE">Hostile</option>
+                                    <option value="Undefined">Undefined</option>
+                                </select>
+                                <label for="valExp">Value:</label>
+                                <input type="text" class="form-control spaced-bottom" id="valExp" required/>
+                                <input type="submit" class="btn btn-default spaced-bottom center" value="Create"/>
+                            </div>
+                        </form>
+                    </div>
+                    <h4>Sensors</h4>
+                    <div class="bdrCont">
+                        <form id="defRadar" onsubmit="wsSubmit('s'); return false;">
+                            <div id="sensorInputs" class="form-group">
+                                <label for="sensors">Type:</label>
+                                <select class="form-control spaced-bottom" id="sensors">
+                                    <option selected value=""></option>
+                                    <option value="XBR">XBR</option>
+                                    <option value="UEW">UEW</option>
+                                    <option value="CD">CD</option>
+                                    <option value="THD">THD</option>
+                                    <option value="SPY">SPY</option>
+                                    <option value="EAPS">EAPS</option>
+                                    <option value="LPWS">LPWS</option>
+                                    <option value="LCMR">LCMR</option>
+                                    <option value="Firfndr_37">Firfndr_37</option>
+                                    <option value="Giraffe">Giraffe</option>
+                                    <option value="Sentinel">Sentinel</option>
+                                    <option value="EQ_36">EQ_36</option>
+                                    <option value="KRFS">KRFS</option>
+                                </select>
+                                <label for="sensorID">Sensor ID:</label>
+                                <input type="text" class="form-control spaced-bottom" id="sensorID" required/>
+                                <input type="submit" class="btn btn-default center" value="Create">
+                            </div>
+                        </form>
+                    </div>
+                    <h4>Weapons</h4>
+                    <div class="bdrCont">
+                        <form id="defWeapon" onsubmit="wsSubmit('w'); return false;">
+                            <div id="weaponInputs" class="form-group">
+                                <label for="weapons">Type:</label>
+                                <select class="form-control spaced-bottom" id="weapons">
+                                    <option selected value=""></option>
+                                    <option value="LBEI">LBEI</option>
+                                    <option value="AegisU">AegisU</option>
+                                    <option value="AegisBlk1B">AegisBlk1B</option>
+                                    <option value="Thaad">Thaad</option>
+                                    <option value="SLAMR">SLAMR</option>
+                                    <option value="PAC2">PAC2</option>
+                                    <option value="PAC2M20">PAC2M20</option>
+                                    <option value="PAC2P20">PAC2P20</option>
+                                    <option value="PAC3">PAC3</option>
+                                    <option value="MSE">MSE</option>
+                                    <option value="EAPS">EAPS</option>
+                                    <option value="GMD">GMD</option>
+                                    <option value="SysA">SysA</option>
+                                    <option value="SysB">SysB</option>
+                                    <option value="SysC">SysC</option>
+                                    <option value="AI3">AI3</option>
+                                </select>
+                                <label for="weaponID">Weapon ID:</label>
+                                <input type="text" class="form-control spaced-bottom" id="weaponID" required/>
+                                <input type="submit" class="btn btn-default center" value="Create"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="leftHideToggle" class="hideToggle">
+            <!--a href="javascript:;" class ="ht" id="lhToggleA" onclick="slideLeft();">&lt<br>&lt</a-->
+            <a href="javascript:;" class="ht" id="lhToggleA" onclick="slideLeft();"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a>
+        </div>
+    </div>
+    <div id="trOne"></div>
+    <div id="trTwo"></div>
+    <div id="rightHide" style="right: -19.75em">
+        <div id="rightHideToggle" class="hideToggle">
+            <a href="javascript:;" class ="ht" id="rhToggleA" onclick="slideRight();"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a>
+        </div>
+        <div id="rightBar">
+            <h4>Selected Entity</h4>
+            <div class="entityOutput">
+                <p id="noSelect">Click on an entity on the globe to view it's parameters.</p>
+                <p id="multipleSelect">You have selected multiple entities from the scene. Select the intended entity from the list below.</p>
+                <ul id="selections"></ul>
+                <div><form id="picked" onsubmit="return false"><div id="pickedO" class="form-group"></div></form></div>
+                <div id="entityControls">
+                    <button class="btn btn-default" type="button" onclick="entHandler('update')">Update</button>
+                    <button class="btn btn-default" type="button" onclick="entHandler('move')">Move</button>
+                    <button class="btn btn-default" type="button" onclick="entHandler('delete')">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="bottom">
+        <div id="surveillanceCont">
+            <div id="ht1" class="center topHideToggle">
+                <a href="javascript:;" class ="bht" id="ht1ToggleA" onclick="slideDown('surveillanceCont', '-271px');">Surveillance Score</a>
+            </div>
+            <div id="surveillanceScore" class="graph"></div>
+        </div>
+        <div id="fireControlCont">
+            <div id="ht2" class="center topHideToggle">
+                <a href="javascript:;" class ="bht" id="ht2ToggleA" onclick="slideDown('fireControlCont', '-331px');">Fire Control Score</a>
+            </div>
+            <div id="fireControlScore" class="graph"></div>
+        </div>
+        <div id="weaponCont">
+            <div id="ht3" class="center topHideToggle">
+                <a href="javascript:;" class ="bht" id="ht3ToggleA" onclick="slideDown('weaponCont', '-311px');">Weapon Score</a>
+            </div>
+            <div id="weaponScore" class="graph"></div>
+        </div>
+        <div id="evaluationCont">
+            <div id="ht4" class="center topHideToggle">
+                <a href="javascript:;" class ="bht" id="ht4ToggleA" onclick="slideDown('evaluationCont', '-471px');">Evaluation</a>
+            </div>
+            <div id="evaluation" class="graph"></div>
+        </div>
+    </div>
+    <div id="openDialog">
+        <div class="bdrCont">
+            <form>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12 col-md-offset-3">
+                            <h4 class="open-dialog">Load Scenario</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <select class="open-dialog open-dialog-select" id="scenarios" size="0"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button type="button" class="open-dialog btn btn-default" onclick="loadScenario()">Load</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="open-dialog btn btn-default" onclick="document.getElementById('openDialog').style.display = 'none';">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="importDialog">
+        <h4>Import Files</h4>
+        <div class="bdrCont">
+            <form>
+                <p>Select one or multiple files to load.</p>
+                <input type="file" id="files" name="files[]" size="40" multiple required/>
+                <div id="lFOutput">
+                    <div id="fileNames"></div>
+                    <div id="fileTypes"></div>
+                </div>
+                <button type="button" onclick="loadFile()">Load</button>
+                <button type="button" onclick="document.getElementById('importDialog').style.display = 'none';">Cancel</button>
+            </form>
+        </div>
+    </div>
+    <div id="saveDialog">
+        <div class="bdrCont">
+            <form>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12 col-md-offset-3">
+                            <h4 class="open-dialog">Scenario Name</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="text" class="form-control" id="scenarioName" size="40" required/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button type="button" class="open-dialog btn btn-default" onclick="saveFile()">Save</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="open-dialog btn btn-default" onclick="document.getElementById('saveDialog').style.display = 'none';">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="saveImgDialog">
+        <div class="bdrCont">
+            <form id="save1">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12 col-md-offset-3">
+                            <h4 class="open-dialog">Save Name</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="text" class="form-control" id="imgName" size="40" required/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="imgSaveBtn" class="col-md-6">
+                            <button type="button" class="open-dialog btn btn-default" onclick="screenshot();" style="color:#000;">Submit</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="open-dialog btn btn-default" onclick="document.getElementById('saveImgDialog').style.display = 'none';">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div id="save2" style="display:none;">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12 col-md-offset-3">
+                            <h4 class="open-dialog" id="fReady">File Ready</h4>
+                        </div>
+                    </div>
+                    <div class="row" id="saveBtnDiag">
+                        <div class="col-md-6">
+                            <a class="open-dialog btn btn-default" id="screenSave" onclick="document.getElementById('saveImgDialog').style.display = 'none';">Save</a>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="open-dialog btn btn-default" onclick="document.getElementById('saveImgDialog').style.display = 'none';">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="saving">
+        <h4 class="open-dialog">Saving...</h4>
+    </div>
+    <div id="footer"></div>
+    <div id="logging"></div>
+    <script src="../public/javascripts/jquery-2.1.4.min.js"></script>
+    <script src="../public/javascripts/d3.min.js" type="text/javascript"></script>
+    <script src="../public/javascripts/cubism/cubism.v1.min.js" type="text/javascript"></script>
+    <script src="../public/javascripts/socket.io.js"></script>
+    <script src="../public/javascripts/bootstrap.min.js"></script>
+
+    <script src="../public/javascripts/html2canvas.js" type="text/javascript"></script>
+    <script src="../public/javascripts/milstd2525/sm-bc.min.js" type="text/javascript"></script>
+    <script src="../public/javascripts/Cesium/Cesium.js" type="text/javascript"></script>
+    <script src="../public/javascripts/Acquire.js" type="text/javascript"></script>
+    <script src="../public/javascripts/controller.js" type="text/javascript"></script>
+    <script src="../public/javascripts/radarChart.js"></script>
+    <script src="../public/javascripts/graph.js"></script>
+</body>
+</html>
