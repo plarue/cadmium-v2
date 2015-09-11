@@ -647,7 +647,7 @@ bigio.initialize(function() {
                     if (err)console.log(err);
                 });
             }
-            console.log("New Scenario - all databases cleared");
+            console.log("All databases cleared");
         });
 
         socket.on('search', function(msg, database, input, callback){
@@ -666,20 +666,26 @@ bigio.initialize(function() {
             mongoose.model(db).find({}, '-_id -__v', function(err, results){
                 if (err) return callback(err);
                 (pt)
-                ? callback(results, pt)
-                : callback(results);
+                    ? callback(results, pt)
+                    : callback(results);
             })
         });
 
-        socket.on('refreshAll', function(callback){
-            var db = ['sensor', 'weapon', 'track', 'asset'];
-            var cType = ['createSensor', 'createWeapon', 'createTrack', 'createAsset'];
-            for (var i=0; i < db.length; i++) {
-                mongoose.model(db[i]).find({}, function (err, results) {
+        socket.on('refreshAll', function(database, callback){
+            (function(db){
+                mongoose.model(db.dbType).find({}, function (err, results) {
                     if (err)console.log(err);
-                    callback({createType: cType[i], dbData:[db[i], results]});
+                    if (results.length > 0) {
+                        var refreshArray = [];
+                        for (var r in results) {
+                            (db.pt)
+                                ? refreshArray.push({createType: db.cType, dbData: ['add', db.pt, results[r]]})
+                                : refreshArray.push({createType: db.cType, dbData: ['add', results[r]]});
+                        }
+                        callback(refreshArray);
+                    }else{console.log('No ' + db.dbType + ' data to load');}
                 })
-            }
+            })(database);
         });
 
         socket.on('newElement', function(type, data){
@@ -731,7 +737,6 @@ bigio.initialize(function() {
         });
 
         socket.on('getScenario', function(folder, cb){
-            console.log('made it');
             var scenarios = [
                 {dirPath: path.join(__dirname, 'public/scenarios', folder, 'scenarios'), loadType: 'loadAsset'},
                 {dirPath: path.join(__dirname, 'public/scenarios', folder, 'sensors'), loadType: 'loadSensor'},
@@ -867,13 +872,13 @@ bigio.initialize(function() {
                     NumSensorIDs: line[7],
                     SensorIDs: sensorIds,
                     Fixed: line[8 + num],
-                    minEl: 2,
-                    max_Range: weaponData.Eff_Alt,
+                    minEl: 0,
+                    max_Range: (weaponData.maxFanAlt + weaponData.maxFanDR) / 2,
                     minRng: weaponData.Min_Alt_Int,
                     boresight_Half_Ang_Az: weaponData.FOF_halfangle,
                     boresight_Half_Ang_El: +line[6],
-                    nFaces: 1,
-                    maxEl: 89,
+                    nFaces: 2,
+                    maxEl: 90,
                     boresightEl: 0,
                     latlonalt: [+line[4], +line[3], +line[5]]
                 };

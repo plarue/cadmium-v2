@@ -1,5 +1,0 @@
-%Name     id   owner    valexp  height(m)  NFZ shape   rad(m)/numVerts  Lat1, Lon1, Alt1, Lat2, Lon2, Alt2, ...
-AegisA    5    Friend   4       0.0        0   Circle  500              32.25             -90.0              0.0
-AegisB    6    Friend   4       0.0        0   Circle  500              29.0              -78.25             0.0
-AegisC    7    Friend   4       0.0        0   Circle  500              32.1              -81.1              0.0
-AegisD    8    Friend   4       0.0        0   Circle  500              27.77             -86.5              0.0

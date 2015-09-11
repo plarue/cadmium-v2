@@ -44,7 +44,9 @@ var weaponTypes = new Schema({
     Strike_Angle0: Number,
     Strike_Angle1: Number,
     Look_Angle0: Number,
-    Inventory: Number
+    Inventory: Number,
+    maxFanAlt: Number,
+    maxFanDR: Number
 });
 
 mongoose.model('weaponTypes', weaponTypes, 'weaponTypes');

@@ -9,11 +9,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
   <title>Acquire</title>
   <style>
-      @import url(../public/stylesheets/cubism.css);
-      @import url(../public/javascripts/milstd2525/renderer.css);
-      @import url(../public/javascripts/Cesium/Widgets/widgets.css);
-      @import url(../public/stylesheets/style.css);
       @import url(../public/stylesheets/bootstrap.min.css);
+      @import url(../public/stylesheets/cubism.css);
+      @import url(../public/javascripts/Cesium/Widgets/widgets.css);
+      @import url(../public/javascripts/milstd2525/renderer.css);
+      @import url(../public/stylesheets/style.css);
+      @import url(../public/stylesheets/font.css);
   </style>
   <!--link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'-->
 </head>
@@ -29,20 +30,19 @@
         <img id="logo" src="../public/images/logo.png" />
     </div>
     <div id="menu">
-        <ul class="no-js">
+        <ul>
             <li class="dropdown">
                 <a href="#" id="fileButton" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                     File
                     <span class="caret"></span>
                 </a>
-                <ul class="dropdown-menu" aria-labelledby="fileButton">
-                    <li><a href="#" id="openScenario" onclick="openScenario()">Open Scenario</a></li>
-                    <li><a href="#" id="saveScenario" onclick="saveScenario()">Save Scenario</a></li>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="fileButton">
+                    <li><a href="#" id="openScenario" onclick="openScenario();">Open Scenario</a></li>
+                    <li><a href="#" id="saveScenario" onclick="saveScenario();">Save Scenario</a></li>
                     <li><a href="#" id="clearScenario" data-toggle="modal" data-target="#clearConfirmModal">Clear Scenario</a></li>
                     <li role="separator" class="bb divider"></li>
-                    <li><a href="#" id="refreshData" onclick="refreshData()">Refresh Current</a></li>
-                    <li><a href="#" id="importFile" onclick="importFile()">Import File</a></li>
-                    <li><a href="javascript:;" id="screenCapture" onclick="screenshotDiag()">Screen Capture</a></li>
+                    <li><a href="#" id="refreshData" onclick="refreshData();">Refresh Current</a></li>
+                    <li><a href="#" id="screenCapture" onclick="screenshotDiag();">Screen Capture</a></li>
                 </ul>
             </li>
             <li class="dropdown">
@@ -51,53 +51,79 @@
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="algorithmButton">
-                    <li><a href="#" id="optimizeParticleSwarm" data-toggle="modal" data-target="#optimizeModal">Optimize</a></li>
-                    <li><a href="#" id="optimizeParticleSwarm" onclick='startOptimization("PARTICLE_SWARM")'>Particle Swarm</a></li>
-                    <li><a href="#" id="optimizeEvolutionary" onclick='startOptimization("EVOLUTIONARY")'>Evolutionary</a></li>
-                    <li><a href="#" id="optimizeGreedy" onclick='startOptimization("GREEDY")'>Greedy</a></li>
-                    <li><a href="#" id="optimizeStadium" onclick='startOptimization("STADIUM")'>Stadium</a></li>
-                    <li role="separator" class="bb divider"></li>
+                    <li><a href="#" id="startOptimization" data-toggle="modal" data-target="#optimizeModal">Optimize</a></li>
                     <li><a href="#" id="stopOptimization" onclick="stopOptimization()">Stop Optimization</a></li>
-                    <li role="separator" class="bb divider"></li>
                     <li><a href="#" id="evaluateScenario" onclick="evaluateScenario()">Evaluate Laydown</a></li>
+                    <li role="separator" class="bb divider"></li>
+                    <li class="disabled" id="generateThreatsItem"><a href="#" id="generateThreats" onclick="generateThreats()">Generate Threats</a></li>
                 </ul>
             </li>
-            <!--li><a href="javascript:;" class ="bl nondd" id="pause" onclick="pauseGraph();">PAUSE</a></li>
-            <li><a href="javascript:;" class ="bl nondd" id="play" onclick="playGraph();">PLAY</a></li-->
+            <!--li><a href="javascript:;" class ="bl nondd" id="pause" onclick="openScenario();">PAUSE</a></li-->
         </ul>
     </div>
     <div class="modal fade" id="optimizeModal" tabindex="-1" role="dialog" aria-labelledby="optimizeModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="optimizeModalLabel">Modal title</h4>
+                    <!--button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button-->
+                    <h4 class="modal-title" id="optimizeModalLabel">Run Optimization</h4>
                 </div>
                 <div class="modal-body">
-                    <form>
-                        <div class="form-group">
-                            <label for="exampleInputEmail1">Email address</label>
-                            <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Algorithm Type</h4>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="algorithmRadio" id="psoAlgorithm" value="Particle Swarm" checked>Particle Swarm</input>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="algorithmRadio" id="evolutionaryAlgorithm" value="Evolutionary">Evolutionary</input>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="algorithmRadio" id="greedyAlgorithm" value="Greedy">Greedy</input>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="algorithmRadio" id="stadiumAlgorithm" value="algStadium">Stadium</input>
+                                </label>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="exampleInputPassword1">Password</label>
-                            <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                        <div class="col-md-6" id="algOne">
+                            <h4>What to optimize</h4>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="typeRadio" id="sensorsType" value="Sensors" checked>Sensors</input>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="typeRadio" id="weaponsType" value="Weapons">Weapons</input>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="typeRadio" id="weaponsSensorsType" value="Weapons and Sensors">Weapons and Sensors</input>
+                                </label>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="exampleInputFile">File input</label>
-                            <input type="file" id="exampleInputFile">
-                            <p class="help-block">Example block-level help text here.</p>
+                        <div class="col-md-6 noShow" id="algTwo">
+                            <h4>What to optimize</h4>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="typeRadio" id="stadiumType" value="optStadium">Stadium</input>
+                                </label>
+                            </div>
                         </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox"> Check me out
-                            </label>
-                        </div>
-                    </form>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" data-dismiss="modal">Optimize</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="optimize();" data-dismiss="modal">Optimize</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -106,16 +132,81 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="clearConfirmLabel" style="color:black">Are you sure?</h4>
+                    <h4 class="modal-title" id="clearConfirmLabel">Are you sure?</h4>
                 </div>
                 <div class="modal-body">
-                    <h2 style="color:black">Are you sure you want to clear all data? Unsaved changes will be lost.</h2>
+                    <h4>Are you sure you want to clear all data? Unsaved changes will be lost.</h4>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="clearData()">Yes</button>
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="newScenario()">Yes</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="modal fade" id="openModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="openDialogLabel">Load Scenario</h4>
+                </div>
+                <div class="modal-body">
+                    <!--div class="row">
+                      <div class="col-md-12 col-md-offset-3">
+                        <h4 class="open-dialog">Load Scenario</h4>
+                      </div>
+                    </div-->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <select class="open-dialog open-dialog-select" id="scenarios" size="0"></select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="loadScenario()">Load</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="importDialog">
+        <h4>Import Files</h4>
+        <div class="bdrCont">
+            <form>
+                <p>Select one or multiple files to load.</p>
+                <input type="file" id="files" name="files[]" size="40" multiple required/>
+                <div id="lFOutput">
+                    <div id="fileNames"></div>
+                    <div id="fileTypes"></div>
+                </div>
+                <button type="button" onclick="loadFile()">Load</button>
+            </form>
+        </div>
+    </div>
+    <div id="saveDialog">
+        <div class="bdrCont">
+            <form>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12 col-md-offset-3">
+                            <h4 class="open-dialog">Scenario Name</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="text" class="form-control" id="scenarioName" size="40" required/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button type="button" class="open-dialog btn btn-default" onclick="saveFile()">Save</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="open-dialog btn btn-default" onclick="document.getElementById('saveDialog').style.display = 'none';">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
     <div id="leftHide" style="left: -22.75em">
@@ -291,73 +382,6 @@
             <div id="evaluation" class="graph"></div>
         </div>
     </div>
-    <div id="openDialog">
-        <div class="bdrCont">
-            <form>
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-12 col-md-offset-3">
-                            <h4 class="open-dialog">Load Scenario</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <select class="open-dialog open-dialog-select" id="scenarios" size="0"></select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <button type="button" class="open-dialog btn btn-default" onclick="loadScenario()">Load</button>
-                        </div>
-                        <div class="col-md-6">
-                            <button type="button" class="open-dialog btn btn-default" onclick="document.getElementById('openDialog').style.display = 'none';">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="importDialog">
-        <h4>Import Files</h4>
-        <div class="bdrCont">
-            <form>
-                <p>Select one or multiple files to load.</p>
-                <input type="file" id="files" name="files[]" size="40" multiple required/>
-                <div id="lFOutput">
-                    <div id="fileNames"></div>
-                    <div id="fileTypes"></div>
-                </div>
-                <button type="button" onclick="loadFile()">Load</button>
-                <button type="button" onclick="document.getElementById('importDialog').style.display = 'none';">Cancel</button>
-            </form>
-        </div>
-    </div>
-    <div id="saveDialog">
-        <div class="bdrCont">
-            <form>
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-12 col-md-offset-3">
-                            <h4 class="open-dialog">Scenario Name</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <input type="text" class="form-control" id="scenarioName" size="40" required/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <button type="button" class="open-dialog btn btn-default" onclick="saveFile()">Save</button>
-                        </div>
-                        <div class="col-md-6">
-                            <button type="button" class="open-dialog btn btn-default" onclick="document.getElementById('saveDialog').style.display = 'none';">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
     <div id="saveImgDialog">
         <div class="bdrCont">
             <form id="save1">
@@ -406,6 +430,7 @@
     </div>
     <div id="footer"></div>
     <div id="logging"></div>
+
     <script src="../public/javascripts/jquery-2.1.4.min.js"></script>
     <script src="../public/javascripts/d3.min.js" type="text/javascript"></script>
     <script src="../public/javascripts/cubism/cubism.v1.min.js" type="text/javascript"></script>

@@ -35,8 +35,8 @@ Acquire.createAsset = function(){
             });
             currentGeometry[asset.name] = {shape: newEllipse, label: newLabel};
         }else{
-            scene.entities.remove(currentGeometry[asset.name].shape);
-            scene.entities.remove(currentGeometry[asset.name].label);
+            viewer.entities.remove(currentGeometry[asset.name].shape);
+            viewer.entities.remove(currentGeometry[asset.name].label);
             delete currentGeometry[asset.name];
         }
     }else{
@@ -64,8 +64,8 @@ Acquire.createAsset = function(){
             });
             currentGeometry[asset.name] = {shape: newPolygon, label: newLabel};
         }else{
-            scene.entities.remove(currentGeometry[asset.name].shape);
-            scene.entities.remove(currentGeometry[asset.name].label);
+            viewer.entities.remove(currentGeometry[asset.name].shape);
+            viewer.entities.remove(currentGeometry[asset.name].label);
             delete currentGeometry[asset.name];
         }
     }
@@ -122,10 +122,13 @@ Acquire.createVolume = function(){
         var instances = [];
         var instanceId = 0;
         var volType = [];
-        if (arguments[1] = 'sensor') {
+        var volumeColor;
+        if (arguments[1] == 'sensor') {
             volType = ['sensorList', 'sensorTitle', "SFGPESR---*****"];
-        }else if (arguments[1] = 'weapon') {
+            volumeColor = Cesium.Color.YELLOW;
+        }else if (arguments[1] == 'weapon') {
             volType = ['weaponList', 'weaponTitle', "SFGPEWM---*****"];
+            volumeColor = Cesium.Color.BLUE;
         }
         for (var j=0; j < faces; j++) {
             var degree = volume.boresight_Half_Ang_El;
@@ -158,10 +161,10 @@ Acquire.createVolume = function(){
                     slicePartitions: 10
                 }),
                 modelMatrix: modelMatrix,
-                id: volume.id + instanceId,
+                id: volume.name + instanceId,
 
                 attributes: {
-                    color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.YELLOW),
+                    color: Cesium.ColorGeometryInstanceAttribute.fromColor(volumeColor),
                     show: new Cesium.ShowGeometryInstanceAttribute(false)
                 }
             });
@@ -179,11 +182,11 @@ Acquire.createVolume = function(){
         scene.primitives.add(newPrimitive);
 
         //ADD VISIBILITY SLIDER
-        var list = document.getElementById(volType[0]);
+        var list = $("#" + volType[0]);
         var li = Acquire.createSlider(volume.name, volume.id, 'volume', 0);
-        list.appendChild(li);
+        list.append(li);
         if (list.innerHTML != '' || list.innerHTML != null) {
-            document.getElementById(volType[1]).style.display = 'inline';
+            $("#" + volType[1]).show();
         }
 
         //ADD ICON
@@ -232,27 +235,13 @@ Acquire.createIcon = function(icon, id, name, lon, lat, alt){
 //DOM CREATION
 
 Acquire.createSlider = function(id, name, type, ov){
-    var li = document.createElement('li');
-    var slider = document.createElement('INPUT');
-    var label = document.createElement('label');
-    var light = document.createElement('div');
-    label.setAttribute('for', id);
-    label.innerHTML = name;
-    slider.setAttribute('type', 'range');
-    slider.setAttribute('id', id);
-    slider.setAttribute('value', ov);
-    slider.setAttribute('min', '0');
-    slider.setAttribute('max', '1');
-    slider.setAttribute('step', '1');
-    light.setAttribute('class', 'indicator');
+    var light, f;
     var indId = 'ind' + id;
-    light.setAttribute('id', indId);
     if (ov === 0){
-        light.style.backgroundColor = '#ff0000';
+        light = '#ff0000';
     }else{
-        light.style.backgroundColor = '#adff2f';
+        light = '#adff2f';
     }
-    var f;
     if (type == 'asset'){
         f = assetCollection;
     }else if(type == 'track'){
@@ -260,10 +249,31 @@ Acquire.createSlider = function(id, name, type, ov){
     }else{
         f = selectInputs;
     }
-    slider.addEventListener('change', f, false);
-    li.appendChild(label);
-    li.appendChild(light);
-    li.appendChild(slider);
+    var li = $('<li></li>')
+        .append($('<label></label>')
+            .attr({
+                for: id
+            })
+            .html(name)
+        )
+        .append($('<div></div>')
+            .attr({
+                class: 'indicator',
+                id: indId
+            })
+            .css('background-color', light)
+        )
+        .append($('<input></input>')
+            .attr({
+                type: 'range',
+                id: id,
+                value: ov,
+                min: 0,
+                max: 1,
+                step: 1
+            })
+            .on('change',f)
+    );
     return li;
 };
 

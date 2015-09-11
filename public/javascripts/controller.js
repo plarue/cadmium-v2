@@ -51,10 +51,10 @@ function assetCollection(e){
     var indId = 'ind' + e.target.id;
     var indicator = document.getElementById(indId);
     if (e.target.value == 0) {
-        cesiumWidget.dataSources.remove(assetStream);
+        viewer.dataSources.remove(assetStream);
         indicator.style.backgroundColor = '#ff0000';
     }else{
-        cesiumWidget.dataSources.add(assetStream);
+        viewer.dataSources.add(assetStream);
         indicator.style.backgroundColor = '#adff2f';
     }
 }
@@ -156,9 +156,33 @@ socket.on('defendedArea', function(grid) {
     });
 });
 //INIT ACQUIRE
-function startOptimization(algorithm) {
-    console.log("Starting optimization");
-    socket.emit('startOptimization', algorithm);
+$(document).ready(function() {
+    $('input[type=radio][name=algorithmRadio]').change(function() {
+        if (this.value == 'algStadium') {
+            $('#algOne').hide();
+            $('#algTwo').show();
+            $('#stadiumType').prop('checked','true');
+        }
+        else{
+            $('#algOne').show();
+            $('#algTwo').hide();
+            $('#sensorsType').prop('checked','true');
+        }
+    });
+});
+function optimize() {
+    var algorithm = $("#optimizeModal").find("#psoAlgorithm").is(':checked') ? 'PARTICLE_SWARM' :
+        $("#optimizeModal").find("#evolutionaryAlgorithm").is(':checked') ? 'EVOLUTIONARY' :
+        $("#optimizeModal").find("#greedyAlgorithm").is(':checked') ? 'GREEDY' :
+        $("#optimizeModal").find("#stadiumAlgorithm").is(':checked') ? 'STADIUM' : '';
+
+    var type = $("#optimizeModal").find("#sensorsType").is(':checked') ? 'SENSORS' :
+        $("#optimizeModal").find("#weaponsType").is(':checked') ? 'WEAPONS' :
+        $("#optimizeModal").find("#weaponsSensorsType").is(':checked') ? 'WEAPONS_SENSORS' :
+        $("#optimizeModal").find("#stadiumType").is(':checked') ? 'STADIUM' : '';
+
+    console.log('Optimizing ' + type + ' and ' + algorithm);
+    socket.emit('startOptimization', algorithm, type);
 }
 function stopOptimization() {
     console.log("Stopping optimization");
@@ -171,20 +195,21 @@ function evaluateScenario() {
 function clearData(callback) {
     console.log('Clearing existing data');
     var dbType = [
-        {createType: 'createVolume', data: ['remove', 'sensor'], db: 'sensor'},
-        {createType: 'createVolume', data: ['remove', 'weapon'], db: 'weapon'},
-        {createType: 'createTrack', data: ['remove'], db: 'track'},
-        {createType: 'createAsset', data: ['remove'], db: 'asset'}
+        {createType: 'createVolume', typeData: ['remove', 'sensor'], db: 'sensor'},
+        {createType: 'createVolume', typeData: ['remove', 'weapon'], db: 'weapon'},
+        {createType: 'createTrack', typeData: ['remove'], db: 'track'},
+        {createType: 'createAsset', typeData: ['remove'], db: 'asset'}
     ];
     for (var i=0; i < 4; i++){
-        socket.emit('findAll', dbType[i].db, function (cb, dbType) {
-            if (cb != []) {
-                dbType[i].data.push(cb[i]);
+        socket.emit('findAll', dbType[i].db, dbType[i], function (cb, dbType) {
+            if (cb.length > 0) {
                 for (var i = 0; i < cb.length; i++) {
-                    Acquire[dbType[i].createType].apply(null, dbType[i].data);
+                    if (i>0) dbType.typeData.pop();
+                    dbType.typeData.push(cb[i]);
+                    Acquire[dbType.createType].apply(null, dbType.typeData);
                 }
-            }
-            if (i == 3){
+            }else{console.log('Database \"' + dbType.db + '\" contained no data')}
+            if (dbType.db == 'asset'){
                 document.getElementById('entityList').innerHTML = '';
                 if(callback) {
                     callback();
@@ -193,19 +218,29 @@ function clearData(callback) {
         });
     }
 }
+//NEW SCENARIO
+function newScenario() {
+    clearData(function(){
+        socket.emit('newF');
+    });
+}
 //REFRESH FROM DATABASE
 function refreshData() {
     clearData(function() {
         console.log('Refreshing data');
-        socket.emit('refreshAll', function(callback){
-            if (callback != []) {
-                for (var i=0; i < callback.length; i++) {
-                    Acquire[callback.createType].apply(null, 'add', callback.dbData);
+        var db = [
+            {dbType: 'sensor', cType: 'createVolume', pt: 'sensor'},
+            {dbType: 'weapon', cType: 'createVolume', pt: 'weapon'},
+            {dbType: 'track', cType: 'createTrack'},
+            {dbType: 'asset', cType: 'createAsset'}
+        ];
+        for (var i=0; i < 4; i++) {
+            socket.emit('refreshAll', db[i], function (cb) {
+                for (var rA in cb) {
+                    Acquire[cb[rA].createType].apply(null, cb[rA].dbData);
                 }
-            }else{
-                console.log('No ' + callback.dbData + ' data to load');
-            }
-        });
+            });
+        }
     });
 }
 
@@ -214,8 +249,6 @@ function refreshData() {
  */
 socket.on('loadElement', function(createType, dbData){
     if(dbData) {
-        console.log(createType);
-        console.log(dbData);
         Acquire[createType].apply(null, dbData);
     }
 });
@@ -233,7 +266,6 @@ socket.on('updateElement', function(createType, dbData){
 function openScenario() {
     socket.emit('openFile', function (dirs) {
         if (dirs.length > 0) {
-            document.getElementById('openDialog').style.display = 'block';
             var scene = document.getElementById('scenarios');
             scene.innerHTML = '';
             for (var i = 0; i < dirs.length; i++) {
@@ -245,19 +277,19 @@ function openScenario() {
                 scene.appendChild(opt);
             }
         }
+        $('#openModal').modal();
     })
 }
 function loadScenario(){
-    //clearData();
-    document.getElementById('openDialog').style.display = 'none';
     var e = document.getElementById('scenarios');
     var sel = e.options[e.selectedIndex].value;
-    var data = "All data cleared";
-    socket.emit('newF');
-    socket.emit('getScenario', sel, function(msg){
-        if (msg == 'pop'){
-            console.log(msg);
-        }
+    clearData(function() {
+        socket.emit('getScenario', sel, function (msg) {
+            $('#generateThreatsItem').removeClass('disabled');
+            if (msg == 'pop') {
+                console.log(msg);
+            }
+        })
     })
 }
 
