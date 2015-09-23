@@ -237,11 +237,7 @@ Acquire.createIcon = function(icon, id, name, lon, lat, alt){
 Acquire.createSlider = function(id, name, type, ov){
     var light, f;
     var indId = 'ind' + id;
-    if (ov === 0){
-        light = '#ff0000';
-    }else{
-        light = '#adff2f';
-    }
+    (ov === 0) ? light = '#ff0000' : light = '#adff2f';
     if (type == 'asset'){
         f = assetCollection;
     }else if(type == 'track'){
@@ -251,9 +247,7 @@ Acquire.createSlider = function(id, name, type, ov){
     }
     var li = $('<li></li>')
         .append($('<label></label>')
-            .attr({
-                for: id
-            })
+            .attr('for', id)
             .html(name)
         )
         .append($('<div></div>')
@@ -278,185 +272,74 @@ Acquire.createSlider = function(id, name, type, ov){
 };
 
 Acquire.listItem = function(name){
-    var li = document.createElement('li');
-    var ckBox = document.createElement('INPUT');
-    var label = document.createElement('label');
-    label.setAttribute('for', name);
-    label.innerHTML = name;
-    ckBox.setAttribute('type', 'checkbox');
-    ckBox.setAttribute('id', name);
-    ckBox.checked = true;
-    li.appendChild(ckBox);
-    li.appendChild(label);
+    var li = $('<li></li>')
+        .append($('<input></input>')
+            .attr({
+                type: 'checkbox',
+                id: name
+            })
+            .prop('checked', true)
+        )
+        .append($('<label></label>')
+            .attr('for', name)
+            .html(name)
+    );
     return li;
 };
 
 Acquire.createInput = function(name, value){
-    var label = document.createElement('label');
-    label.setAttribute('for', name);
-    label.innerHTML = name;
-    var textBox = document.createElement('input');
-    textBox.setAttribute('type', 'text');
-    textBox.setAttribute('id', name);
-    textBox.setAttribute('value', value);
-    var li = document.createElement('li');
-    li.appendChild(label);
-    li.appendChild(textBox);
+    var li = $('<li></li>')
+        .append($('<label></label>')
+            .attr('for', name)
+            .html(name)
+        )
+        .append($('<input></input>')
+            .attr({
+                type: 'text',
+                id: name,
+                value: value
+            })
+    );
     return li;
 };
 
-function pretify(name) {
-  name = name.split(/(?=[A-Z])/).join(' ');
-  name = name.replace(/_/g, ' ');
-  name = name.charAt(0).toUpperCase() + name.slice(1);
-  return name;
-}
-
-Acquire.constructParameterDisplay = function(result) {
-    var ul = document.createElement('ul');
-
-    for (var key in result) {
-        if (key == '_id' || key == '__v' || key == 'id') {
-            continue;
-        }
-
-        var value = result[key];
-
-        if(typeof value === 'string' || typeof value === 'number') {
-            var label = document.createElement('label');
-            label.setAttribute('for', key);
-            label.innerHTML = pretify(key);
-
-            var textBox = document.createElement('input');
-            textBox.setAttribute('type', 'text');
-            textBox.setAttribute('class', 'form-control')
-            textBox.setAttribute('id', key);
-            textBox.setAttribute('value', value);
-            var li = document.createElement('li');
-            li.appendChild(label);
-            ul.appendChild(li);
-            var li = document.createElement('li');
-            li.appendChild(textBox);
-            ul.appendChild(li);
-
-        } else if(Array.isArray(value)) {
-            var label = document.createElement('label');
-            label.setAttribute('for', key);
-            label.innerHTML = pretify(key);
-            var li = document.createElement('li');
-            li.appendChild(label);
-            ul.appendChild(li);
-
-            var oa = result[key];
-            for (i = 0; i < value.length; i += 1) {
-                var textBox = document.createElement('input');
-                textBox.setAttribute('type', 'text');
-                textBox.setAttribute('class', 'form-control')
-                textBox.setAttribute('id', key);
-                textBox.setAttribute('value', value[i]);
-                var li = document.createElement('li');
-                li.setAttribute('class', 'triplet');
-                li.appendChild(textBox);
-                ul.appendChild(li);
-            }
-        }
-    }
-
-    return ul;
-};
-
-Acquire.createROInput = function(name, value){
-    var label = document.createElement('label');
-    label.setAttribute('for', name);
-    label.innerHTML = name;
-    var textBox = document.createElement('input');
-    textBox.setAttribute('type', 'text');
-    textBox.setAttribute('id', name);
-    textBox.setAttribute('value', value);
-    textBox.style.width = '6em';
-    textBox.style.color = '#000';
-    textBox.readOnly = true;
-    var li = document.createElement('li');
-    li.appendChild(label);
-    li.appendChild(textBox);
-    return li;
-};
-
-Acquire.createTriInput = function(name, values){
-    var label = document.createElement('p');
-    label.style.fontWeight = 'bold';
-    label.innerHTML = name;
-    var li = document.createElement('li');
-    li.appendChild(label);
-    var array = [values[0], values[1], values[2]];
-    for (var k=0;k<3;k++) {
-        var label2 = document.createElement('label');
-        label2.setAttribute('for', name + k);
-        label2.setAttribute('class', 'noShow');
-        label2.innerHTML = name;
-        li.appendChild(label2);
-        var textBox = document.createElement('input');
-        textBox.setAttribute('type', 'text');
-        textBox.setAttribute('id', name + k);
-        textBox.setAttribute('value', array[k]);
-        textBox.style.color = '#000';
-        li.appendChild(textBox);
-    }
-    return li;
-};
-
-Acquire.createTriROInput = function(name, value, valuetwo, valuethree){
-    var label = document.createElement('label');
-    label.setAttribute('for', name);
-    label.innerHTML = name;
-    var li = document.createElement('li');
-    li.appendChild(label);
-    var array = [value, valuetwo, valuethree];
-    for (var j=0;j<3;j++) {
-        var textBox = document.createElement('input');
-        textBox.setAttribute('type', 'text');
-        textBox.setAttribute('id', name);
-        textBox.setAttribute('value', array[j]);
-        textBox.style.width = '10em';
-        textBox.style.color = '#000';
-        textBox.readOnly = true;
-        li.appendChild(textBox);
-    }
-    return li;
-};
-
-Acquire.createArrayInput = function(name, ar){
-    var label = document.createElement('p');
-    label.style.fontWeight = 'bold';
-    label.innerHTML = name;
-    var li = document.createElement('li');
-    li.appendChild(label);
-    for (var j=0;j<ar.length;j++) {
-        var label2 = document.createElement('label');
-        label2.setAttribute('for', name + j);
-        label2.setAttribute('class', 'noShow');
-        label2.innerHTML = name;
-        li.appendChild(label2);
-        var textBox = document.createElement('input');
-        textBox.setAttribute('type', 'text');
-        textBox.setAttribute('id', name + j);
-        textBox.setAttribute('value', ar[j]);
-        textBox.style.color = '#000';
-        li.appendChild(textBox);
+Acquire.createArrayInput = function(name, values){
+    var li = $('<li></li>')
+        .append($('<p></p>')
+            .html(name)
+            .css('fontWeight', 'bold')
+    );
+    for (var k=0;k < values.length;k++) {
+        li.append($('<label></label>')
+            .attr({
+                for: name + k,
+                class: 'noShow'
+            })
+            .html(name)
+        ).append($('<input></input>')
+            .attr({
+                type: 'text',
+                id: name + k,
+                value: array[k]
+            })
+            .css('color', '#000')
+        );
     }
     return li;
 };
 
 Acquire.createSelection = function(name, type){
-    var button = document.createElement('button');
-    button.setAttribute('class', 'btn btn-default')
-    button.setAttribute('type', 'button');
-    button.setAttribute('id', name);
-    button.setAttribute('value', type);
-    button.innerHTML = name;
-    button.addEventListener('click', entityListSelect, false);
-    var li = document.createElement('li');
-    li.appendChild(button);
+    var li = $('<li></li>')
+        .append($('<button></button>')
+            .attr({
+                class: 'btn btn-default',
+                type: 'button',
+                id: name,
+                value: type
+            })
+            .html(name)
+            .click(entityListSelect)
+    );
     return li;
 };
 
@@ -474,3 +357,10 @@ Acquire.removeDuplicates = function(a) {
     }
     return out;
 };
+
+function pretify(name) {
+    name = name.split(/(?=[A-Z])/).join(' ');
+    name = name.replace(/_/g, ' ');
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+    return name;
+}
