@@ -15,7 +15,7 @@ Acquire.createAsset = function(){
     if (asset.shape == 'Circle'){
         if (arguments[0] == 'add'){
             var newEllipse = viewer.entities.add({
-                position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[0], asset.latlonalt[1]),
+                position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[1], asset.latlonalt[0]),
                 name : asset.name,
                 ellipse : {
                     semiMinorAxis : asset.rad,
@@ -26,7 +26,7 @@ Acquire.createAsset = function(){
                 }
             });
             var newLabel = viewer.entities.add({
-                position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[0], asset.latlonalt[1]),
+                position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[1], asset.latlonalt[0]),
                 name: asset.name,
                 label: {
                     text: asset.name,
@@ -43,7 +43,7 @@ Acquire.createAsset = function(){
         if (arguments[0] == 'add'){
             var vertices = [];
             for (var i=0; i < asset.latlonalt.length; i+=3){
-                vertices.push(asset.latlonalt[i], asset.latlonalt[i+1]);
+                vertices.push(asset.latlonalt[i+1], asset.latlonalt[i]);
             }
             var newPolygon = viewer.entities.add({
                 name : asset.name,
@@ -55,7 +55,7 @@ Acquire.createAsset = function(){
                 }
             });
             var newLabel = viewer.entities.add({
-                position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[0], asset.latlonalt[1]),
+                position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[1], asset.latlonalt[0]),
                 name: asset.name,
                 label: {
                     text: asset.name,

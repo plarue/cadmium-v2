@@ -738,22 +738,22 @@ bigio.initialize(function() {
 
         socket.on('getScenario', function(folder, cb){
             var scenarios = [
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'scenarios'), loadType: 'loadAsset'},
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'sensors'), loadType: 'loadSensor'},
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'weapons'), loadType: 'loadWeapon'}
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'scenarios'), loadType: 'loadAsset', fNames: ['AllowedRegions.dat', 'DefendedAreas.dat', 'DefendedAssets.dat','RestrictedRegions.dat','ThreatAreas.dat']},
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'sensors'), loadType: 'loadSensor', fNames: ['Radars.dat']},
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'weapons'), loadType: 'loadWeapon', fNames: ['Launchers.dat']}
             ];
             scenarios.forEach(function(scenario){
-                var curPath = scenario.dirPath;
-                fs.readdir(curPath, function (err, files) {
-                    for (var file in files) {
-                        var filePath = path.join(curPath, files[file]);
+                for (var file in scenario.fNames) {
+                    var filePath = path.join(scenario.dirPath, scenario.fNames[file]);
+                    var ftype = scenario.fNames[file];
+                    (function (filePath, ftype) {
                         new lazy(fs.createReadStream(filePath))
                             .lines
                             .forEach(function (line) {
-                                loading[scenario.loadType](line.toString());
+                                loading[scenario.loadType](line.toString(), ftype);
                             });
-                    }
-                });
+                    })(filePath, ftype);
+                }
             });
         });
 
@@ -762,18 +762,20 @@ bigio.initialize(function() {
         });
 
         var loading = {};
-        loading.loadAsset = function(line) {
+        loading.loadAsset = function() {
+            var line = arguments[0];
+            var ftype = arguments[1];
             if(line == null || line == '' || line.slice(0, 1) == '%') {
                 return;
             }
             line = line.match(/[^ ]+/g);
             var pos = [];
             if (line[6] == 'Circle') {
-                pos = [+line[9], +line[8], +line[10]];
+                pos = [+line[8], +line[9], +line[10]];
             } else {
                 var vertexNum = line[7];
                 for (var a = 8; a < 3 * vertexNum + 8; a += 3) {
-                    pos.push(+line[a + 1], +line[a], +line[a + 2]);
+                    pos.push(+line[a], +line[a + 1], +line[a + 2]);
                 }
             }
             var data = {
@@ -783,9 +785,11 @@ bigio.initialize(function() {
                 owner: line[2],
                 valexp: +line[3],
                 height: +line[4],
+                NFZ: +line[5],
                 shape: line[6],
                 rad: line[7],
-                latlonalt: pos
+                latlonalt: pos,
+                ftype: ftype
             };
             socket.emit('loadElement', 'createAsset', ['add', data]);
             var entry = new asset(data);
@@ -793,7 +797,8 @@ bigio.initialize(function() {
                 if (err) return console.log(err);
             });
         };
-        loading.loadSensor = function(line) {
+        loading.loadSensor = function() {
+            var line = arguments[0];
             if(line == null || line == '' || line.slice(0, 1) == '%') {
                 return;
             }
@@ -843,14 +848,14 @@ bigio.initialize(function() {
                 });
             });
         };
-        loading.loadWeapon = function(line) {
+        loading.loadWeapon = function() {
+            var line = arguments[0];
             if(line == null || line == '' || line.slice(0, 1) == '%') {
                 return;
             }
             line = line.match(/[^ ]+/g);
 
             var weaponType = line[2];
-
             mongoose.model('weaponTypes').findOne({id: weaponType}, function(err, results) {
                 var weaponData = results;
                 var num = +line[7];
@@ -910,13 +915,12 @@ function copyRecursiveSync(src, dest) {
 function saveScenario(dir, name, callback) {
     var root = path.join(__dirname, 'public', dir, name);
     var dirs = [
-        {directory: 'scenarios', db: 'asset', filename: 'Assets.dat', obj: ['%', 'name', 'Index', 'owner', 'valexp', 'height', 'shape', 'rad', 'latlonalt']},
+        {directory: 'scenarios', db: 'asset', filename: 'Assets.dat', obj: ['%', 'name', 'Index', 'owner', 'valexp', 'height', 'NFZ', 'shape', 'rad', 'latlonalt']},
         {directory: 'sensors', db: 'sensor', filename: 'Radars.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'BoresightAz', 'NumWeaponIDs', 'WeaponIDs', 'KFactorClass', 'KFactorType', 'KFactorID', 'Fixed']},
         {directory: 'weapons', db: 'weapon', filename: 'Launchers.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'Boresight', 'NumSensorIDs', 'SensorIDs', 'Fixed']}
     ];
     fs.mkdir(root, function(err){
         if(err)console.log(err);
-        //copyRecursiveSync(path.join(__dirname, 'public/template'), root);
         require('ncp').ncp(path.join(__dirname, 'public/template'), root, function(err) {
             if(err)console.log(err);
             async.each(dirs, function(dir, cb) {
@@ -931,7 +935,7 @@ function saveScenario(dir, name, callback) {
                 mongoose.model(dir.db).find({},'-_id -__v').lean().exec(function(err, results){
                     if(err)console.log(err);
                     if (results.length > 0) {
-                        if (dir.db != 'track') {
+                        if (dir.db != 'asset') {
                             var comData = [];
                             var cLine = dir.obj;
                             comData[0] = cLine.join(' ');
@@ -955,42 +959,32 @@ function saveScenario(dir, name, callback) {
                                 if (err)console.log(err);
                             });
                         } else {
-                            var comData = [];
+                            var comFiles = {};
                             for (var i=0; i < results.length; i++){
                                 var p = results[i];
-
-                                console.log(p);
-
-                                for(var j = 0; j < p.time.length; j++) {
-                                    var line = [
-                                        p.id,
-                                        p.time[j],
-                                        p.positions[j].x,
-                                        p.positions[j].y,
-                                        p.positions[j].z,
-                                        p.velocity[j][0],
-                                        p.velocity[j][1],
-                                        p.velocity[j][2],
-                                        p.rcs
-                                    ];
-                                    comData.push(line.join(' '));
+                                var cLine = dir.obj;
+                                if (!comFiles[p.ftype]) {
+                                    comFiles[p.ftype] = {fName: p.ftype, comData: []};
+                                    comFiles[p.ftype].comData[0] = cLine.join(' ');
                                 }
-
-                                /* var len = p.positions.length / 3;
-                                for (var j=0, k= 0, l=0; j < len; j++, k+=3, l+=4){
-                                    var line = [
-                                        p.id,
-                                        p.time[j],
-                                        +p.positions[k], +p.positions[k+1], +p.positions[k+2],
-                                        +p.velocity[l], +p.velocity[l+1], +p.velocity[l+2], +p.velocity[l+3]
-                                    ];
-                                    comData.push(line.join(' '));
-                                } */
+                                var comObj = [];
+                                for (var j=1; j < cLine.length; j++) {
+                                    if (Array.isArray(p[cLine[j]])) {
+                                        comObj.push(p[cLine[j]].join(' '));
+                                    } else if (cLine[j] == 'Index') {
+                                        comObj.push(comFiles[p.ftype].comData.length + 1);
+                                    } else {
+                                        comObj.push(p[cLine[j]]);
+                                    }
+                                }
+                                comFiles[p.ftype].comData.push(comObj.join(' '));
                             }
-                            var data = comData.join('\r\n');
-                            fs.writeFile(path.join(root, dir.directory, dir.filename), data, function(err){
-                                if (err)console.log(err);
-                            });
+                            for (var key in comFiles) {
+                                var data = comFiles[key].comData.join('\r\n');
+                                fs.writeFile(path.join(root, dir.directory, comFiles[key].fName), data, function (err) {
+                                    if (err)console.log(err);
+                                });
+                            }
                         }
                     }
                     cb();

@@ -11,9 +11,11 @@ var asset = mongoose.Schema({
     owner: String,
     valexp: Number,
     height: Number,
+    NFZ: Number,
     shape: String,
     rad: Number,
-    latlonalt: []
+    latlonalt: [],
+    ftype: String
 }, { id: false });
 
 mongoose.model('asset', asset, 'asset');
