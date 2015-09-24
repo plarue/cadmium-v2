@@ -486,6 +486,7 @@ bigio.initialize(function() {
                 var rcs = +message[8];
 
                 threat.id = id;
+                threat.name = 'T' + id;
                 threat.times = [];
                 threat.positions = [];
                 threat.colors = [];
@@ -504,7 +505,7 @@ bigio.initialize(function() {
                     threat.times.push(time);
                     threat.positions.push({x: x, y: y, z: z});
                     threat.colors.push({red: 1, green: 0, blue: 0});
-                    threat.velocity.push([vx, vy, vx]);
+                    threat.velocity.push([vx, vy, vz]);
                 }
 
                 socket.emit('loadElement', 'createTrack', ['add', threat]);
@@ -640,6 +641,19 @@ bigio.initialize(function() {
             });
         });
 
+        socket.on('generateThreats', function() {
+            var name = makeid();
+            saveScenario('tmp', name, function() {
+                console.log("Generating threats.");
+                var message = {relativePath: path.join(__dirname, 'public/tmp', name)};
+                bigio.send({
+                    topic: 'acquire_generate_threats',
+                    message: message,
+                    type: "com.a2i.messages.GenerateThreatsMessage"
+                });
+            });
+        });
+
         socket.on('newF', function(){
             var db = [sensor, weapon, track, asset];
             for (var i=0; i < db.length; i++) {
@@ -736,11 +750,43 @@ bigio.initialize(function() {
             })
         });
 
+        socket.on('getWeaponParams', function(name, callback) {
+            mongoose.model('weaponA').findOne({Identifier: name}, function(err, results) {
+                if(results) {
+                    mongoose.model('weaponTypes').findOne({id: results.Type}, function(e, res) {
+                        if(res) {
+                            callback(res);
+                        } else {
+                            callback({});
+                        }
+                    });
+                } else {
+                    callback({});
+                }
+            });
+        });
+
+        socket.on('getSensorParams', function(name, callback) {
+            mongoose.model('sensorA').findOne({Identifier: name}, function(err, results) {
+                if(results) {
+                    mongoose.model('radarTypes').findOne({id: results.Type}, function(e, res) {
+                        if(res) {
+                            callback(res);
+                        } else {
+                            callback({});
+                        }
+                    });
+                } else {
+                    callback({});
+                }
+            });
+        });
+
         socket.on('getScenario', function(folder, cb){
             var scenarios = [
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'scenarios'), loadType: 'loadAsset', fNames: ['AllowedRegions.dat', 'DefendedAreas.dat', 'DefendedAssets.dat','RestrictedRegions.dat','ThreatAreas.dat']},
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'sensors'), loadType: 'loadSensor', fNames: ['Radars.dat']},
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'weapons'), loadType: 'loadWeapon', fNames: ['Launchers.dat']}
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'scenarios'), loadType: 'loadAsset', fNames: ['AllowedRegions_NK.dat', 'DefendedAreas_NK.dat', 'DefendedAssets_NK.dat','RestrictedRegions_NK.dat','ThreatAreas_NK.dat']},
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'sensors'), loadType: 'loadSensor', fNames: ['Radars_NK.dat']},
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'weapons'), loadType: 'loadWeapon', fNames: ['Launchers_NK.dat']}
             ];
             scenarios.forEach(function(scenario){
                 for (var file in scenario.fNames) {
@@ -755,6 +801,7 @@ bigio.initialize(function() {
                     })(filePath, ftype);
                 }
             });
+            cb();
         });
 
         socket.on('importFile', function(type, line){
@@ -779,7 +826,7 @@ bigio.initialize(function() {
                 }
             }
             var data = {
-                id: line[1],
+                id: 'A' + line[0],
                 name: line[0],
                 Index: line[1],
                 owner: line[2],
@@ -916,8 +963,8 @@ function saveScenario(dir, name, callback) {
     var root = path.join(__dirname, 'public', dir, name);
     var dirs = [
         {directory: 'scenarios', db: 'asset', filename: 'Assets.dat', obj: ['%', 'name', 'Index', 'owner', 'valexp', 'height', 'NFZ', 'shape', 'rad', 'latlonalt']},
-        {directory: 'sensors', db: 'sensor', filename: 'Radars.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'BoresightAz', 'NumWeaponIDs', 'WeaponIDs', 'KFactorClass', 'KFactorType', 'KFactorID', 'Fixed']},
-        {directory: 'weapons', db: 'weapon', filename: 'Launchers.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'Boresight', 'NumSensorIDs', 'SensorIDs', 'Fixed']}
+        {directory: 'sensors', db: 'sensor', filename: 'Radars_NK.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'BoresightAz', 'NumWeaponIDs', 'WeaponIDs', 'KFactorClass', 'KFactorType', 'KFactorID', 'Fixed']},
+        {directory: 'weapons', db: 'weapon', filename: 'Launchers_NK.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'Boresight', 'NumSensorIDs', 'SensorIDs', 'Fixed']}
     ];
     fs.mkdir(root, function(err){
         if(err)console.log(err);

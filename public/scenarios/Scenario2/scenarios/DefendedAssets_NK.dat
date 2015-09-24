@@ -1,0 +1,12 @@
+%Name     id   owner    valexp  height(m)  NFZ shape   rad(m)/numVerts  Lat1, Lon1, Alt1, Lat2, Lon2, Alt2, ...
+Fukuejima      11     Friend   4       0.0        0   Circle  11000            32.68            128.76              0.0
+Nagasaki       12     Friend   4       0.0        0   Circle  9000             32.75            129.89              0.0
+Hiroshima      13     Friend   4       0.0        0   Circle  17000            34.33            132.76              0.0
+Osaka          15     Friend   4       0.0        0   Circle  8500             34.70            135.48              0.0
+Tokyo          16     Friend   4       0.0        0   Circle  26000            35.70            139.69              0.0
+Akita          17     Friend   4       0.0        0   Circle  17000            39.70            140.10              0.0
+Sapporo        18     Friend   4       0.0        0   Circle  19000            43.04            141.42              0.0
+Seoul          19     Friend   4       0.0        0   Circle  14000            37.55            126.99              0.0
+Daegu          20     Friend   4       0.0        0   Circle  17000            35.90            128.63              0.0
+Busan          21     Friend   4       0.0        0   Circle  15600            35.17            128.98              0.0 
+Incheon        22     Friend   4       0.0        0   Circle  18000            37.36            126.73              0.0 

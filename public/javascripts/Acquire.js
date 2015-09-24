@@ -16,7 +16,7 @@ Acquire.createAsset = function(){
         if (arguments[0] == 'add'){
             var newEllipse = viewer.entities.add({
                 position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[1], asset.latlonalt[0]),
-                name : asset.name,
+                name : asset.id,
                 ellipse : {
                     semiMinorAxis : asset.rad,
                     semiMajorAxis : asset.rad,
@@ -33,11 +33,11 @@ Acquire.createAsset = function(){
                     font : '16px Helvetica'
                 }
             });
-            currentGeometry[asset.name] = {shape: newEllipse, label: newLabel};
+            currentGeometry[asset.id] = {shape: newEllipse, label: newLabel};
         }else{
-            viewer.entities.remove(currentGeometry[asset.name].shape);
-            viewer.entities.remove(currentGeometry[asset.name].label);
-            delete currentGeometry[asset.name];
+            viewer.entities.remove(currentGeometry[asset.id].shape);
+            viewer.entities.remove(currentGeometry[asset.id].label);
+            delete currentGeometry[asset.id];
         }
     }else{
         if (arguments[0] == 'add'){
@@ -46,7 +46,7 @@ Acquire.createAsset = function(){
                 vertices.push(asset.latlonalt[i+1], asset.latlonalt[i]);
             }
             var newPolygon = viewer.entities.add({
-                name : asset.name,
+                name : asset.id,
                 polygon : {
                     hierarchy : Cesium.Cartesian3.fromDegreesArray(vertices),
                     material : rgba[0],
@@ -62,11 +62,11 @@ Acquire.createAsset = function(){
                     font : '16px Helvetica'
                 }
             });
-            currentGeometry[asset.name] = {shape: newPolygon, label: newLabel};
+            currentGeometry[asset.id] = {shape: newPolygon, label: newLabel};
         }else{
-            viewer.entities.remove(currentGeometry[asset.name].shape);
-            viewer.entities.remove(currentGeometry[asset.name].label);
-            delete currentGeometry[asset.name];
+            viewer.entities.remove(currentGeometry[asset.id].shape);
+            viewer.entities.remove(currentGeometry[asset.id].label);
+            delete currentGeometry[asset.id];
         }
     }
 };
@@ -97,14 +97,14 @@ Acquire.createTrack = function(){
         scene.primitives.add(primitive);
 
         //ADD VISIBILITY SLIDER
-        var list = document.getElementById('entityList');
+        var list = $('#entityList');
         var trackSlider = document.getElementById('tracks');
         if (trackSlider == null) {
             var li = Acquire.createSlider('tracks', 'Tracks', 'track', 1);
-            list.appendChild(li);
+            list.append(li);
         }
         if (list.innerHTML != '' || list.innerHTML != null){
-            document.getElementById('entityTitle').style.display = 'inline';
+            $('#entityTitle').show();
         }
     }else if (arguments[0] == 'remove'){
         scene.primitives.remove(currentGeometry[track.name]);

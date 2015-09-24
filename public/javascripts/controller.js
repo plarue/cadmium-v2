@@ -190,7 +190,20 @@ function stopOptimization() {
 }
 function evaluateScenario() {
     console.log("Evaluating scenario");
+    clearHeatmap();
     socket.emit('evaluateScenario');
+}
+function generateThreats() {
+    if(!$("#generateThreatsItem").hasClass("disabled")) {
+        console.log("Generating threats");
+        socket.emit('generateThreats');
+    }
+}
+function clearHeatmap() {
+    for(var p in heatMap) {
+        scene.primitives.remove(heatMap[p]);
+    }
+    heatMap = [];
 }
 function clearData(callback) {
     console.log('Clearing existing data');
@@ -224,6 +237,7 @@ function newScenario() {
         socket.emit('newF');
     });
 }
+
 //REFRESH FROM DATABASE
 function refreshData() {
     clearData(function() {
@@ -443,6 +457,7 @@ function checkFonts()
         //Do actions to handle font failure to load scenario
     }
 }
+
 function slideDown(container, distance) {
     var box = document.getElementById(container);
     ( box.style.bottom == distance || box.style.bottom == '' )
