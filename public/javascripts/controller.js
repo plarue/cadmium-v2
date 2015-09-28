@@ -199,12 +199,82 @@ function generateThreats() {
         socket.emit('generateThreats');
     }
 }
+
+//HEAT MAP
+var heatMap = [];
+socket.on('defendedArea', function(grid) {
+    heatMap = heatMap.concat(voronoiGrid(grid));
+});
+function voronoiGrid(grid) {
+    console.log("Displaying grid");
+    var voronoi = d3.geom.voronoi();
+    voronoi.clipExtent([[grid.bounds.west, grid.bounds.south], [grid.bounds.east, grid.bounds.north]]);
+    voronoi.x(function(d) {
+        return d.lon;
+    });
+    voronoi.y(function(d) {
+        return d.lat;
+    });
+
+    var polygons = voronoi(grid.points);
+
+    var primitives = [];
+
+    for(var i in polygons) {
+        var vertices = [];
+        for(var j in polygons[i]) {
+            if(Array.isArray(polygons[i][j])) {
+                vertices = vertices.concat(polygons[i][j]);
+            }
+        }
+        var pg = new Cesium.Polygon({
+            positions: Cesium.Cartesian3.fromDegreesArray(vertices),
+            material: new Cesium.Material({
+                fabric : {
+                    type : 'Color',
+                    uniforms : {
+                        //color : new Cesium.Color(1.0 - grid.points[i].avgPk, grid.points[i].avgPk, 0.0, 0.6)
+                        color : new Cesium.Color(
+                            red(2 * (1 - grid.points[i].maxPk) - 1),
+                            green(2 * (1 - grid.points[i].maxPk) - 1),
+                            blue(2 * (1 - grid.points[i].maxPk) - 1), 0.6)
+                    }
+                }
+            })
+        });
+        scene.primitives.add(pg);
+        primitives.push(pg);
+    }
+
+    return primitives;
+}
+function interpolate(val, y0, x0, y1, x1) {
+    return (val-x0)*(y1-y0)/(x1-x0) + y0;
+}
+function base(val) {
+    if ( val <= -0.75 ) return 0;
+    else if ( val <= -0.25 ) return interpolate( val, 0.0, -0.75, 1.0, -0.25 );
+    else if ( val <= 0.25 ) return 1.0;
+    else if ( val <= 0.75 ) return interpolate( val, 1.0, 0.25, 0.0, 0.75 );
+    else return 0.0;
+}
+function red(val) {
+    return base(val - 0.5);
+}
+function green(val) {
+    return base(val);
+}
+function blue(val) {
+    return base(val + 0.5);
+}
 function clearHeatmap() {
     for(var p in heatMap) {
         scene.primitives.remove(heatMap[p]);
     }
     heatMap = [];
 }
+
+//CLEAR DATA
 function clearData(callback) {
     console.log('Clearing existing data');
     var dbType = [

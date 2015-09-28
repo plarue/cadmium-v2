@@ -190,7 +190,7 @@ bigio.initialize(function() {
 
                 socket.emit('defendedArea', grid);
             }
-        });
+        })
 
         bigio.addListener({
             topic: 'acquire_weapon_score',
@@ -443,7 +443,7 @@ bigio.initialize(function() {
                             if (err) console.log(err);
                             trackC.findOne({id: 'T' + msg[1]}, function (err, tracktwo) {
                                 if (err) console.log(err);
-                                socket.emit('updateElement', 'updateTrack', ['remove', tracktwo]);
+                                socket.emit('updateElement', 'createTrack', ['remove', tracktwo]);
                             })
                         });
                     }
@@ -458,7 +458,7 @@ bigio.initialize(function() {
                     if (err) {console.log(err)}
                     sensor.findOne({Index : message[0]}, function (err, sensor) {
                         if (err) {console.log(err)}
-                        socket.emit('updateElement', 'createSensor', ['remove', 'sensor', sensor]);
+                        socket.emit('updateElement', 'createVolume', ['remove', 'sensor', sensor]);
                     });
                 });
             }
@@ -471,7 +471,7 @@ bigio.initialize(function() {
                     if (err) {console.log(err)}
                     weapon.findOne({Index : message[0]}, function (err, weapon) {
                         if (err) {console.log(err)}
-                        socket.emit('updateElement', 'updateWeapon', ['remove', 'weapon', weapon]);
+                        socket.emit('updateElement', 'createVolume', ['remove', 'weapon', weapon]);
                     });
                 });
             }
@@ -604,16 +604,16 @@ bigio.initialize(function() {
             }
         });
 
-        socket.on('startOptimization', function(algorithm) {
+        socket.on('startOptimization', function(algorithm, type) {
             console.log("Saving scenario for the run");
             var name = makeid();
             saveScenario('tmp', name, function() {
                 console.log('Starting Optimization: ' + algorithm);
-                var message = {relativePath: path.join(__dirname, 'public/tmp', name), algorithm: algorithm};
+                var message = {relativePath: path.join(__dirname, 'public/tmp', name), algorithm: algorithm, type: type};
                 bigio.send({
                     topic: 'acquire_start',
                     message: message,
-                    javaclass: "com.a2i.messages.StartMessage"
+                    type: "com.a2i.messages.StartMessage"
                 });
             });
         });
@@ -636,7 +636,7 @@ bigio.initialize(function() {
                 bigio.send({
                     topic: 'acquire_evaluate',
                     message: message,
-                    javaclass: "com.a2i.messages.EvaluateMessage"
+                    type: "com.a2i.messages.EvaluateMessage"
                 });
             });
         });
