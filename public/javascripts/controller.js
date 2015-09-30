@@ -98,70 +98,93 @@ function selectInputs(e) {
         }
     }
 }
+function entityListSelect(e){
+    var type = e.target.value;
+    var id = e.target.id;
+    $('#selections').html('');
+    $('#pickedO').html('');
+    $('#noSelect').hide();
+    $('#multipleSelect').hide();
+    Acquire.displayElementData(id, type);
+}
+var pickHandler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+pickHandler.setInputAction(function(click) {
+    var pickedObjects = scene.drillPick(click.position);
+    if (Cesium.defined(pickedObjects)){
+        var ul = $('#selections');
+        var uldata = $('#pickedO');
+        var noSelect = $('#noSelect');
+        var multipleSelect = $('#multipleSelect');
+        $('#entityControls').show();
+        ul.html('');
+        uldata.html('');
+        noSelect.show();
+        multipleSelect.hide();
+        if (pickedObjects.length > 1) {
+            noSelect.hide();
+            multipleSelect.show();
+            var elements = [];
+            for (i=0; i < pickedObjects.length; i++){
+                var elementType = Acquire.elType(pickedObjects[i].id);
+                elements.push(elementType[0] + ' ' + elementType[1] + ' ' + elementType[2]);
+            }
+            var selections = Acquire.removeDuplicates(elements);
+            if (selections.length == 1){
+                var element = selections[0].match(/[^ ]+/g);
+                if (element[0] != 'err' && element[0] != 'track'){
+                    multipleSelect.hide();
+                    Acquire.displayElementData(element[1], element[0])
+                }else if(element[1] == 'track'){
+                    noSelect.show();
+                    multipleSelect.hide();
+                }else{console.log('Unknown ElementType in selected Element.')}
+            }else{
+                var badInputs = [];
+                for (i = 0; i < selections.length; i++) {
+                    var element = selections[i].match(/[^ ]+/g);
+                    if (element[0] == 'track' || element[0] == 'err'){
+                        badInputs.push(1);
+                    }
+                }
+                if (badInputs.length != selections.length) {
+                    for (i = 0; i < selections.length; i++) {
+                        var element = selections[i].match(/[^ ]+/g);
+                        if (element[1] != 'track' && element[1] != 'err') {
+                            var li = Acquire.createSelection(element[1], element[2], element[0]);
+                            ul.append(li);
+                        }
+                    }
+                }else{
+                    noSelect.show();
+                    multipleSelect.hide();
+                }
+            }
+        } else if (pickedObjects.length == 1) {
+            noSelect.hide();
+            var elementType = Acquire.elType(pickedObjects[0].id);
+            var elementID = elementType[1];
+            if (elementType[0] != 'err' && elementType[0] != 'track'){
+                Acquire.displayElementData(elementID, elementType[0]);
+            } else if(elementType[0] == 'track') {
+                noSelect.show();
+                multipleSelect.hide();
+            } else {
+                console.log('Unknown ElementType in selected Element.')
+            }
+        }
+    }
+},Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
 /**
  * ACQUIRE/C2 INCOMING & OUTGOING DATA
  */
-
-//INCOMING FROM ACQUIRE BACKEND
-socket.on('defendedArea', function(grid) {
-    console.log(grid);
-    return;
-
-    var rectangle = scene.primitives.add(new Cesium.RectanglePrimitive({
-        rectangle: Cesium.Rectangle.fromDegrees(
-            grid.bounds.west,
-            grid.bounds.south,
-            grid.bounds.east,
-            grid.bounds.north),
-        show: true
-    }));
-
-    var svgDataDeclare = "data:image/svg+xml,";
-    var svgCircle = '<circle cx="10" cy="10" r="10" stroke="black" stroke-width="3" fill="purple" /> ';
-    var svgPrefix = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px" height="40px" xml:space="preserve">';
-    var svgSuffix = "</svg>";
-    var svgString = svgPrefix + svgCircle + svgSuffix;
-
-    // create the cesium entity
-    var svgEntityImage = svgDataDeclare + svgString;
-
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('version', '1.1');
-    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-    svg.setAttribute('xml:space', 'preserve');
-    svg.setAttribute('width', '50px');
-    svg.setAttribute('height', '50px');
-    svg.setAttribute('x', '0px');
-    svg.setAttribute('y', '0px');
-    var circle = document.createElement('circle');
-    circle.setAttribute('cx', 10);
-    circle.setAttribute('cy', 10);
-    circle.setAttribute('r', 10);
-    circle.setAttribute('stroke', 'black');
-    circle.setAttribute('stroke-width', 3);
-    circle.setAttribute('fill', 'purple');
-    svg.appendChild(circle);
-
-    //rectangle.material = Cesium.Material.fromType('Color');
-    rectangle.material = new Cesium.Material({
-        fabric : {
-            type: 'Image',
-            uniforms: {
-                //image: svgEntityImage
-                image: svgDataDeclare + svg.outerHTML
-            }
-        }
-    });
-});
 //INIT ACQUIRE
 $(document).ready(function() {
     $('input[type=radio][name=algorithmRadio]').change(function() {
         if (this.value == 'algStadium') {
             $('#algOne').hide();
             $('#algTwo').show();
-            $('#stadiumType').prop('checked','true');
+            $('#sensorsTypeTwo').prop('checked','true');
         }
         else{
             $('#algOne').show();
@@ -177,6 +200,7 @@ function optimize() {
         $("#optimizeModal").find("#stadiumAlgorithm").is(':checked') ? 'STADIUM' : '';
 
     var type = $("#optimizeModal").find("#sensorsType").is(':checked') ? 'SENSORS' :
+        $("#optimizeModal").find("#sensorsTypeTwo").is(':checked') ? 'SENSORS' :
         $("#optimizeModal").find("#weaponsType").is(':checked') ? 'WEAPONS' :
         $("#optimizeModal").find("#weaponsSensorsType").is(':checked') ? 'WEAPONS_SENSORS' :
         $("#optimizeModal").find("#stadiumType").is(':checked') ? 'STADIUM' : '';
@@ -301,6 +325,7 @@ function clearData(callback) {
         });
     }
 }
+
 //NEW SCENARIO
 function newScenario() {
     clearData(function(){
@@ -446,6 +471,189 @@ function getFileType(name){
     }else{
         console.log('File type unidentifiable')
     }
+}
+/**
+ * ENTITY HANDLING
+ */
+function entHandler(action){
+    var form = document.getElementById('picked');
+    var labels = form.getElementsByTagName('label');
+    var unique = [['SensorIDs0', 'weapon'], ['WeaponIDs0', 'sensor'], ['shape', 'asset']];
+    var obj = {};
+    for (var i=0; i < labels.length; i++){
+        var f = labels[i].htmlFor;
+        obj[f] = document.getElementById(f).value;
+    }
+    var type;
+    for (var i=0; i < unique.length; i++) {
+        if (obj.hasOwnProperty(unique[i][0])) {
+            if (unique[i][0] == 'shape'){
+                var shape = obj[unique[i][0]];
+                type = shape.toLowerCase();
+            }else{
+                type = unique[i][1];
+            }
+        }
+    }
+    var count;
+    if (type == 'weapon') {
+        count = obj.NumSensorIDs;
+        obj.SensorIDs = [];
+    }else if(type == 'sensor'){
+        count = obj.NumWeaponIDs;
+        obj.WeaponIDs = [];
+    }else if(type == 'polygon'){
+        count = obj.rad;
+        obj.latlonalt = [];
+    }else if(type == 'circle'){
+        count = 3;
+        obj.latlonalt = [];
+    }
+    for (var i=0; i < count; i++) {
+        if (type == 'weapon'){
+            obj.SensorIDs.push(obj['SensorIDs' + i]);
+            delete obj['SensorIDs' + i];
+        }else if(type == 'sensor'){
+            obj.WeaponIDs.push(obj['WeaponIDs' + i]);
+            delete obj['WeaponIDs' + i];
+        }else if(type == 'polygon'){
+            var curID = 'latlonalt' + (i + 1);
+            for (var j=0; j<3; j++){
+                obj.latlonalt.push(obj[curID + j]);
+                delete obj[curID + j];
+            }
+        }else if(type == 'circle'){
+            obj.latlonalt.push(obj['latlonalt1' + i]);
+            delete obj['latlonalt1' + i];
+        }
+    }
+    if (action == 'update') {
+        updateEntity(type, obj)
+    } else if(action == 'move') {
+        var eid;
+        if (type == 'weapon'){
+            eid = 'W' + obj.id;
+        } else {
+            eid = 'S' + obj.id;
+        }
+        socket.emit('searchID', 'range', type + 'C', eid, function(cb, msg){
+            moveEntity(type, obj, cb, eid);
+        })
+    }else if(action == 'delete'){
+        deleteEntity(type, obj);
+    }
+}
+function updateEntity(type, data){
+    var sid = data.id;
+    var dataA = {};
+    var dataC = {};
+    if (type == 'sensor'){
+        dataA.id = 'S' + sid;
+        dataC.id = 'S' + sid;
+        dataC.latlonalt = [data.Lon, data.Lat, data.Alt];
+        dataC.boresight_Half_Ang_El = data.BoresightAz;
+        dataC.name = data.Identifier;
+        Acquire.createSensor('r', dataA);
+        socket.emit('updateData', data.id, dataC.id, 'sensor', data, dataC, function(cb){
+            Acquire.createSensor('a', cb);
+        });
+    }else if(type == 'weapon'){
+        dataA.id = 'W' + data.id;
+        dataC.id = 'W' + data.id;
+        dataC.latlonalt = [data.Lon, data.Lat, data.Alt];
+        dataC.boresight_Half_Ang_El = data.BoresightAz;
+        dataC.name = data.Identifier;
+        Acquire.createWeapon('r', dataA);
+        socket.emit('updateData', data.id, dataC.id, 'weapon', data, dataC, function(cb){
+            Acquire.createWeapon('a', cb);
+        });
+    }
+}
+function moveEntity(type, data, id){
+    var entity = cesiumWidget.entities.add({
+        label: {
+            show: false
+        }
+    });
+    var entityTwo = cesiumWidget.entities.add({
+        name : 'blue circle',
+        position: Cesium.Cartesian3.fromDegrees(data.Lon, data.Lat, 0.0),
+        ellipse : {
+            semiMajorAxis: 100000,
+            semiMinorAxis: 100000,
+            material : Cesium.Color.AQUA.withAlpha(0.5),
+            outline: true,
+            outlineColor: Cesium.Color.BLACK,
+            show: false
+        }
+    });
+    var mousePosition = new Cesium.Cartesian2();
+    var mousePositionProperty = new Cesium.CallbackProperty(
+        function(time, result){
+            var position = scene.camera.pickEllipsoid(mousePosition, undefined, result);
+            var cartographic = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
+            cartographic.height = 0.0;
+            return Cesium.Ellipsoid.WGS84.cartographicToCartesian(cartographic);
+        },
+        false);
+
+    var dragging = false;
+    var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+    var rem = {id: id};
+    handler.setInputAction(
+        function(click) {
+            var pickLoc = Cesium.Cartesian3.fromDegrees(dataA.Lon, dataA.Lat);
+            var pickedObject = scene.pick(Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, pickLoc));
+            if (Cesium.defined(pickedObject)) {
+                entityTwo.ellipse.show = true;
+                dragging = true;
+                scene.screenSpaceCameraController.enableRotate = false;
+                Acquire.createVolume('remove', type, rem);
+                Cesium.Cartesian2.clone(click.position, mousePosition);
+                entityTwo.position = mousePositionProperty;
+            }
+        },
+        Cesium.ScreenSpaceEventType.LEFT_DOWN
+    );
+
+    handler.setInputAction(
+        function(movement) {
+            if (dragging) {
+                Cesium.Cartesian2.clone(movement.endPosition, mousePosition);
+            }
+        },
+        Cesium.ScreenSpaceEventType.MOUSE_MOVE
+    );
+
+    handler.setInputAction(
+        function(click) {
+            if(dragging) {
+                dragging = false;
+                scene.screenSpaceCameraController.enableRotate = true;
+                var cp = scene.camera.pickEllipsoid(click.position);
+                var cartographic = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cp);
+                var positions = [Cesium.Cartographic.fromRadians(cartographic.longitude, cartographic.latitude)];
+                var promise = Cesium.sampleTerrain(terrainProvider, 11, positions);
+                Cesium.when(promise, function (updatedPositions) {
+                    cartographic.height = positions[0].height;
+                    data.Lat = Cesium.Math.toDegrees(cartographic.latitude);
+                    data.Lon = Cesium.Math.toDegrees(cartographic.longitude)
+                    data.Alt = cartographic.height
+                    data.latlonalt = [data.Lon, data.Lat, data.Alt];
+                    socket.emit('updateData', data.id, type, data, function(cb){
+                        entityTwo.ellipse.show = false;
+                        Acquire.createVolume('add', type, cb);
+                    });
+                    handler = handler && handler.destroy();
+                });
+            }
+        },
+        Cesium.ScreenSpaceEventType.LEFT_UP
+    );
+}
+function deleteEntity(type, data){
+    (type == 'sensor' || type == 'weapon') ? Acquire.createVolume('remove', type, data) : Acquire.createAsset('remove', type, data);
+    socket.emit('removeData', type, data.id);
 }
 
 /**

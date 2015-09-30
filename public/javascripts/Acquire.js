@@ -27,7 +27,7 @@ Acquire.createAsset = function(){
             });
             var newLabel = viewer.entities.add({
                 position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[1], asset.latlonalt[0]),
-                name: asset.name,
+                name: asset.id,
                 label: {
                     text: asset.name,
                     font : '16px Helvetica'
@@ -35,9 +35,11 @@ Acquire.createAsset = function(){
             });
             currentGeometry[asset.id] = {shape: newEllipse, label: newLabel};
         }else{
-            viewer.entities.remove(currentGeometry[asset.id].shape);
-            viewer.entities.remove(currentGeometry[asset.id].label);
-            delete currentGeometry[asset.id];
+            if (currentGeometry[asset.id]) {
+                viewer.entities.remove(currentGeometry[asset.id].shape);
+                viewer.entities.remove(currentGeometry[asset.id].label);
+                delete currentGeometry[asset.id];
+            }
         }
     }else{
         if (arguments[0] == 'add'){
@@ -56,7 +58,7 @@ Acquire.createAsset = function(){
             });
             var newLabel = viewer.entities.add({
                 position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[1], asset.latlonalt[0]),
-                name: asset.name,
+                name: asset.id,
                 label: {
                     text: asset.name,
                     font : '16px Helvetica'
@@ -64,9 +66,11 @@ Acquire.createAsset = function(){
             });
             currentGeometry[asset.id] = {shape: newPolygon, label: newLabel};
         }else{
-            viewer.entities.remove(currentGeometry[asset.id].shape);
-            viewer.entities.remove(currentGeometry[asset.id].label);
-            delete currentGeometry[asset.id];
+            if (currentGeometry[asset.id]) {
+                viewer.entities.remove(currentGeometry[asset.id].shape);
+                viewer.entities.remove(currentGeometry[asset.id].label);
+                delete currentGeometry[asset.id];
+            }
         }
     }
 };
@@ -84,7 +88,7 @@ Acquire.createTrack = function(){
                     colorsPerVertex: false,
                     vertexFormat: Cesium.PolylineColorAppearance.VERTEX_FORMAT
                 }),
-                id: track.name,
+                id: track.id,
                 attributes: {
                     show: new Cesium.ShowGeometryInstanceAttribute(true)
                 }
@@ -93,7 +97,7 @@ Acquire.createTrack = function(){
                 translucent: false
             })
         });
-        currentGeometry[track.name] = primitive;
+        currentGeometry[track.id] = primitive;
         scene.primitives.add(primitive);
 
         //ADD VISIBILITY SLIDER
@@ -107,8 +111,8 @@ Acquire.createTrack = function(){
             $('#entityTitle').show();
         }
     }else if (arguments[0] == 'remove'){
-        scene.primitives.remove(currentGeometry[track.name]);
-        delete currentGeometry[track.name];
+        scene.primitives.remove(currentGeometry[track.id]);
+        delete currentGeometry[track.id];
     }
 };
 
@@ -161,7 +165,7 @@ Acquire.createVolume = function(){
                     slicePartitions: 10
                 }),
                 modelMatrix: modelMatrix,
-                id: volume.name + instanceId,
+                id: volume.id + instanceId,
 
                 attributes: {
                     color: Cesium.ColorGeometryInstanceAttribute.fromColor(volumeColor),
@@ -178,34 +182,34 @@ Acquire.createVolume = function(){
                 flat: true
             })
         });
-        currentGeometry[volume.name] = newPrimitive;
+        currentGeometry[volume.id] = newPrimitive;
         scene.primitives.add(newPrimitive);
 
         //ADD VISIBILITY SLIDER
         var list = $("#" + volType[0]);
-        var li = Acquire.createSlider(volume.name, volume.id, 'volume', 0);
+        var li = Acquire.createSlider(volume.id, volume.name, 'volume', 0);
         list.append(li);
         if (list.innerHTML != '' || list.innerHTML != null) {
             $("#" + volType[1]).show();
         }
 
         //ADD ICON
-        Acquire.createIcon(volType[2], volume.name, volume.id, +volume.latlonalt[0], +volume.latlonalt[1], +volume.latlonalt[2]);
+        Acquire.createIcon(volType[2], volume.id, volume.name, +volume.latlonalt[0], +volume.latlonalt[1], +volume.latlonalt[2]);
 
     }else if(arguments[0] == 'remove'){
         //REMOVE SENSOR VOLUME
-        scene.primitives.remove(currentGeometry[volume.name]);
-        delete currentGeometry[volume.name];
+        scene.primitives.remove(currentGeometry[volume.id]);
+        delete currentGeometry[volume.id];
 
         //REMOVE VISIBILITY SLIDER
-        var item = document.getElementById(volume.name);
+        var item = document.getElementById(volume.id);
         if (item != null) {
             var slide = item.parentNode;
             slide.parentNode.removeChild(slide);
         }
 
         //REMOVE ICON
-        viewer.entities.removeById(volume.name);
+        viewer.entities.removeById(volume.id);
     }
 };
 
@@ -217,6 +221,7 @@ Acquire.createIcon = function(icon, id, name, lon, lat, alt){
 
     viewer.entities.add({
         id: id,
+        name: id,
         position: Cesium.Cartesian3.fromDegrees(lon, lat, alt),
         billboard: {
             image: ii.getImage()
@@ -303,12 +308,13 @@ Acquire.createInput = function(name, value){
     return li;
 };
 
-Acquire.createArrayInput = function(name, values){
+Acquire.createArrayInput = function(name, values, iteration){
     var li = $('<li></li>')
         .append($('<p></p>')
             .html(name)
             .css('fontWeight', 'bold')
     );
+
     for (var k=0;k < values.length;k++) {
         li.append($('<label></label>')
             .attr({
@@ -320,7 +326,7 @@ Acquire.createArrayInput = function(name, values){
             .attr({
                 type: 'text',
                 id: name + k,
-                value: array[k]
+                value: values[k]
             })
             .css('color', '#000')
         );
@@ -328,13 +334,13 @@ Acquire.createArrayInput = function(name, values){
     return li;
 };
 
-Acquire.createSelection = function(name, type){
+Acquire.createSelection = function(id, name, type){
     var li = $('<li></li>')
         .append($('<button></button>')
             .attr({
                 class: 'btn btn-default',
                 type: 'button',
-                id: name,
+                id: id,
                 value: type
             })
             .html(name)
@@ -342,6 +348,79 @@ Acquire.createSelection = function(name, type){
     );
     return li;
 };
+
+Acquire.displayElementData = function(elementID, elementType) {
+    var msg = '';
+    console.log("Database: " + elementType);
+    console.log("Input: " + elementID);
+    socket.emit('searchID', msg, elementType, elementID, function(result, msg) {
+        var form = $('#pickedO');
+        var ul = form.append('<ul></ul>');
+        var ov = result;
+        var eData;
+        for (var key in ov) {
+            if (key == '_id' || key == '__v') { continue; }
+            if(typeof ov[key] === 'string' || typeof ov[key] === 'number') {
+                eData = Acquire.createInput(key, ov[key]);
+                ul.append(eData);
+            } else if(Array.isArray(ov[key])) {
+                var oa = ov[key];
+                if(elementType == 'asset') {
+                    for (var i = 0, j = 1; i < oa.length; i += 3, j++) {
+                        eData = Acquire.createArrayInput((key + j), [oa[i],oa[i+1],oa[i+2]]);
+                        ul.append(eData);
+                    }
+                }else{
+                    eData = Acquire.createArrayInput(key, oa);
+                    ul.append(eData);
+                }
+            }
+        }
+        socket.emit('getParams', elementType, elementID, function(result) {
+            for(var key in result) {
+                if(key != 'id' && key != 'Id' && key != '_id' && key != 'name' && key != 'Name') {
+                    ul.append(Acquire.createInput(key, result[key]));
+                }
+            }
+            form.append(ul);
+            $('#entityControls').show();
+        });
+    });
+
+};
+
+//FUNCTIONS
+
+Acquire.elType = function(pickedObject) {
+    var objId = pickedObject;
+    var po, poID, poName;
+    if (typeof objId !== 'string') {
+        po = pickedObject._name.slice(0,1);
+        poID = pickedObject._name;
+        poName = pickedObject._name.slice(1);
+        if (po == 'A') {
+            return ['asset', poID, poName];
+        } else if (po == 'S') {
+            return ['sensor', poID, poName];
+        } else if (po == 'W'){
+            return ['weapon', poID, poName];
+        }else{
+            return ['err'];
+        }
+    }else{
+        po = objId.slice(0, 1);
+        poName = objId.slice(1);
+        if (po == 'S') {
+            return ['sensor', objId, poName];
+        } else if (po == 'W') {
+            return ['weapon', objId, poName];
+        } else if (po == 'T') {
+            return ['track', objId, poName];
+        } else {
+            return ['err'];
+        }
+    }
+}
 
 Acquire.removeDuplicates = function(a) {
     var seen = {};

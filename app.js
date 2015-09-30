@@ -190,7 +190,7 @@ bigio.initialize(function() {
 
                 socket.emit('defendedArea', grid);
             }
-        })
+        });
 
         bigio.addListener({
             topic: 'acquire_weapon_score',
@@ -485,8 +485,8 @@ bigio.initialize(function() {
                 var id = message[0];
                 var rcs = +message[8];
 
-                threat.id = id;
-                threat.name = 'T' + id;
+                threat.id = 'T' + id;
+                threat.name = id;
                 threat.times = [];
                 threat.positions = [];
                 threat.colors = [];
@@ -782,6 +782,22 @@ bigio.initialize(function() {
             });
         });
 
+        socket.on('getParams', function(model, name, callback) {
+            mongoose.model(model).findOne({Identifier: name}, function(err, results) {
+                if(results) {
+                    mongoose.model('radarTypes').findOne({id: results.Type}, function(e, res) {
+                        if(res) {
+                            callback(res);
+                        } else {
+                            callback({});
+                        }
+                    });
+                } else {
+                    callback({});
+                }
+            });
+        });
+
         socket.on('getScenario', function(folder, cb){
             var scenarios = [
                 {dirPath: path.join(__dirname, 'public/scenarios', folder, 'scenarios'), loadType: 'loadAsset', fNames: ['AllowedRegions_NK.dat', 'DefendedAreas_NK.dat', 'DefendedAssets_NK.dat','RestrictedRegions_NK.dat','ThreatAreas_NK.dat']},
@@ -862,9 +878,9 @@ bigio.initialize(function() {
                 }
 
                 var data = {
-                    id: line[1],
+                    id: 'S' + line[1],
                     Index: line[0],
-                    name: 'S' + line[1],
+                    name: line[1],
                     Identifier: line[1],
                     Type: line[2],
                     Lat: line[3],
@@ -912,9 +928,9 @@ bigio.initialize(function() {
                 }
 
                 var data = {
-                    id: line[1],
+                    id: 'W' + line[1],
                     Index: line[0],
-                    name: 'W' + line[1],
+                    name: line[1],
                     Identifier: line[1],
                     Type: line[2],
                     Lat: line[3],
