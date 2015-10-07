@@ -325,10 +325,8 @@ function hexbinTwo(grid){
                 pkArray.push(polygons[i][j].maxPk);
             }
         }
-        console.log(pkArray);
         var sum = pkArray.reduce(function(a,b){return a + b;});
         var avgPk = sum / pkArray.length;
-        console.log(avgPk);
         var vertices = hexagon(polygons[i].y, polygons[i].x, avgDist[1]);
         var rgba = new Cesium.Color(
             red(2 * (1 - avgPk) - 1),
@@ -393,9 +391,9 @@ function bruteForce(points) {
     return ordered;
 }
 function bruteAvg(points) {
-    var minDeg = null,
-        currDeg = null,
-        currHav = null,
+    var minDist = null,
+        currDeg = {},
+        currHav = {},
         allMinDeg = [],
         allMinHav = [];
 
@@ -404,25 +402,35 @@ function bruteAvg(points) {
             if (j !== i) {
                 var deg = Math.sqrt(Math.pow(points[i].lat - points[j].lat, 2) + Math.pow(points[i].lon - points[j].lon, 2));
                 var hav = haversine([points[i].lat, points[i].lon], [points[j].lat, points[j].lon]);
-                if (minDeg === null || deg < minDeg) {
-                    currDeg = {index: j, dist: deg};
-                    currHav = {index: j, dist: hav};
+                if (minDist === null || deg < minDist) {
+                    minDist = deg;
+                    currDeg = {i: j, dist: deg};
+                    currHav = {i: j, dist: hav};
                 }
             }
         }
-        if(minDeg !== null) {
+        if(minDist !== null) {
             allMinDeg.push(currDeg);
             allMinHav.push(currHav);
-            minDeg = null;
-            currDeg = null;
-            currHav = null;
+            minDist = null;
+            currDeg = {};
+            currHav = {};
         }
     }
-    allMinDeg.sort(function(a,b){return parseFloat(a.index) - parseFloat(b.index);});
-    var maxDeg = allMinDeg[allMinDeg.length - 1],
-        minDeg = allMinDeg[0],
-        maxHav = allMinHav[maxDeg.index],
-        minHav = allMinHav[minDeg.index];
+    allMinDeg.sort(function(a,b){return parseFloat(a.dist) - parseFloat(b.dist);});
+    var lookup = {};
+    for (var i = 0, len = allMinHav.length; i < len; i++) {
+        lookup[allMinHav[i].i] = allMinHav[i];
+    }
+    console.log(allMinDeg);
+    console.log(allMinDeg.length - 1);
+    console.log(allMinHav);
+    var maxDeg = allMinDeg[allMinDeg.length - 1].dist,
+        maxIndex = allMinDeg[allMinDeg.length - 1].i,
+        minDeg = allMinDeg[0].dist,
+        minIndex = allMinDeg[0].i,
+        maxHav = lookup[maxIndex].dist,
+        minHav = lookup[minIndex].dist;
     return [((minDeg + maxDeg)/2), ((minHav + maxHav)/2)];
 }
 function toRad(x) {
