@@ -6,16 +6,18 @@ var viewer = new Cesium.Viewer('cesiumContainer', {
     timeline : false,
     navigationHelpButton : false,
     geocoder : false,
+    //OFFLINE IMAGERY PROVIDER
     imageryProvider : new Cesium.TileMapServiceImageryProvider({
         //url : Cesium.buildModuleUrl('/Cesium/Assets/Textures/NaturalEarthII')
         url : ('../../public/javascripts/Cesium/Assets/Textures/NaturalEarthII'),
         maximumLevel : 5
     }),
+    //ONLINE IMAGERY PROVIDER
     /*imageryProvider : new Cesium.BingMapsImageryProvider({
         url : '//dev.virtualearth.net',
         mapStyle : Cesium.BingMapsStyle.AERIAL_WITH_LABELS
-    }),
-    imageryProvider : new Cesium.WebMapTileServiceImageryProvider({
+    }),*/
+    /*imageryProvider : new Cesium.WebMapTileServiceImageryProvider({
         url : 'http://map1.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi?SERVICE=WMTS&request=GetCapabilities',
         layer : 'MODIS_Terra_SurfaceReflectance_Bands121',
         style : 'default',
@@ -26,11 +28,11 @@ var viewer = new Cesium.Viewer('cesiumContainer', {
         credit : new Cesium.Credit('U. S. Geological Survey'),
         proxy: new Cesium.DefaultProxy('/proxy/')
     }),*/
-    /*terrainProvider : new Cesium.CesiumTerrainProvider({
-        url : '//cesiumjs.org/stk-terrain/tilesets/world/tiles'
-    }),*/
+    terrainProvider : new Cesium.CesiumTerrainProvider({
+        url : '//assets.agi.com/stk-terrain/world'
+    }),
     creditContainer: "hidden"
-});
+})
 
 var scene = viewer.scene;
 var ellipsoid = scene.globe.ellipsoid;
@@ -227,11 +229,12 @@ function generateThreats() {
 //HEAT MAP
 var heatMap = [];
 socket.on('defendedArea', function(grid) {
-    heatMap = heatMap.concat(voronoiGrid(grid));
+    heatMap = heatMap.concat(hexbinTwo(grid));
 });
 function voronoiGrid(grid) {
     console.log("Displaying grid");
     var voronoi = d3.geom.voronoi();
+    console.log(grid.bounds);
     voronoi.clipExtent([[grid.bounds.west, grid.bounds.south], [grid.bounds.east, grid.bounds.north]]);
     voronoi.x(function(d) {
         return d.lon;
@@ -272,6 +275,75 @@ function voronoiGrid(grid) {
 
     return primitives;
 }
+function hexbin(grid) {
+    console.log("Displaying grid");
+
+    var polygons = bruteForce(grid.points);
+    var primitives = [];
+
+    for(var i in polygons) {
+        var rad = polygons[i].diameter - (polygons[polygons[i].nIndex].diameter / 2);
+        var vertices = hexagon(polygons[i].lat, polygons[i].lon, rad);
+        var rgba = new Cesium.Color(
+            red(2 * (1 - polygons[i].maxPk) - 1),
+            green(2 * (1 - polygons[i].maxPk) - 1),
+            blue(2 * (1 - polygons[i].maxPk) - 1),
+            0.8
+        );
+        if (i == 1){console.log(rgba);console.log(vertices);}
+        viewer.entities.add({
+            polygon : {
+                hierarchy : Cesium.Cartesian3.fromDegreesArray(vertices),
+                material : rgba
+            }
+        });
+    }
+
+    return primitives;
+}
+function hexbinTwo(grid){
+    console.log("Displaying Grid");
+    var b = grid.bounds,
+        chartWidth = (b.west > b.east) ? b.west - b.east : b.east - b.west,
+        chartHeight = (b.north > b.south) ? b.north - b.south : b.south - b.north,
+        avgDist = bruteAvg(grid.points);
+    console.log(chartWidth + ' x ' + chartHeight);
+    console.log(avgDist);
+
+    var hexbin = d3.hexbin()
+        .size([chartWidth, chartHeight])
+        .radius(avgDist[0]);
+
+    var polygons = hexbin(grid.points);
+
+    console.log(polygons);
+
+    for (var i in polygons){
+        var pkArray = [];
+        for (var j in polygons[i]){
+            if (typeof polygons[i][j] === 'object'){
+                pkArray.push(polygons[i][j].maxPk);
+            }
+        }
+        console.log(pkArray);
+        var sum = pkArray.reduce(function(a,b){return a + b;});
+        var avgPk = sum / pkArray.length;
+        console.log(avgPk);
+        var vertices = hexagon(polygons[i].y, polygons[i].x, avgDist[1]);
+        var rgba = new Cesium.Color(
+            red(2 * (1 - avgPk) - 1),
+            green(2 * (1 - avgPk) - 1),
+            blue(2 * (1 - avgPk) - 1),
+            0.8
+        );
+        viewer.entities.add({
+            polygon : {
+                hierarchy : Cesium.Cartesian3.fromDegreesArray(vertices),
+                material : rgba
+            }
+        });
+    }
+}
 function interpolate(val, y0, x0, y1, x1) {
     return (val-x0)*(y1-y0)/(x1-x0) + y0;
 }
@@ -290,6 +362,104 @@ function green(val) {
 }
 function blue(val) {
     return base(val + 0.5);
+}
+function bruteForce(points) {
+    var ordered = [];
+    var point1 = null;
+    var point2 = null;
+    var distance = null;
+    var nearestIndex = null;
+
+    for (var i = 0; i < points.length; i++) {
+        for (var j = 0; j < points.length; j++) {
+            if (j !== i) {
+                var curr = haversine([points[i].lat, points[i].lon], [points[j].lat, points[j].lon]);
+                if (distance === null || curr < distance) {
+                    distance = curr;
+                    point1 = [points[i].lat, points[i].lon];
+                    point2 = [points[j].lat, points[j].lon];
+                    nearestIndex = j;
+                }
+            }
+        }
+        if(distance !== null) {
+            var newPoint = points[i];
+            newPoint.diameter = distance;
+            newPoint.nIndex = nearestIndex;
+            ordered.push(newPoint);
+            distance = null;
+        }
+    }
+    return ordered;
+}
+function bruteAvg(points) {
+    var minDeg = null,
+        currDeg = null,
+        currHav = null,
+        allMinDeg = [],
+        allMinHav = [];
+
+    for (var i = 0; i < points.length; i++) {
+        for (var j = 0; j < points.length; j++) {
+            if (j !== i) {
+                var deg = Math.sqrt(Math.pow(points[i].lat - points[j].lat, 2) + Math.pow(points[i].lon - points[j].lon, 2));
+                var hav = haversine([points[i].lat, points[i].lon], [points[j].lat, points[j].lon]);
+                if (minDeg === null || deg < minDeg) {
+                    currDeg = {index: j, dist: deg};
+                    currHav = {index: j, dist: hav};
+                }
+            }
+        }
+        if(minDeg !== null) {
+            allMinDeg.push(currDeg);
+            allMinHav.push(currHav);
+            minDeg = null;
+            currDeg = null;
+            currHav = null;
+        }
+    }
+    allMinDeg.sort(function(a,b){return parseFloat(a.index) - parseFloat(b.index);});
+    var maxDeg = allMinDeg[allMinDeg.length - 1],
+        minDeg = allMinDeg[0],
+        maxHav = allMinHav[maxDeg.index],
+        minHav = allMinHav[minDeg.index];
+    return [((minDeg + maxDeg)/2), ((minHav + maxHav)/2)];
+}
+function toRad(x) {
+    return x * Math.PI / 180;
+}
+function haversine(p1, p2){
+    var R = 6371000; // metres
+    var L1 = toRad(p1[0]);
+    var L2 = toRad(p2[0]);
+    var dLat = toRad((p2[0]-p1[0]));
+    var dLon = toRad((p2[1]-p1[1]));
+
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(L1) * Math.cos(L2) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c;
+}
+function hexagon(lat, lon, radius){
+    var vertices = [],
+        R=6378137,
+        x = lat,
+        y = lon,
+        nOffset = radius,
+        dy = nOffset/(R*Math.cos(Math.PI*x/180)),
+        cx = x,
+        cy = y + dy * 180/Math.PI;
+    for (var i=0; i <= 360; i+=60){
+        var theta = (Math.PI / 180) * i,
+            cos = Math.cos(theta),
+            sin = Math.sin(theta),
+            nx = (sin * (cx - x)) + (cos * (cy - y)) + x,
+            ny = (sin * (cy - y)) + (cos * (cx - x)) + y;
+        vertices.push(ny, nx);
+    }
+    return vertices;
 }
 function clearHeatmap() {
     for(var p in heatMap) {

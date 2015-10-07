@@ -145,6 +145,9 @@ bigio.initialize(function() {
         bigio.addListener({
             topic: 'acquire_defended_area',
             listener: function(msg) {
+                if(msg) {
+                    console.log('Defended Area Message Received');
+                }
                 var grid = {
                     bounds: {
                         north: 0,
@@ -345,19 +348,19 @@ bigio.initialize(function() {
         bigio.addListener({
             topic: 'acquire_sensor_coverage',
             listener: function(msg) {
-                track.findOne({id: 'T' + msg[1]}, function(err, track) {
+                track.findOne({id: 'T' + msg[1]}, function(err, t) {
                     if (err) console.log(err);
-                    if (track === null) {
-                        // console.log('Track T' + msg[1] + ' does not exist');
+                    if (t === null) {
+                        console.log('Track T' + msg[1] + ' does not exist');
                     }else{
                         var yellow = {alpha: 1, blue: 0, green: 1, red: 1};
                         var green = {alpha: 1, blue: 0, green: 1, red: 0};
                         var red = {alpha: 1, blue: 0, green: 0, red: 1};
                         var blue = {alpha: 1, blue: 1, green: 0, red: 0};
                         var newColorArray = [];
-                        var times = track.times;
+                        var times = t.times;
                         for (var i = 0; i < (times.length - 1); i++) {
-                            var color = track.colors[i];
+                            var color = t.colors[i];
                             if (times[i] >= msg[2] && times[i] <= msg[3]) {
                                 if (color.blue == 0 && color.green == 0 && color.red == 1) {
                                     //red to yellow
@@ -370,7 +373,7 @@ bigio.initialize(function() {
                                     newColorArray[i] = yellow;
                                 } else {
                                     //color stays the same
-                                    newColorArray[i] = track.colors[i];
+                                    newColorArray[i] = t.colors[i];
                                 }
                             } else {
                                 if (color.blue == 0 && color.green == 1 && color.red == 0) {
@@ -381,15 +384,15 @@ bigio.initialize(function() {
                                     newColorArray[i] = red;
                                 } else {
                                     //color stays the same
-                                    newColorArray[i] = track.colors[i];
+                                    newColorArray[i] = t.colors[i];
                                 }
                             }
                         }
                         track.findOneAndUpdate({id: 'T' + msg[1]}, {colors: newColorArray}, function (err, callback) {
                             if (err) console.log(err);
-                            trackC.findOne({id: 'T' + msg[1]}, function (err, tracktwo) {
+                            track.findOne({id: 'T' + msg[1]}, function (err, tTwo) {
                                 if (err) console.log(err);
-                                socket.emit('updateElement', 'updateTrack', ['remove', tracktwo]);
+                                socket.emit('updateElement', 'createTrack', ['remove', tTwo]);
                             })
                         });}
                 });
@@ -399,19 +402,19 @@ bigio.initialize(function() {
         bigio.addListener({
             topic: 'acquire_weapon_coverage',
             listener: function(msg) {
-                track.findOne({id: 'T' + msg[1]}, function(err, track) {
+                track.findOne({id: 'T' + msg[1]}, function(err, t) {
                     if (err) console.log(err);
                     if (track === null) {
-
+                        console.log('Track T' + msg[1] + ' does not exist');
                     }else {
                         var blue = {alpha: 1, blue: 1, green: 0, red: 0};
                         var green = {alpha: 1, blue: 0, green: 1, red: 0};
                         var yellow = {alpha: 1, blue: 0, green: 1, red: 1};
                         var red = {alpha: 1, blue: 0, green: 0, red: 1};
                         var newColorArray = [];
-                        var times = track.times;
+                        var times = t.times;
                         for (var i = 0; i < (times.length - 1); i++) {
-                            var color = track.colors[i];
+                            var color = t.colors[i];
                             if (times[i] >= msg[2] && times[i] <= msg[3]) {
                                 if (color.blue == 0 && color.green == 0 && color.red == 1) {
                                     //red to blue
@@ -424,7 +427,7 @@ bigio.initialize(function() {
                                     newColorArray[i] = blue;
                                 } else {
                                     //color stays the same
-                                    newColorArray[i] = track.colors[i];
+                                    newColorArray[i] = t.colors[i];
                                 }
                             } else {
                                 if (color.blue == 0 && color.green == 1 && color.red == 0) {
@@ -435,15 +438,15 @@ bigio.initialize(function() {
                                     newColorArray[i] = red;
                                 } else {
                                     //color stays the same
-                                    newColorArray[i] = track.colors[i];
+                                    newColorArray[i] = t.colors[i];
                                 }
                             }
                         }
                         track.findOneAndUpdate({id: 'T' + msg[1]}, {colors: newColorArray}, function (err, callback) {
                             if (err) console.log(err);
-                            trackC.findOne({id: 'T' + msg[1]}, function (err, tracktwo) {
+                            track.findOne({id: 'T' + msg[1]}, function (err, tTwo) {
                                 if (err) console.log(err);
-                                socket.emit('updateElement', 'createTrack', ['remove', tracktwo]);
+                                socket.emit('updateElement', 'createTrack', ['remove', tTwo]);
                             })
                         });
                     }
