@@ -8,10 +8,10 @@ https://nodejs.org/en/
 
 https://www.mongodb.org/
 
-3.	In the c2-gui project folder, edit the file “mongo.bat” to reflect the following directories on your computer:
+3.	In the cadmium-v2 project folder, edit the file “mongo.bat” to reflect the following directories on your computer:
 
 cd <directory to “bin” folder in the mongodb install directory>
-start mongod.exe –dbpath <directory to “c2-gui/data” folder on your computer> & start cmd /k <directory to “bin/mongo.exe” in the mongodb install directory>
+start mongod.exe –dbpath <directory to “cadmium-v2/data” folder on your computer> & start cmd /k <directory to “bin/mongo.exe” in the mongodb install directory>
 
 4.	 After saving the mongo.bat file, run it. Two dialogs will pop up. In one dialog you will see “connecting to: test”
 In that dialog type the following:
@@ -20,15 +20,15 @@ use acquire
 
 Then type the following using your directory to the c2-gui project’s loadData.js:
 
-load(“<directory to c2-gui/bin/initData/loadData.js>”)
+load(“<directory to cadmium-v2/bin/initData/loadData.js>”)
 
 I believe it should say “true” if it worked successfully
 
-5.	From the root project folder open a terminal and type the following to download the dependencies:
+5.	From the cadmium-v2 root project folder open a terminal and type the following to download the dependencies:
 
 npm install
 
-6.	The GUI is now configured and can be run from a shell. Navigate to the c2-gui root directory and type the following:
+6.	The GUI is now configured and can be run from a shell. Navigate to the cadmium-v2 root directory and type the following:
 
 node server.js
 
