@@ -1,9 +1,12 @@
 /**
- * Created by Brent on 5/28/2015.
+ * Created by Brent Shanahan on 5/28/2015.
  */
 var express = require('express');
-var app = module.exports = express();
+var router = express.Router();
 
-app.get('/', function(req, res) {
-  res.sendFile('index.html');
+/* GET home page. */
+router.get('/', function(req, res) {
+  res.render('ngIndex', { title: 'Athena' });
 });
+
+module.exports = router;

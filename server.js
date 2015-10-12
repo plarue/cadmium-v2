@@ -1,21 +1,24 @@
-//server
+/**
+ * Created by Brent Shanahan on 5/18/2015.
+ */
+//Server
 var express = require('express');
+var router = express.Router();
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var async = require('async');
 var fs = require('fs');
-var jade = require('jade');
 var path = require('path');
 var url = require('url');
 var request = require('request');
 var lazy = require('lazy');
 
-//bigio
+//Bigio
 var bigio = require('bigio');
 var logger = require('winston');
 
-//mongo database
+//Mongo database
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/acquire');
 var db = mongoose.connection;
@@ -53,13 +56,18 @@ weapon.remove({}, function(err) {
     console.log('Weapon collection cleared')
 });
 
-//set port & path to index
-app.set('view engine', 'jade');
+//Express
+app.use('/public', express.static('public'));
+app.use('/node_modules', express.static('node_modules'));
+var routes = require('./routes/index');
+app.use('/', routes);
+
+app.set('view engine', 'ejs');
 app.set('port', process.env.PORT || 8080);
-app.use(express.static(__dirname));
-app.get('/', function(req,res){
+//app.use(express.static(__dirname));
+/*app.get('/', function(req,res){
     res.sendFile(path.join(__dirname + '/views/index.html'));
-});
+});*/
 
 function getRemoteUrlFromParam(req) {
     var remoteUrl = req.params[0];

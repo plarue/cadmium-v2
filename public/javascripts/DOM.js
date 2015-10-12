@@ -1,5 +1,5 @@
 /**
- * Created by Brent on 5/18/2015.
+ * Created by Brent Shanahan on 5/18/2015.
  */
 var DOM = {};
 var currentGeometry = {};

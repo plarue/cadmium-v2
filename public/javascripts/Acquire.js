@@ -1,3 +1,6 @@
+/**
+ * Created by Brent Shanahan on 5/18/2015.
+ */
 var viewer = new Cesium.Viewer('cesiumContainer', {
     scene3DOnly : true,
     baseLayerPicker : false,
