@@ -28,7 +28,9 @@ var sensor = new Schema({
     nFaces: Number,
     minRng: Number,
     boresightEl: Number,
-    latlonalt: []
+    latlonalt: [],
+    cType: String,
+    create: String
 });
 
 mongoose.model('sensor', sensor, 'sensor');

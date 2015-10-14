@@ -11,7 +11,9 @@ var track = new Schema({
     positions: [],
     velocity: [],
     colors: [],
-    rcs: Number
+    rcs: Number,
+    cType: String,
+    create: String
 },{ id: false });
 
 mongoose.model('track', track, 'track');

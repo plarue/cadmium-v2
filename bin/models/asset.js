@@ -15,7 +15,9 @@ var asset = mongoose.Schema({
     shape: String,
     rad: Number,
     latlonalt: [],
-    ftype: String
+    ftype: String,
+    cType: String,
+    create: String
 }, { id: false });
 
 mongoose.model('asset', asset, 'asset');

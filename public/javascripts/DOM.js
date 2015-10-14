@@ -117,7 +117,7 @@ DOM.createTrack = function(){
 };
 
 DOM.createVolume = function(){
-    var volume = arguments[2];
+    var volume = arguments[1];
     //ADD SENSOR VOLUME
     if (arguments[0] == 'add') {
         var faces = volume.nFaces;
@@ -127,10 +127,10 @@ DOM.createVolume = function(){
         var instanceId = 0;
         var volType = [];
         var volumeColor;
-        if (arguments[1] == 'sensor') {
+        if (volume.cType == 'sensor') {
             volType = ['sensorList', 'sensorTitle', "SFGPESR---*****"];
             volumeColor = Cesium.Color.YELLOW;
-        }else if (arguments[1] == 'weapon') {
+        }else if (volume.cType == 'weapon') {
             volType = ['weaponList', 'weaponTitle', "SFGPEWM---*****"];
             volumeColor = Cesium.Color.BLUE;
         }
@@ -219,7 +219,7 @@ DOM.createIcon = function(icon, id, name, lon, lat, alt){
 
     var ii = armyc2.c2sd.renderer.MilStdIconRenderer.Render(icon, modifiers);
 
-    viewer.entities.add({
+    var icon = viewer.entities.add({
         id: id,
         name: id,
         position: Cesium.Cartesian3.fromDegrees(lon, lat, alt),
@@ -235,6 +235,7 @@ DOM.createIcon = function(icon, id, name, lon, lat, alt){
             pixelOffset : new Cesium.Cartesian2(0, 32)
         }
     });
+    return icon;
 };
 
 //DOM CREATION
@@ -292,19 +293,23 @@ DOM.listItem = function(name){
     return li;
 };
 
-DOM.createInput = function(name, value){
-    var li = $('<li></li>')
-        .append($('<label></label>')
+DOM.createInput = function(name, value, ro){
+    var li = $('<li></li>');
+    var label = $('<label></label>')
             .attr('for', name)
-            .html(name)
-        )
-        .append($('<input></input>')
+            .html(name);
+    var input = $('<input></input>')
             .attr({
                 type: 'text',
                 id: name,
                 value: value
-            })
-    );
+            });
+    li.append(label);
+    li.append(input);
+    if (ro) {
+        input.prop('readonly', true);
+        li.hide();
+    }
     return li;
 };
 
@@ -350,16 +355,18 @@ DOM.createSelection = function(id, name, type){
 };
 
 DOM.displayElementData = function(elementID, elementType) {
-    var msg = '';
-    console.log("Database: " + elementType);
-    console.log("Input: " + elementID);
-    socket.emit('searchID', msg, elementType, elementID, function(result, msg) {
+    socket.emit('searchID', '', elementType, elementID, function(result) {
         var form = $('#pickedO');
         var ul = form.append('<ul></ul>');
         var ov = result;
         var eData;
         for (var key in ov) {
             if (key == '_id' || key == '__v') { continue; }
+            if (key == 'id' || key == 'cType' || key == 'create'){
+                eData = DOM.createInput(key, ov[key], true);
+                ul.append(eData);
+                continue;
+            }
             if(typeof ov[key] === 'string' || typeof ov[key] === 'number') {
                 eData = DOM.createInput(key, ov[key]);
                 ul.append(eData);

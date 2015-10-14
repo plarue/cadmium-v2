@@ -25,7 +25,9 @@ var weapon = new Schema({
     minRng: Number,
     maxEl: Number,
     boresightEl: Number,
-    latlonalt: []
+    latlonalt: [],
+    cType: String,
+    create: String
 });
 
 mongoose.model('weapon', weapon, 'weapon');

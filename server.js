@@ -503,6 +503,8 @@ bigio.initialize(function() {
                 threat.colors = [];
                 threat.velocity = [];
                 threat.rcs = rcs;
+                threat.cType = 'track';
+                threat.create = 'createTrack';
 
                 for(var i = 0; i < message[1].length; i++) {
                     var time = message[1][i];
@@ -519,7 +521,7 @@ bigio.initialize(function() {
                     threat.velocity.push([vx, vy, vz]);
                 }
 
-                socket.emit('loadElement', 'createTrack', ['add', threat]);
+                socket.emit('loadElement', threat);
                 var entry = new track(threat);
                 entry.save(function (err) {
                     if (err) return console.log(err);
@@ -675,7 +677,7 @@ bigio.initialize(function() {
             console.log("All databases cleared");
         });
 
-        socket.on('search', function(msg, database, input, callback){
+        socket.on('searchName', function(msg, database, input, callback){
             mongoose.model(database).findOne({name: input}, function(err, results){
                 callback(results, msg);
             })
@@ -698,31 +700,27 @@ bigio.initialize(function() {
 
         socket.on('refreshAll', function(database, callback){
             (function(db){
-                mongoose.model(db.dbType).find({}, function (err, results) {
+                mongoose.model(db).find({}, function (err, results) {
                     if (err)console.log(err);
                     if (results.length > 0) {
                         var refreshArray = [];
                         for (var r in results) {
-                            (db.pt)
-                                ? refreshArray.push({createType: db.cType, dbData: ['add', db.pt, results[r]]})
-                                : refreshArray.push({createType: db.cType, dbData: ['add', results[r]]});
+                            refreshArray.push(results[r]);
                         }
                         callback(refreshArray);
-                    }else{console.log('No ' + db.dbType + ' data to load');}
+                    }else{console.log('No ' + db + ' data to load');}
                 })
             })(database);
         });
 
         socket.on('newElement', function(type, data){
             var entry;
-            if (type == 'A'){
+            if (type == 'asset'){
                 entry = new asset(data);
-            }else if(type == 'S'){
+            }else if(type == 'sensor'){
                 entry = new sensor(data);
-            }else if(type == 'W'){
+            }else if(type == 'weapon') {
                 entry = new weapon(data);
-            }else{
-                entry = new track(data);
             }
             entry.save(function(err){
                 if (err) return console.log(err);
@@ -734,7 +732,6 @@ bigio.initialize(function() {
                 if (err) return console.log(err);
                 mongoose.model(db).findOne({id: id}, function(err, result){
                     if (err) return console.log(err);
-                    console.log(result);
                     cb(result)
                 });
             });
@@ -863,9 +860,11 @@ bigio.initialize(function() {
                 shape: line[6],
                 rad: line[7],
                 latlonalt: pos,
-                ftype: ftype
+                ftype: ftype,
+                cType: 'asset',
+                create: 'createAsset'
             };
-            socket.emit('loadElement', 'createAsset', ['add', data]);
+            socket.emit('loadElement', data);
             var entry = new asset(data);
             entry.save(function (err) {
                 if (err) return console.log(err);
@@ -912,10 +911,12 @@ bigio.initialize(function() {
                     boresight_Half_Ang_El: +line[6],
                     nFaces: radarData.nFaces,
                     boresightEl: radarData.boresightEl,
-                    latlonalt: [+line[4], +line[3], +line[5]]
+                    latlonalt: [+line[4], +line[3], +line[5]],
+                    cType: 'sensor',
+                    create: 'createVolume'
                 };
 
-                socket.emit('loadElement', 'createVolume', ['add', 'sensor', data]);
+                socket.emit('loadElement', data);
                 var entry = new sensor(data);
                 entry.save(function (err) {
                     if (err) return console.log(err);
@@ -959,10 +960,12 @@ bigio.initialize(function() {
                     nFaces: 2,
                     maxEl: 90,
                     boresightEl: 0,
-                    latlonalt: [+line[4], +line[3], +line[5]]
+                    latlonalt: [+line[4], +line[3], +line[5]],
+                    cType: 'weapon',
+                    create: 'createVolume'
                 };
 
-                socket.emit('loadElement', 'createVolume', ['add', 'weapon', data]);
+                socket.emit('loadElement', data);
                 var entry = new weapon(data);
                 entry.save(function (err) {
                     if (err) return console.log(err);

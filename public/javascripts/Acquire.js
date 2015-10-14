@@ -35,9 +35,12 @@ var viewer = new Cesium.Viewer('cesiumContainer', {
         url : '//assets.agi.com/stk-terrain/world'
     }),
     creditContainer: "hidden"
-})
+});
 
 var scene = viewer.scene;
+var terrainProvider = new Cesium.CesiumTerrainProvider({
+    url : '//assets.agi.com/stk-terrain/world'
+});
 var ellipsoid = scene.globe.ellipsoid;
 var handler;
 var i = 0;
@@ -234,50 +237,6 @@ var heatMap = [];
 socket.on('defendedArea', function(grid) {
     heatMap = heatMap.concat(hexbinTwo(grid));
 });
-function voronoiGrid(grid) {
-    console.log("Displaying grid");
-    var voronoi = d3.geom.voronoi();
-    console.log(grid.bounds);
-    voronoi.clipExtent([[grid.bounds.west, grid.bounds.south], [grid.bounds.east, grid.bounds.north]]);
-    voronoi.x(function(d) {
-        return d.lon;
-    });
-    voronoi.y(function(d) {
-        return d.lat;
-    });
-
-    var polygons = voronoi(grid.points);
-
-    var primitives = [];
-
-    for(var i in polygons) {
-        var vertices = [];
-        for(var j in polygons[i]) {
-            if(Array.isArray(polygons[i][j])) {
-                vertices = vertices.concat(polygons[i][j]);
-            }
-        }
-        var pg = new Cesium.Polygon({
-            positions: Cesium.Cartesian3.fromDegreesArray(vertices),
-            material: new Cesium.Material({
-                fabric : {
-                    type : 'Color',
-                    uniforms : {
-                        //color : new Cesium.Color(1.0 - grid.points[i].avgPk, grid.points[i].avgPk, 0.0, 0.6)
-                        color : new Cesium.Color(
-                            red(2 * (1 - grid.points[i].maxPk) - 1),
-                            green(2 * (1 - grid.points[i].maxPk) - 1),
-                            blue(2 * (1 - grid.points[i].maxPk) - 1), 0.6)
-                    }
-                }
-            })
-        });
-        scene.primitives.add(pg);
-        primitives.push(pg);
-    }
-
-    return primitives;
-}
 function hexbin(grid) {
     console.log("Displaying grid");
 
@@ -482,22 +441,15 @@ function clearHeatmap() {
 //CLEAR DATA
 function clearData(callback) {
     console.log('Clearing existing data');
-    var dbType = [
-        {createType: 'createVolume', typeData: ['remove', 'sensor'], db: 'sensor'},
-        {createType: 'createVolume', typeData: ['remove', 'weapon'], db: 'weapon'},
-        {createType: 'createTrack', typeData: ['remove'], db: 'track'},
-        {createType: 'createAsset', typeData: ['remove'], db: 'asset'}
-    ];
+    var dbType = ['sensor', 'weapon', 'track', 'asset'];
     for (var i=0; i < 4; i++){
-        socket.emit('findAll', dbType[i].db, dbType[i], function (cb, dbType) {
+        socket.emit('findAll', dbType[i], dbType[i], function (cb, pt) {
             if (cb.length > 0) {
                 for (var i = 0; i < cb.length; i++) {
-                    if (i>0) dbType.typeData.pop();
-                    dbType.typeData.push(cb[i]);
-                    DOM[dbType.createType].apply(null, dbType.typeData);
+                    DOM[cb[i].create]('remove', cb[i]);
                 }
-            }else{console.log('Database \"' + dbType.db + '\" contained no data')}
-            if (dbType.db == 'asset'){
+            }else{console.log('Database \"' + pt + '\" contained no data')}
+            if (pt == 'asset'){
                 document.getElementById('entityList').innerHTML = '';
                 if(callback) {
                     callback();
@@ -518,16 +470,11 @@ function newScenario() {
 function refreshData() {
     clearData(function() {
         console.log('Refreshing data');
-        var db = [
-            {dbType: 'sensor', cType: 'createVolume', pt: 'sensor'},
-            {dbType: 'weapon', cType: 'createVolume', pt: 'weapon'},
-            {dbType: 'track', cType: 'createTrack'},
-            {dbType: 'asset', cType: 'createAsset'}
-        ];
+        var db = ['sensor', 'weapon', 'track', 'asset'];
         for (var i=0; i < 4; i++) {
             socket.emit('refreshAll', db[i], function (cb) {
                 for (var rA in cb) {
-                    DOM[cb[rA].createType].apply(null, cb[rA].dbData);
+                    DOM[cb[rA].create]('add', cb[rA]);
                 }
             });
         }
@@ -537,16 +484,15 @@ function refreshData() {
 /**
  * CESIUM ELEMENT CONSTRUCTION/UPDATING
  */
-socket.on('loadElement', function(createType, dbData){
+socket.on('loadElement', function(dbData){
     if(dbData) {
-        DOM[createType].apply(null, dbData);
+        DOM[dbData.create]('add', dbData);
     }
 });
-socket.on('updateElement', function(createType, dbData){
+socket.on('updateElement', function(dbData){
     if (dbData) {
-        DOM[createType].apply(null, dbData);
-        dbData[0] = 'add';
-        DOM[createType].apply(null, dbData);
+        DOM[dbData.create]('remove', dbData);
+        DOM[dbData.create]('add', dbData);
     }
 });
 
@@ -601,7 +547,7 @@ function saveFile() {
  * IMPORT FILE LOADING
  */
 function importFile() {
-    document.getElementById('importDialog').style.display = 'block';
+    $('#importModal').modal()
 }
 document.getElementById('files').onchange = handleFileSelect;
 function handleFileSelect() {
@@ -617,7 +563,6 @@ function handleFileSelect() {
     }
 }
 function loadFile(){
-    document.getElementById('importDialog').style.display = 'none';
     var inp = document.getElementById('files');
     for (var i=0; i < inp.files.length; i++) {
         var file = inp.files[i];
@@ -657,117 +602,25 @@ function getFileType(name){
  * ENTITY HANDLING
  */
 function entHandler(action){
-    var form = document.getElementById('picked');
-    var labels = form.getElementsByTagName('label');
-    var unique = [['SensorIDs0', 'weapon'], ['WeaponIDs0', 'sensor'], ['shape', 'asset']];
-    var obj = {};
-    for (var i=0; i < labels.length; i++){
-        var f = labels[i].htmlFor;
-        obj[f] = document.getElementById(f).value;
-    }
-    var type;
-    for (var i=0; i < unique.length; i++) {
-        if (obj.hasOwnProperty(unique[i][0])) {
-            if (unique[i][0] == 'shape'){
-                var shape = obj[unique[i][0]];
-                type = shape.toLowerCase();
-            }else{
-                type = unique[i][1];
-            }
-        }
-    }
-    var count;
-    if (type == 'weapon') {
-        count = obj.NumSensorIDs;
-        obj.SensorIDs = [];
-    }else if(type == 'sensor'){
-        count = obj.NumWeaponIDs;
-        obj.WeaponIDs = [];
-    }else if(type == 'polygon'){
-        count = obj.rad;
-        obj.latlonalt = [];
-    }else if(type == 'circle'){
-        count = 3;
-        obj.latlonalt = [];
-    }
-    for (var i=0; i < count; i++) {
-        if (type == 'weapon'){
-            obj.SensorIDs.push(obj['SensorIDs' + i]);
-            delete obj['SensorIDs' + i];
-        }else if(type == 'sensor'){
-            obj.WeaponIDs.push(obj['WeaponIDs' + i]);
-            delete obj['WeaponIDs' + i];
-        }else if(type == 'polygon'){
-            var curID = 'latlonalt' + (i + 1);
-            for (var j=0; j<3; j++){
-                obj.latlonalt.push(obj[curID + j]);
-                delete obj[curID + j];
-            }
-        }else if(type == 'circle'){
-            obj.latlonalt.push(obj['latlonalt1' + i]);
-            delete obj['latlonalt1' + i];
-        }
-    }
-    if (action == 'update') {
-        updateEntity(type, obj)
-    } else if(action == 'move') {
-        var eid;
-        if (type == 'weapon'){
-            eid = 'W' + obj.id;
-        } else {
-            eid = 'S' + obj.id;
-        }
-        socket.emit('searchID', 'range', type + 'C', eid, function(cb, msg){
-            moveEntity(type, obj, cb, eid);
-        })
-    }else if(action == 'delete'){
-        deleteEntity(type, obj);
-    }
+    var id = $('#id').val();
+    var cType = $('#cType').val();
+    console.log(action);
+    socket.emit('searchID', action, cType, id, function(cb, msg){
+        console.log(msg);
+        (msg == 'update') ? updateEntity(cb) :
+            (msg == 'move') ? moveEntity(cb) :
+            (msg == 'delete') ? deleteEntity(cb) : '';
+    })
 }
-function updateEntity(type, data){
-    var sid = data.id;
-    var dataA = {};
-    var dataC = {};
-    if (type == 'sensor'){
-        dataA.id = 'S' + sid;
-        dataC.id = 'S' + sid;
-        dataC.latlonalt = [data.Lon, data.Lat, data.Alt];
-        dataC.boresight_Half_Ang_El = data.BoresightAz;
-        dataC.name = data.Identifier;
-        DOM.createSensor('r', dataA);
-        socket.emit('updateData', data.id, dataC.id, 'sensor', data, dataC, function(cb){
-            DOM.createSensor('a', cb);
+function updateEntity(data){
+    DOM[data.create]('remove', data);
+    (function(data) {
+        socket.emit('updateData', data.id, data.cType, data, function (cb) {
+            DOM[cb.create]('add', cb);
         });
-    }else if(type == 'weapon'){
-        dataA.id = 'W' + data.id;
-        dataC.id = 'W' + data.id;
-        dataC.latlonalt = [data.Lon, data.Lat, data.Alt];
-        dataC.boresight_Half_Ang_El = data.BoresightAz;
-        dataC.name = data.Identifier;
-        DOM.createWeapon('r', dataA);
-        socket.emit('updateData', data.id, dataC.id, 'weapon', data, dataC, function(cb){
-            DOM.createWeapon('a', cb);
-        });
-    }
+    })(data);
 }
-function moveEntity(type, data, id){
-    var entity = cesiumWidget.entities.add({
-        label: {
-            show: false
-        }
-    });
-    var entityTwo = cesiumWidget.entities.add({
-        name : 'blue circle',
-        position: Cesium.Cartesian3.fromDegrees(data.Lon, data.Lat, 0.0),
-        ellipse : {
-            semiMajorAxis: 100000,
-            semiMinorAxis: 100000,
-            material : Cesium.Color.AQUA.withAlpha(0.5),
-            outline: true,
-            outlineColor: Cesium.Color.BLACK,
-            show: false
-        }
-    });
+function moveEntity(data){
     var mousePosition = new Cesium.Cartesian2();
     var mousePositionProperty = new Cesium.CallbackProperty(
         function(time, result){
@@ -780,18 +633,20 @@ function moveEntity(type, data, id){
 
     var dragging = false;
     var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-    var rem = {id: id};
+    var rem = {id: data.id};
+    var dt, icon;
+    (data.cType == 'sensor') ? icon = "SFGPESR---*****" : icon = "SFGPEWM---*****";
     handler.setInputAction(
         function(click) {
-            var pickLoc = Cesium.Cartesian3.fromDegrees(dataA.Lon, dataA.Lat);
+            var pickLoc = Cesium.Cartesian3.fromDegrees(data.Lon, data.Lat);
             var pickedObject = scene.pick(Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, pickLoc));
             if (Cesium.defined(pickedObject)) {
-                entityTwo.ellipse.show = true;
                 dragging = true;
                 scene.screenSpaceCameraController.enableRotate = false;
-                DOM.createVolume('remove', type, rem);
+                DOM.createVolume('remove', rem);
+                dt = DOM.createIcon(icon, 'dragTemp', data.name, data.Lon, data.Lat, 0);
                 Cesium.Cartesian2.clone(click.position, mousePosition);
-                entityTwo.position = mousePositionProperty;
+                dt.position = mousePositionProperty;
             }
         },
         Cesium.ScreenSpaceEventType.LEFT_DOWN
@@ -811,6 +666,7 @@ function moveEntity(type, data, id){
             if(dragging) {
                 dragging = false;
                 scene.screenSpaceCameraController.enableRotate = true;
+                viewer.entities.removeById('dragTemp');
                 var cp = scene.camera.pickEllipsoid(click.position);
                 var cartographic = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cp);
                 var positions = [Cesium.Cartographic.fromRadians(cartographic.longitude, cartographic.latitude)];
@@ -818,12 +674,11 @@ function moveEntity(type, data, id){
                 Cesium.when(promise, function (updatedPositions) {
                     cartographic.height = positions[0].height;
                     data.Lat = Cesium.Math.toDegrees(cartographic.latitude);
-                    data.Lon = Cesium.Math.toDegrees(cartographic.longitude)
-                    data.Alt = cartographic.height
+                    data.Lon = Cesium.Math.toDegrees(cartographic.longitude);
+                    data.Alt = cartographic.height;
                     data.latlonalt = [data.Lon, data.Lat, data.Alt];
-                    socket.emit('updateData', data.id, type, data, function(cb){
-                        entityTwo.ellipse.show = false;
-                        DOM.createVolume('add', type, cb);
+                    socket.emit('updateData', data.id, data.cType, data, function(cb){
+                        DOM.createVolume('add', cb);
                     });
                     handler = handler && handler.destroy();
                 });
@@ -832,9 +687,199 @@ function moveEntity(type, data, id){
         Cesium.ScreenSpaceEventType.LEFT_UP
     );
 }
-function deleteEntity(type, data){
-    (type == 'sensor' || type == 'weapon') ? DOM.createVolume('remove', type, data) : DOM.createAsset('remove', type, data);
+function deleteEntity(data){
+    DOM[data.create]('remove', data);
     socket.emit('removeData', type, data.id);
+}
+/**
+ * ENTITY CREATION
+ */
+function createModal(type){
+    (type == 'sensor')
+        ? $('#sensorModal').modal() :
+    (type == 'weapon')
+        ? $('#weaponModal').modal()
+        : $('#assetModal').modal();
+}
+function wsSubmit(type) {
+    var name, database, pt, sfixed, wfixed;
+    if (type == 'sensor') {
+        name = $('#sensors').val();
+        database = 'radarTypes';
+        $('#sensorFixed').change(function(){
+            sfixed = this.value ^= 1;
+        });
+        pt = {
+            type: type,
+            id: 'S' + $('#sensorID').val(),
+            fixed: sfixed,
+            weaponIDs: $('#weaponIDs').val()
+        }
+    } else {
+        name = $('#weapons').val();
+        database = 'weaponTypes';
+        $('#weaponFixed').change(function(){
+            wfixed = this.value ^= 1;
+        });
+        pt = {
+            type: type,
+            id: 'W' + $('#sensorID').val(),
+            fixed: wfixed,
+            sensorIDs: $('#sensorIDs').val()
+        }
+    }
+    socket.emit('searchName', pt, database, name, function (callback, pt) {
+        var inData = callback;
+        var geoID = Object.keys(currentGeometry);
+        for (var i = 0; i < geoID.length; i++) {
+            if ((inData.id) == geoID[i]) {
+                loggingMessage('ID already in use!');
+                return;
+            }
+        }
+        var mousePosition = new Cesium.Cartesian2();
+        var mousePositionProperty = new Cesium.CallbackProperty(
+            function(time, result){
+                var position = scene.camera.pickEllipsoid(mousePosition, undefined, result);
+                var cartographic = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
+                cartographic.height = 0.0;
+                return Cesium.Ellipsoid.WGS84.cartographicToCartesian(cartographic);
+            },
+            false);
+
+        var entity = viewer.entities.add({
+            label: {
+                show: false
+            }
+        });
+        var entitytwo = viewer.entities.add({
+            polyline: {
+                show: false,
+                width: 2,
+                material: Cesium.Color.YELLOW
+            }
+        });
+        var entitythree = viewer.entities.add({
+            polyline: {
+                show: false,
+                width: 1,
+                material: Cesium.Color.YELLOW
+            }
+        });
+
+        var lla = [],
+            stage = 0,
+            degree = 0,
+            cartographic,
+            cartographictwo;
+        var positionHandler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+
+        positionHandler.setInputAction(function (movement) {
+            if (stage == 0) {
+                var cartesian = viewer.camera.pickEllipsoid(movement.endPosition, ellipsoid);
+                if (cartesian) {
+                    cartographic = ellipsoid.cartesianToCartographic(cartesian);
+                    var longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(4);
+                    var latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(4);
+
+                    entity.position = mousePositionProperty;
+                    entity.label.show = true;
+                    entity.label.text = '(' + longitudeString + ', ' + latitudeString + ')';
+                } else {
+                    entity.label.show = false;
+                }
+            }else if (stage == 1){
+                var cartesiantwo = cesiumWidget.camera.pickEllipsoid(movement.endPosition, ellipsoid);
+                cartographictwo = ellipsoid.cartesianToCartographic(cartesian);
+                if (cartesiantwo) {
+                    var pos = Cesium.Cartesian2.clone(movement.endPosition, mousePosition);
+                    entity.position = mousePositionProperty;
+                    entity.label.show = true;
+                    entity.label.text = '(Rotation: ' + degree + ')';
+                    entitytwo.polyline.positions = Cesium.Cartesian3.fromDegreesArray([lla[0], lla[1], Cesium.Math.toDegrees(cartographictwo.longitude), Cesium.Math.toDegrees(cartographictwo.latitude)]);
+                    entitytwo.polyline.show = true;
+                    entitythree.polyline.positions = Cesium.Cartesian3.fromDegreesArray([lla[0], lla[1], lla[0], 90]);
+                    entitythree.polyline.show = true;
+                    var dlat = cartographictwo.latitude - cartographic.latitude;
+                    var dlon = cartographictwo.longitude - cartographic.longitude;
+                    degree = Cesium.Math.toDegrees(Math.PI / 2.0 - Math.atan2(dlat, dlon));
+                } else {
+                    entity.label.show = false;
+                }
+            }
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+        positionHandler.setInputAction(function (click) {
+            if (stage == 0) {
+                var cartesian = viewer.camera.pickEllipsoid(click.position, ellipsoid);
+                cartographic = ellipsoid.cartesianToCartographic(cartesian);
+                lla = [
+                    Cesium.Math.toDegrees(cartographic.longitude),
+                    Cesium.Math.toDegrees(cartographic.latitude),
+                    Cesium.Math.toDegrees(cartographic.height)
+                ];
+                var positions = [cartographic.longitude, cartographic.latitude];
+                var promise = Cesium.sampleTerrain(terrainProvider, 11, positions);
+                Cesium.when(promise, function (updatedPositions) {
+                    stage = 1;
+                    lla[2] = positions[0].height;
+                    positionHandler = positionHandler && positionHandler.destroy();
+                });
+            }else if (stage === 1) {
+                var data = {
+                    Index: 0,
+                    name: pt.id,
+                    Identifier: pt.id,
+                    Type: inData.id,
+                    Lat: lla[1],
+                    Lon: lla[0],
+                    Alt: lla[2],
+                    Fixed: pt.fixed,
+                    minEl: inData.minEl,
+                    maxEl: inData.maxEl,
+                    max_Range: inData.max_Range,
+                    minRng: inData.minRng,
+                    boresight_Half_Ang_Az: inData.boresight_Half_Ang_Az,
+                    boresight_Half_Ang_El: inData.boresight_Half_Ang_El,
+                    nFaces: inData.nFaces,
+                    boresightEl: inData.boresightEl,
+                    latlonalt: lla
+                };
+                if (pt.cType == 'sensor') {
+                    jQuery.extend(data, {
+                        id: 'S' + pt.id,
+                        BoresightAz: +degree,
+                        NumWeaponIDs: pt.weaponIDs.length,
+                        WeaponIDs: pt.weaponIDs,
+                        KFactorClass: $('#KFactorClass').val(),
+                        KFactorType: $('#KFactorType').val(),
+                        KFactorID: $('#KFactorID').val(),
+                        cType: 'sensor',
+                        create: 'createVolume'
+                    });
+                    console.log("Creating sensor");
+                    DOM.createVolume('add', data);
+                    socket.emit('newElement', data.cType, data);
+                } else {
+                    jQuery.extend(data, {
+                        id: 'W' + pt.id,
+                        Boresight: +degree,
+                        NumSensorIDs: pt.sensorIDs.length,
+                        SensorIDs: pt.sensorIDs,
+                        cType: 'weapon',
+                        create: 'createVolume'
+                    });
+                    console.log("Creating weapon");
+                    DOM.createVolume('add', data);
+                    socket.emit('newElement', data.cType, data);
+                }
+                viewer.entities.remove(entity);
+                viewer.entities.remove(entitytwo);
+                viewer.entities.remove(entitythree);
+                positionHandler = positionHandler && positionHandler.destroy();
+            }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    });
 }
 
 /**
@@ -948,8 +993,8 @@ function slideRight() {
 function screenshotDiag(){
     var ovCont = document.getElementById('scOverlay');
     ovCont.innerHTML = '';
-    cesiumWidget.render();
-    var overlay = cesiumWidget.canvas.toDataURL('image/png');
+    viewer.render();
+    var overlay = viewer.canvas.toDataURL('image/png');
     var image = document.createElement('img');
     image.src = overlay;
     ovCont.appendChild(image);

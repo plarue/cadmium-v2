@@ -49,12 +49,23 @@
             </a>
             <ul class="dropdown-menu" role="menu" aria-labelledby="fileButton">
                 <li><a href="#" id="openScenario" onclick="openScenario();">Open Scenario</a></li>
-                <li><a href="#" id="loadFile" onclick="importFile();">Load File</a></li>
+                <li><a href="#" id="loadFile" onclick="importFile();">Import File</a></li>
                 <li><a href="#" id="saveScenario" onclick="saveScenario();">Save Scenario</a></li>
                 <li><a href="#" id="clearScenario" data-toggle="modal" data-target="#clearConfirmModal">Clear Scenario</a></li>
                 <li role="separator" class="bb divider"></li>
                 <li><a href="#" id="refreshData" onclick="refreshData();">Refresh Current</a></li>
                 <li><a href="#" id="screenCapture" onclick="screenshotDiag();">Screen Capture</a></li>
+            </ul>
+        </li>
+        <li class="dropdown">
+            <a href="#" id="createButton" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                Create
+                <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="fileButton">
+                <li><a href="#" id="createSensor" onclick="createModal('sensor');">Sensors</a></li>
+                <li><a href="#" id="createWeapon" onclick="createModal('weapon');">Weapons</a></li>
+                <li><a href="#" id="createAsset" onclick="createModal('asset');">Assets</a></li>
             </ul>
         </li>
         <li class="dropdown">
@@ -186,18 +197,125 @@
         </div>
     </div>
 </div>
-<div id="importDialog">
-    <h4>Import Files</h4>
-    <div class="bdrCont">
-        <form>
-            <p>Select one or multiple files to load.</p>
-            <input type="file" id="files" name="files[]" size="40" multiple required/>
-            <div id="lFOutput">
-                <div id="fileNames"></div>
-                <div id="fileTypes"></div>
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="importDialogLabel">Import File</h4>
             </div>
-            <button type="button" onclick="loadFile()">Load</button>
-        </form>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form>
+                            <p>Select one or multiple files to load.</p>
+                            <input type="file" id="files" name="files[]" size="40" multiple required/>
+                            <div id="lFOutput">
+                                <div id="fileNames"></div>
+                                <div id="fileTypes"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="loadFile()">Import</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="sensorModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="sensorDialogLabel">Sensors</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="defRadar">
+                        <div id="sensorInputs" class="form-group col-md-12">
+                            <label for="sensors">Type:</label>
+                            <select class="form-control spaced-bottom" id="sensors"></select>
+                            <label for="sensorID">Sensor ID:</label>
+                            <input type="text" class="form-control spaced-bottom" id="sensorID" required/>
+                            <label for="weaponIDs">Weapon IDs:</label>
+                            <input type="text" class="form-control spaced-bottom" id="weaponIDs" required/>
+                            <label for="KFactorClass">KFactorClass:</label>
+                            <input type="text" class="form-control spaced-bottom" id="KFactorClass" required/>
+                            <label for="KFactorType">KFactorType:</label>
+                            <input type="text" class="form-control spaced-bottom" id="KFactorType" required/>
+                            <label for="KFactorID">KFactorID:</label>
+                            <input type="text" class="form-control spaced-bottom" id="KFactorID" required/>
+                            <label for="sensorFixed">Fixed:</label>
+                            <input type="checkbox" class="form-control spaced-bottom" id="sensorFixed" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="wsSubmit('sensor')">Create</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="weaponModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="weaponDialogLabel">Weapons</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="defWeapon">
+                        <div id="weaponInputs" class="form-group col-md-12">
+                            <label for="sensors">Type:</label>
+                            <select class="form-control spaced-bottom" id="weapons"></select>
+                            <label for="weaponID">Weapon ID:</label>
+                            <input type="text" class="form-control spaced-bottom" id="weaponID" required/>
+                            <label for="sensorIDs">Sensor IDs:</label>
+                            <input type="text" class="form-control spaced-bottom" id="sensorIDs" required/>
+                            <label for="weaponFixed">Fixed:</label>
+                            <input type="checkbox" class="form-control spaced-bottom" id="weaponFixed" required/>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="wsSubmit('weapon')">Create</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="assetModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="assetDialogLabel">Assets</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="defAsset">
+                        <div id="assetInputs" class="form-group col-md-12">
+                            <label for="name">Name:</label>
+                            <input type="text" class="form-control spaced-bottom" id="name" size="30" required/>
+                            <label for="owner">Affiliation:</label>
+                            <select class="form-control spaced-bottom" id="owner">
+                                <option value="FRIEND">Friend</option>
+                                <option value="HOSTILE">Hostile</option>
+                            </select>
+                            <label for="valExp">Value:</label>
+                            <input type="text" class="form-control spaced-bottom" id="valExp" required/>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="">Create</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <div id="saveDialog">
@@ -231,7 +349,6 @@
         <div id="tabs">
             <ul>
                 <li id="tabHeader_1" class="bl">Scene</li>
-                <li id="tabHeader_2">Create</li>
             </ul>
         </div>
         <div id="tabscontent">
@@ -266,83 +383,6 @@
                             <ul id="sensorList"></ul>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="tabpage" id="tabpage_2">
-                <h4>Areas</h4>
-                <div class="bdrCont">
-                    <form onsubmit="createAsset();return false">
-                        <div id="toolbar" class="form-group">
-                            <label for="name">Name:</label>
-                            <input type="text" class="form-control spaced-bottom" id="name" size="30" required/>
-                            <label for="owner">Affiliation:</label>
-                            <select class="form-control spaced-bottom" id="owner">
-                                <option value="FRIEND">Friend</option>
-                                <option value="HOSTILE">Hostile</option>
-                                <option value="Undefined">Undefined</option>
-                            </select>
-                            <label for="valExp">Value:</label>
-                            <input type="text" class="form-control spaced-bottom" id="valExp" required/>
-                            <input type="submit" class="btn btn-default spaced-bottom center" value="Create"/>
-                        </div>
-                    </form>
-                </div>
-                <h4>Sensors</h4>
-                <div class="bdrCont">
-                    <form id="defRadar" onsubmit="wsSubmit('s'); return false;">
-                        <div id="sensorInputs" class="form-group">
-                            <label for="sensors">Type:</label>
-                            <select class="form-control spaced-bottom" id="sensors">
-                                <option selected value=""></option>
-                                <option value="XBR">XBR</option>
-                                <option value="UEW">UEW</option>
-                                <option value="CD">CD</option>
-                                <option value="THD">THD</option>
-                                <option value="SPY">SPY</option>
-                                <option value="EAPS">EAPS</option>
-                                <option value="LPWS">LPWS</option>
-                                <option value="LCMR">LCMR</option>
-                                <option value="Firfndr_37">Firfndr_37</option>
-                                <option value="Giraffe">Giraffe</option>
-                                <option value="Sentinel">Sentinel</option>
-                                <option value="EQ_36">EQ_36</option>
-                                <option value="KRFS">KRFS</option>
-                            </select>
-                            <label for="sensorID">Sensor ID:</label>
-                            <input type="text" class="form-control spaced-bottom" id="sensorID" required/>
-                            <input type="submit" class="btn btn-default center" value="Create">
-                        </div>
-                    </form>
-                </div>
-                <h4>Weapons</h4>
-                <div class="bdrCont">
-                    <form id="defWeapon" onsubmit="wsSubmit('w'); return false;">
-                        <div id="weaponInputs" class="form-group">
-                            <label for="weapons">Type:</label>
-                            <select class="form-control spaced-bottom" id="weapons">
-                                <option selected value=""></option>
-                                <option value="LBEI">LBEI</option>
-                                <option value="AegisU">AegisU</option>
-                                <option value="AegisBlk1B">AegisBlk1B</option>
-                                <option value="Thaad">Thaad</option>
-                                <option value="SLAMR">SLAMR</option>
-                                <option value="PAC2">PAC2</option>
-                                <option value="PAC2M20">PAC2M20</option>
-                                <option value="PAC2P20">PAC2P20</option>
-                                <option value="PAC3">PAC3</option>
-                                <option value="MSE">MSE</option>
-                                <option value="EAPS">EAPS</option>
-                                <option value="GMD">GMD</option>
-                                <option value="SysA">SysA</option>
-                                <option value="SysB">SysB</option>
-                                <option value="SysC">SysC</option>
-                                <option value="AI3">AI3</option>
-                            </select>
-                            <label for="weaponID">Weapon ID:</label>
-                            <input type="text" class="form-control spaced-bottom" id="weaponID" required/>
-                            <input type="submit" class="btn btn-default center" value="Create"/>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
