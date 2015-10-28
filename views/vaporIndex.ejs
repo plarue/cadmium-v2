@@ -8,7 +8,7 @@
     <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-    <title>Athena</title>
+    <title>Vapor</title>
 
     <script src="../public/javascripts/jquery-2.1.4.min.js"></script>
     <script src="../public/javascripts/d3/d3.min.js" type="text/javascript"></script>
@@ -36,7 +36,7 @@
 <!--div id="baTwo" class="backAng"></div-->
 <!--div id="hidden" style="display: none;"/-->
 <div id="menuCont">
-    <img id="logo" src="../public/images/logo.png" />
+    <img id="mainLogo" src="../public/images/vaporLogo.svg" />
 </div>
 <div id="menu">
     <ul>
@@ -66,93 +66,8 @@
                 <li><a href="#" id="createAsset" onclick="createModal('asset');">Assets</a></li>
             </ul>
         </li>
-        <li class="dropdown">
-            <a href="#" id="algorithmButton" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                Algorithms
-                <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="algorithmButton">
-                <li><a href="#" id="startOptimization" data-toggle="modal" data-target="#optimizeModal">Optimize</a></li>
-                <li><a href="#" id="stopOptimization" onclick="stopOptimization()">Stop Optimization</a></li>
-                <li><a href="#" id="evaluateScenario" onclick="evaluateScenario()">Evaluate Laydown</a></li>
-                <li role="separator" class="bb divider"></li>
-                <li class="disabled" id="generateThreatsItem"><a href="#" id="generateThreats" onclick="generateThreats()">Generate Threats</a></li>
-            </ul>
-        </li>
         <!--li><a href="javascript:;" class ="bl nondd" id="pause" onclick="openScenario();">PAUSE</a></li-->
     </ul>
-</div>
-<div class="modal fade" id="optimizeModal" tabindex="-1" role="dialog" aria-labelledby="optimizeModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <!--button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button-->
-                <h4 class="modal-title" id="optimizeModalLabel">Run Optimization</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h4>Algorithm Type</h4>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="algorithmRadio" id="psoAlgorithm" value="Particle Swarm" checked>Particle Swarm</input>
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="algorithmRadio" id="evolutionaryAlgorithm" value="Evolutionary">Evolutionary</input>
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="algorithmRadio" id="greedyAlgorithm" value="Greedy">Greedy</input>
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="algorithmRadio" id="stadiumAlgorithm" value="algStadium">Stadium</input>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-md-6" id="algOne">
-                        <h4>What to optimize</h4>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="typeRadio" id="sensorsType" value="Sensors" checked>Sensors</input>
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="typeRadio" id="weaponsType" value="Weapons">Weapons</input>
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="typeRadio" id="weaponsSensorsType" value="Weapons and Sensors">Weapons and Sensors</input>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-md-6 noShow" id="algTwo">
-                        <h4>What to optimize</h4>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="typeRadio" id="sensorsTypeTwo" value="Sensors">Sensors</input>
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="typeRadio" id="stadiumType" value="optStadium">Search Sectors</input>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="optimize();" data-dismiss="modal">Optimize</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
 </div>
 <div class="modal fade" id="clearConfirmModal" tabindex="-1" role="dialog" aria-labelledby="clearConfirmLabel">
     <div class="modal-dialog" role="document">
@@ -346,11 +261,20 @@
     <div id="tabContainer">
         <div id="tabs">
             <ul>
-                <li id="tabHeader_1" class="bl">Scene</li>
+                <li id="tabHeader_1" class="bl">Prioritization</li>
+                <li id="tabHeader_2" class="bl">Scene</li>
             </ul>
         </div>
         <div id="tabscontent">
             <div class="tabpage" id="tabpage_1">
+                <div id="leftBar">
+                    <h4>Track Prioritization</h4>
+                    <div class="bdrCont" id="trackPList">
+                    </div>
+                    <button class="btn btn-default" type="button" onclick="vaporReturn()">Update</button>
+                </div>
+            </div>
+            <div class="tabpage" id="tabpage_2">
                 <div id="leftBar">
                     <h4>Scene Entities</h4>
                     <div class="bdrCont">
@@ -397,7 +321,7 @@
         <a href="javascript:;" class ="ht" id="rhToggleA" onclick="slideRight();"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a>
     </div>
     <div id="rightBar">
-        <h4>Selected Entity</h4>
+        <h4>Simulation Parameter</h4>
         <div class="entityOutput">
             <p id="noSelect">Click on an entity on the globe to view it's parameters.</p>
             <p id="multipleSelect">You have selected multiple entities from the scene. Select the intended entity from the list below.</p>
@@ -405,36 +329,10 @@
             <div><form id="picked" onsubmit="return false"><div id="pickedO" class="form-group"></div></form></div>
             <div id="entityControls">
                 <button class="btn btn-default" type="button" onclick="entHandler('update')">Update</button>
-                <button class="btn btn-default" type="button" onclick="entHandler('move')">Move</button>
-                <button class="btn btn-default" type="button" onclick="entHandler('delete')">Delete</button>
+                <!--<button class="btn btn-default" type="button" onclick="entHandler('move')">Move</button>
+                <button class="btn btn-default" type="button" onclick="entHandler('delete')">Delete</button>-->
             </div>
         </div>
-    </div>
-</div>
-<div id="bottom">
-    <div id="surveillanceCont">
-        <div id="ht1" class="center topHideToggle">
-            <a href="javascript:;" class ="bht" id="ht1ToggleA" onclick="slideDown('surveillanceCont', '-271px');">Surveillance Score</a>
-        </div>
-        <div id="surveillanceScore" class="graph"></div>
-    </div>
-    <div id="fireControlCont">
-        <div id="ht2" class="center topHideToggle">
-            <a href="javascript:;" class ="bht" id="ht2ToggleA" onclick="slideDown('fireControlCont', '-331px');">Fire Control Score</a>
-        </div>
-        <div id="fireControlScore" class="graph"></div>
-    </div>
-    <div id="weaponCont">
-        <div id="ht3" class="center topHideToggle">
-            <a href="javascript:;" class ="bht" id="ht3ToggleA" onclick="slideDown('weaponCont', '-311px');">Weapon Score</a>
-        </div>
-        <div id="weaponScore" class="graph"></div>
-    </div>
-    <div id="evaluationCont">
-        <div id="ht4" class="center topHideToggle">
-            <a href="javascript:;" class ="bht" id="ht4ToggleA" onclick="slideDown('evaluationCont', '-471px');">Evaluation</a>
-        </div>
-        <div id="evaluation" class="graph"></div>
     </div>
 </div>
 <div id="saveImgDialog">

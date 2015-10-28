@@ -27,6 +27,7 @@ db.on('error', console.error.bind(console, 'Mongo connection error:'));
 fs.readdirSync(__dirname + '/bin/models').forEach(function(filename) {
     if (~filename.indexOf('.js')) require(__dirname + '/bin/models/' + filename)
 });
+
 app.use(function(req,res,next) {
     req.db = db;
     next();
@@ -45,6 +46,11 @@ track.remove({}, function(err) {
     if(err)console.log(err);
     console.log('Track collection cleared')
 });
+var truth = mongoose.model('truth');
+truth.remove({}, function(err) {
+    if(err)console.log(err);
+    console.log('Truth collection cleared')
+});
 var sensor = mongoose.model('sensor');
 sensor.remove({}, function(err) {
     if(err)console.log(err);
@@ -59,6 +65,7 @@ weapon.remove({}, function(err) {
 //Express
 app.use('/public', express.static('public'));
 app.use('/node_modules', express.static('node_modules'));
+app.use('/views', express.static('views'));
 var routes = require('./routes/index');
 app.use('/', routes);
 
@@ -529,6 +536,122 @@ bigio.initialize(function() {
             }
         });
 
+        bigio.addListener({
+            topic: 'threat_truth_topic',
+            listener: function(message){
+                mongoose.model('truth').findOne({name: message[1]}, function(err, result){
+                    if (err) return console.log(err);
+                    var id = message[1],
+                        identity, classification, positions, velocity, exists;
+
+                    if (result){
+                        result.positions.push({x: message[3][0], y: message[3][1], z: message[3][2]});
+                        result.velocity.push(message[3][3], message[3][4], message[3][5]);
+                        positions = result.positions;
+                        velocity = result.velocity;
+                        exists = true;
+                    }else{
+                        positions = [{x: message[3][0], y: message[3][1], z: message[3][2]}];
+                        velocity = [message[3][3], message[3][4], message[3][5]];
+                        exists = false;
+                    }
+                    var threat = {};
+
+                    (message[7] == 2) ? identity = 'HOSTILE' : identity = 'FRIEND';
+                    (message[8] == 1) ? classification = 'GROUND_VEHICLE' : classification = '';
+
+                    threat.hdr = message[0];
+                    threat.id = 'Tr' + id;
+                    threat.name = id;
+                    threat.positions = positions;
+                    threat.color = {red: 255, green: 0, blue: 0, alpha: 255};
+                    threat.velocity = velocity;
+                    threat.beta = message[4];
+                    threat.rcs = message[5];
+                    threat.radIntensity = message[6];
+                    threat.identity = identity;
+                    threat.classification = classification;
+                    threat.lastThreatTruth = message[9];
+                    threat.cType = 'truth';
+                    threat.create = 'createTruth';
+
+                    if (exists){
+                        mongoose.model('truth').findOneAndUpdate({id: threat.id}, threat, function(err) {
+                            if (err) return console.log(err);
+                        });
+                        socket.emit('vapor', threat);
+                    }else{
+                        var entry = new truth(threat);
+                        entry.save(function (err) {
+                            if (err) return console.log(err);
+                        });
+                    }
+                });
+            }
+        });
+        bigio.addListener({
+            topic: 'system_track_topic',
+            listener: function(message){
+                mongoose.model('track').findOne({name: message[1]}, function(err, result){
+                    if (err) return console.log(err);
+                    var id = message[1],
+                        identity, type, classification, positions, velocity, exists;
+
+                    if (result){
+                        result.positions.push({x: message[8][0], y: message[8][1], z: message[8][2]});
+                        result.velocity.push(message[8][3], message[8][4], message[8][5]);
+                        positions = result.positions;
+                        velocity = result.velocity;
+                        exists = true;
+                    }else{
+                        positions = [{x: message[8][0], y: message[8][1], z: message[8][2]}];
+                        velocity = [message[8][3], message[8][4], message[8][5]];
+                        exists = false;
+                    }
+                    var threat = {};
+
+                    (message[4] == 1) ? type = 'GroundTrack' : type = '';
+                    (message[5] == 1) ? classification = 'GROUND_VEHICLE' : classification = '';
+                    (message[6] == 2) ? identity = 'HOSTILE' : identity = 'FRIEND';
+
+                    threat.hdr = message[0];
+                    threat.id = 'sTr' + id;
+                    threat.name = id;
+                    threat.sysTrkID = message[1];
+                    threat.leadSrcID = message[2];
+                    threat.truthID = message[3];
+                    threat.positions = positions;
+                    threat.color = {red: 255, green: 122, blue: 0, alpha: 200};
+                    threat.velocity = velocity;
+                    threat.tValid = message[7];
+                    threat.cov = message[14];
+                    threat.type = type;
+                    threat.friendHostile = identity;
+                    threat.classification = classification;
+                    threat.pLethal = message[9];
+                    threat.urgency = message[10];
+                    threat.ballisticCoef = message[11];
+                    threat.priority = message[12];
+                    threat.dropped = message[13];
+                    threat.cType = 'truth';
+                    threat.create = 'createTruth';
+
+
+                    if (exists){
+                        mongoose.model('track').findOneAndUpdate({id: threat.id}, threat, function(err) {
+                            if (err) return console.log(err);
+                        });
+                        socket.emit('vapor', threat);
+                    }else{
+                        var entry = new track(threat);
+                        entry.save(function (err) {
+                            if (err) return console.log(err);
+                        });
+                    }
+                });
+            }
+        });
+
 //TODO: ASSET REFACTOR FROM CZML
         bigio.addListener({
             topic: 'threat_truth',
@@ -668,7 +791,7 @@ bigio.initialize(function() {
         });
 
         socket.on('newF', function(){
-            var db = [sensor, weapon, track, asset];
+            var db = [sensor, weapon, track, asset, truth];
             for (var i=0; i < db.length; i++) {
                 db[i].remove({}, function (err) {
                     if (err)console.log(err);
@@ -1083,4 +1206,30 @@ function makeid() {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
 
     return text;
+}
+
+var a = 6378137,
+    f = 0.0034,
+    b = 6.3568e6,
+    e = Math.sqrt((Math.pow(a, 2) - Math.pow(b, 2)) / Math.pow(a, 2)),
+    e2 = Math.sqrt((Math.pow(a, 2) - Math.pow(b, 2)) / Math.pow(b, 2));
+function ecef2lla(x, y, z) {
+    var lla = [0, 0, 0];
+    var lat, lon, height, N , theta, p;
+
+    p = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+    theta = Math.atan((z * a) / (p * b));
+    lon = Math.atan(y / x);
+    lat = Math.atan(((z + Math.pow(e2, 2) * b * Math.pow(Math.sin(theta), 3)) / ((p - Math.pow(e, 2) * a * Math.pow(Math.cos(theta), 3)))));
+    N = a / (Math.sqrt(1 - (Math.pow(e, 2) * Math.pow(Math.sin(lat), 2))));
+    var m = (p / Math.cos(lat));
+    height = m - N;
+
+
+    lon = lon * 180 / Math.PI;
+    lat = lat * 180 / Math.PI;
+    lla[0] = lat;
+    lla[1] = lon;
+    lla[2] = height;
+    return lla;
 }

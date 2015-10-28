@@ -1,0 +1,45 @@
+<div class="modal fade" id="saveImageModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="saveImageDialogLabel">Save Image</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="save1">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12 col-md-offset-3">
+                                    <h4 class="open-dialog">Save Name</h4>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <input type="text" class="form-control" id="imgName" size="40" required/>
+                                </div>
+                            </div>
+                            <div class="modal-footer" id="saveBtnDiag">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="screenshot();">Create</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="save2" style="display:none;">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12 col-md-offset-3">
+                                    <h4 class="open-dialog" id="fReady">File Ready</h4>
+                                </div>
+                            </div>
+                            <div class="modal-footer" id="saveBtnDiag">
+                                <button id="screenSave" type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

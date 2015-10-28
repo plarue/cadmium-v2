@@ -1,17 +1,17 @@
 /**
- * Created by Brent on 6/1/2015.
+ * Created by Brent on 10/23/2015.
  */
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var track = new Schema({
+var truth = new Schema({
     hdr: [],
     id: String,
     name: String,
     times: [],
     positions: [],
     velocity: [],
-    colors: [],
+    color: {},
     rcs: Number,
     tValid: Number,
     beta: Number,
@@ -20,7 +20,17 @@ var track = new Schema({
     classification: String,
     lastThreatTruth: Boolean,
     cType: String,
-    create: String
+    create: String,
+    sysTrkID: Number,
+    leadSrcID: Number,
+    truthID: Number,
+    cov: [],
+    type: String,
+    friendHostile: String,
+    pLethal: Number,
+    urgency: Number,
+    ballisticCoef: Number,
+    dropped: Boolean
 },{ id: false });
 
-mongoose.model('track', track, 'track');
+mongoose.model('truth', truth, 'truth');

@@ -1,0 +1,35 @@
+<div class="modal fade" id="sensorModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="sensorDialogLabel">Sensors</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="defRadar">
+                        <div id="sensorInputs" class="form-group col-md-12">
+                            <label for="sensors">Type:</label>
+                            <select class="form-control spaced-bottom" id="sensors"></select>
+                            <label for="sensorID">Sensor ID:</label>
+                            <input type="text" class="form-control spaced-bottom" id="sensorID" required/>
+                            <label for="weaponIDs">Weapon IDs:</label>
+                            <input type="text" class="form-control spaced-bottom" id="weaponIDs" required/>
+                            <label for="KFactorClass">KFactorClass:</label>
+                            <input type="text" class="form-control spaced-bottom" id="KFactorClass" required/>
+                            <label for="KFactorType">KFactorType:</label>
+                            <input type="text" class="form-control spaced-bottom" id="KFactorType" required/>
+                            <label for="KFactorID">KFactorID:</label>
+                            <input type="text" class="form-control spaced-bottom" id="KFactorID" required/>
+                            <label for="sensorFixed">Fixed:</label>
+                            <input type="checkbox" class="form-control spaced-bottom" id="sensorFixed" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="wsSubmit('sensor')">Create</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

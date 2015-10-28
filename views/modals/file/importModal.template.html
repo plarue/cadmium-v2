@@ -1,0 +1,27 @@
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="importDialogLabel">Import File</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form>
+                            <p>Select one or multiple files to load.</p>
+                            <input type="file" id="files" name="files[]" size="40" multiple required/>
+                            <div id="lFOutput">
+                                <div id="fileNames"></div>
+                                <div id="fileTypes"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="loadFile()">Import</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

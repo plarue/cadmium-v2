@@ -127,10 +127,11 @@ input, select, option{
   transform: skew(-45deg);
   z-index: 0;
 }
-#logo {
+#mainLogo {
   position: relative;
   float: left;
   padding: 6px 20px;
+  height: 100%;
   z-index: 1;
 }
 .dropdown-menu .divider {
@@ -889,4 +890,20 @@ input[type=range]::-ms-thumb {
 }
 .radar-chart .d3-enter, .radar-chart .d3-exit {
   opacity: 0;
+}
+#trackPList label {
+  float: left;
+  font-size: 80%;
+}
+#trackPList input {
+  float: right;
+}
+#trackPList ul {
+  margin: 20px 0;
+  list-style-type: none;
+  overflow: hidden;
+}
+#trackPList ul li{
+  display: inline-block;
+  width: 100%;
 }

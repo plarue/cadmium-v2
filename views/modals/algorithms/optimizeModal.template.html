@@ -1,0 +1,72 @@
+<div class="modal fade" id="optimizeModal" tabindex="-1" role="dialog" aria-labelledby="optimizeModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!--button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button-->
+                <h4 class="modal-title" id="optimizeModalLabel">Run Optimization</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Algorithm Type</h4>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="algorithmRadio" id="psoAlgorithm" value="Particle Swarm" checked>Particle Swarm</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="algorithmRadio" id="evolutionaryAlgorithm" value="Evolutionary">Evolutionary</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="algorithmRadio" id="greedyAlgorithm" value="Greedy">Greedy</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="algorithmRadio" id="stadiumAlgorithm" value="algStadium">Stadium</input>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6" id="algOne">
+                        <h4>What to optimize</h4>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="typeRadio" id="sensorsType" value="Sensors" checked>Sensors</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="typeRadio" id="weaponsType" value="Weapons">Weapons</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="typeRadio" id="weaponsSensorsType" value="Weapons and Sensors">Weapons and Sensors</input>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 noShow" id="algTwo">
+                        <h4>What to optimize</h4>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="typeRadio" id="sensorsTypeTwo" value="Sensors">Sensors</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="typeRadio" id="stadiumType" value="optStadium">Search Sectors</input>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="optimize();" data-dismiss="modal">Optimize</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,7 @@
 /**
+ * Created by Brent on 10/21/2015.
+ */
+/**
  * Created by Brent Shanahan on 5/18/2015.
  */
 var viewer = new Cesium.Viewer('cesiumContainer', {
@@ -17,20 +20,20 @@ var viewer = new Cesium.Viewer('cesiumContainer', {
     }),*/
     //ONLINE IMAGERY PROVIDER
     imageryProvider : new Cesium.BingMapsImageryProvider({
-        url : '//dev.virtualearth.net',
-        mapStyle : Cesium.BingMapsStyle.AERIAL_WITH_LABELS
-    }),
+     url : '//dev.virtualearth.net',
+     mapStyle : Cesium.BingMapsStyle.AERIAL_WITH_LABELS
+     }),
     /*imageryProvider : new Cesium.WebMapTileServiceImageryProvider({
-        url : 'http://map1.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi?SERVICE=WMTS&request=GetCapabilities',
-        layer : 'MODIS_Terra_SurfaceReflectance_Bands121',
-        style : 'default',
-        format : 'image/jpeg',
-        tileMatrixSetID : 'EPSG4326_250m',
-        // tileMatrixLabels : ['default028mm:0', 'default028mm:1', 'default028mm:2' ...],
-        maximumLevel: 9,
-        credit : new Cesium.Credit('U. S. Geological Survey'),
-        proxy: new Cesium.DefaultProxy('/proxy/')
-    }),*/
+     url : 'http://map1.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi?SERVICE=WMTS&request=GetCapabilities',
+     layer : 'MODIS_Terra_SurfaceReflectance_Bands121',
+     style : 'default',
+     format : 'image/jpeg',
+     tileMatrixSetID : 'EPSG4326_250m',
+     // tileMatrixLabels : ['default028mm:0', 'default028mm:1', 'default028mm:2' ...],
+     maximumLevel: 9,
+     credit : new Cesium.Credit('U. S. Geological Survey'),
+     proxy: new Cesium.DefaultProxy('/proxy/')
+     }),*/
     terrainProvider : new Cesium.CesiumTerrainProvider({
         url : '//assets.agi.com/stk-terrain/world'
     })
@@ -51,52 +54,6 @@ var camera = scene.camera;
 //MIL STD 2525
 var RendererSettings = armyc2.c2sd.renderer.utilities.RendererSettings;
 var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-
-/**
- * VAPOR INCOMING/OUTGOING
- */
-socket.on('vapor', function(msg){
-    if(!currentGeometry[msg.id]) {
-        (function (msg) {
-            DOM.createTruth('add', msg);
-            if (msg.id.slice(0,2) == 'Tr') {
-                var form = $('#trackPList');
-                form.append($('<h5>Track ' + msg.name + '</h5>'));
-                var ul = $('<ul></ul>');
-                var ov = msg;
-                var eData;
-                for (var key in ov) {
-                    if (key == '_id' || key == '__v' || key == 'hdr' || key == 'positions' || key == 'velocity') {
-                        continue;
-                    }
-                    if (key == 'id' || key == 'cType' || key == 'create') {
-                        eData = DOM.createInput(key, ov[key], true);
-                        ul.append(eData);
-                        continue;
-                    }
-                    if (typeof ov[key] === 'string' || typeof ov[key] === 'number') {
-                        eData = DOM.createInput(key, ov[key]);
-                        ul.append(eData);
-                    } else if (Array.isArray(ov[key])) {
-                        var oa = ov[key];
-                        eData = DOM.createArrayInput(key, oa);
-                        ul.append(eData);
-                    }
-                }
-                form.append(ul);
-            }
-        })(msg);
-    }else{
-        DOM.createTruth('update', msg);
-    }
-});
-
-function vaporReturn(){
-    var priorityList = $('.priorityList').map(function(){
-        return $(this).value()
-    }).get();
-    socket.emit('vaporPriority', priorityList);
-}
 
 /**
  * PICKING HANDLERS
@@ -187,7 +144,7 @@ pickHandler.setInputAction(function(click) {
                 var element = selections[0].match(/[^ ]+/g);
                 if (element[0] != 'err' && element[0] != 'track'){
                     multipleSelect.hide();
-                    DOM.displayElementData(element[1], element[0], '#pickedO')
+                    DOM.displayElementData(element[1], element[0])
                 }else if(element[1] == 'track'){
                     noSelect.show();
                     multipleSelect.hide();
@@ -218,7 +175,7 @@ pickHandler.setInputAction(function(click) {
             var elementType = DOM.elType(pickedObjects[0].id);
             var elementID = elementType[1];
             if (elementType[0] != 'err' && elementType[0] != 'track'){
-                DOM.displayElementData(elementID, elementType[0], '#pickedO');
+                DOM.displayElementData(elementID, elementType[0]);
             } else if(elementType[0] == 'track') {
                 noSelect.show();
                 multipleSelect.hide();
@@ -250,14 +207,14 @@ $(document).ready(function() {
 function optimize() {
     var algorithm = $("#optimizeModal").find("#psoAlgorithm").is(':checked') ? 'PARTICLE_SWARM' :
         $("#optimizeModal").find("#evolutionaryAlgorithm").is(':checked') ? 'EVOLUTIONARY' :
-        $("#optimizeModal").find("#greedyAlgorithm").is(':checked') ? 'GREEDY' :
-        $("#optimizeModal").find("#stadiumAlgorithm").is(':checked') ? 'STADIUM' : '';
+            $("#optimizeModal").find("#greedyAlgorithm").is(':checked') ? 'GREEDY' :
+                $("#optimizeModal").find("#stadiumAlgorithm").is(':checked') ? 'STADIUM' : '';
 
     var type = $("#optimizeModal").find("#sensorsType").is(':checked') ? 'SENSORS' :
         $("#optimizeModal").find("#sensorsTypeTwo").is(':checked') ? 'SENSORS' :
-        $("#optimizeModal").find("#weaponsType").is(':checked') ? 'WEAPONS' :
-        $("#optimizeModal").find("#weaponsSensorsType").is(':checked') ? 'WEAPONS_SENSORS' :
-        $("#optimizeModal").find("#stadiumType").is(':checked') ? 'STADIUM' : '';
+            $("#optimizeModal").find("#weaponsType").is(':checked') ? 'WEAPONS' :
+                $("#optimizeModal").find("#weaponsSensorsType").is(':checked') ? 'WEAPONS_SENSORS' :
+                    $("#optimizeModal").find("#stadiumType").is(':checked') ? 'STADIUM' : '';
 
     console.log('Optimizing ' + type + ' and ' + algorithm);
     socket.emit('startOptimization', algorithm, type);
@@ -487,16 +444,16 @@ function clearHeatmap() {
 //CLEAR DATA
 function clearData(callback) {
     console.log('Clearing existing data');
-    var dbType = ['sensor', 'weapon', 'track', 'asset'];
-    for (var i=0; i < 4; i++){
-        socket.emit('findAll', dbType[i], dbType[i], function (cb, pt) {
+    var dbType = ['sensor', 'weapon', 'track', 'asset', 'truth'];
+    for (var i=0; i < 5; i++){
+        socket.emit('findAll', dbType[i], null, function (cb) {
             if (cb.length > 0) {
                 for (var i = 0; i < cb.length; i++) {
                     DOM[cb[i].create]('remove', cb[i]);
                 }
-            }else{console.log('Database \"' + pt + '\" contained no data')}
-            if (pt == 'asset'){
-                document.getElementById('entityList').innerHTML = '';
+            }else{console.log('Database \"' + cb.cType + '\" contained no data')}
+            if (cb.cType == 'truth'){
+                $('#entityList').html('');
                 if(callback) {
                     callback();
                 }
@@ -509,21 +466,6 @@ function clearData(callback) {
 function newScenario() {
     clearData(function(){
         socket.emit('newF');
-    });
-}
-
-//REFRESH FROM DATABASE
-function refreshData() {
-    clearData(function() {
-        console.log('Refreshing data');
-        var db = ['sensor', 'weapon', 'track', 'asset'];
-        for (var i=0; i < 4; i++) {
-            socket.emit('refreshAll', db[i], function (cb) {
-                for (var rA in cb) {
-                    DOM[cb[rA].create]('add', cb[rA]);
-                }
-            });
-        }
     });
 }
 
@@ -545,7 +487,7 @@ socket.on('updateElement', function(dbData){
 /**
  * SCENARIO LOADING
  */
-function openScenario() {
+/*function openScenario() {
     socket.emit('openFile', function (dirs) {
         if (dirs.length > 0) {
             var scene = document.getElementById('scenarios');
@@ -561,7 +503,7 @@ function openScenario() {
         }
         $('#openModal').modal();
     })
-}
+}*/
 function loadScenario(){
     var e = document.getElementById('scenarios');
     var sel = e.options[e.selectedIndex].value;
@@ -578,9 +520,6 @@ function loadScenario(){
 /**
  * SCENARIO SAVING
  */
-function saveScenario() {
-    document.getElementById('saveDialog').style.display = 'block';
-}
 function saveFile() {
     document.getElementById('saveDialog').style.display = 'none';
     var name = document.getElementById('scenarioName').value;
@@ -592,9 +531,6 @@ function saveFile() {
 /**
  * IMPORT FILE LOADING
  */
-function importFile() {
-    $('#importModal').modal()
-}
 document.getElementById('files').onchange = handleFileSelect;
 function handleFileSelect() {
     if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -655,7 +591,7 @@ function entHandler(action){
         console.log(msg);
         (msg == 'update') ? updateEntity(cb) :
             (msg == 'move') ? moveEntity(cb) :
-            (msg == 'delete') ? deleteEntity(cb) : '';
+                (msg == 'delete') ? deleteEntity(cb) : '';
     })
 }
 function updateEntity(data){
@@ -743,9 +679,9 @@ function deleteEntity(data){
 function createModal(type){
     (type == 'sensor')
         ? $('#sensorModal').modal() :
-    (type == 'weapon')
-        ? $('#weaponModal').modal()
-        : $('#assetModal').modal();
+        (type == 'weapon')
+            ? $('#weaponModal').modal()
+            : $('#assetModal').modal();
 }
 function wsSubmit(type) {
     var name, database, pt, sfixed, wfixed;
@@ -1007,13 +943,6 @@ function checkFonts()
         //Do actions to handle font failure to load scenario
     }
 }
-
-function slideDown(container, distance) {
-    var box = document.getElementById(container);
-    ( box.style.bottom == distance || box.style.bottom == '' )
-        ? box.style.bottom = '1em'
-        : box.style.bottom = distance;
-}
 function slideLeft() {
     var box = document.getElementById('leftHide');
     var text = document.getElementById('lhToggleA');
@@ -1035,19 +964,6 @@ function slideRight() {
         box.style.right = '0em';
         text.innerHTML = '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>';
     }
-}
-function screenshotDiag(){
-    var ovCont = document.getElementById('scOverlay');
-    ovCont.innerHTML = '';
-    viewer.render();
-    var overlay = viewer.canvas.toDataURL('image/png');
-    var image = document.createElement('img');
-    image.src = overlay;
-    ovCont.appendChild(image);
-    ovCont.style.display = 'block';
-    document.getElementById('save1').style.display = 'block';
-    document.getElementById('save2').style.display = 'none';
-    document.getElementById('saveImgDialog').style.display = 'block';
 }
 function screenshot(){
     document.getElementById('saving').style.display = 'block';

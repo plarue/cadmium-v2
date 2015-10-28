@@ -116,6 +116,43 @@ DOM.createTrack = function(){
     }
 };
 
+DOM.createTruth = function(){
+    var truth = arguments[1];
+    if (arguments[0] == 'add') {
+        var polyline = viewer.entities.add({
+            name : "" + truth.name,
+            id: truth.id,
+            polyline : {
+                positions: truth.positions,
+                width: 2,
+                material: Cesium.Color.fromBytes(truth.color.red, truth.color.green, truth.color.blue, truth.color.alpha)
+            }
+        });
+        currentGeometry[truth.id] = polyline;
+
+                //ADD VISIBILITY SLIDER
+        var list = $('#entityList');
+        var trackSlider = document.getElementById('tracks');
+        if (trackSlider == null) {
+            var li = DOM.createSlider('tracks', 'Tracks', 'track', 1);
+            list.append(li);
+        }
+        if (list.innerHTML != '' || list.innerHTML != null){
+            $('#entityTitle').show();
+        }
+    }else if (arguments[0] == 'remove'){
+        if (currentGeometry[truth.id]) {
+            viewer.entities.remove(currentGeometry[truth.id]);
+            delete currentGeometry[truth.id];
+        }
+    }else if (arguments[0] == 'update'){
+        if (currentGeometry[truth.id]) {
+            var entity = viewer.entities.getById(truth.id);
+            entity.polyline.positions = truth.positions;
+        }
+    }
+};
+
 DOM.createVolume = function(){
     var volume = arguments[1];
     //ADD SENSOR VOLUME
@@ -354,9 +391,9 @@ DOM.createSelection = function(id, name, type){
     return li;
 };
 
-DOM.displayElementData = function(elementID, elementType) {
+DOM.displayElementData = function(elementID, elementType, form) {
     socket.emit('searchID', '', elementType, elementID, function(result) {
-        var form = $('#pickedO');
+        var form = $(form);
         var ul = form.append('<ul></ul>');
         var ov = result;
         var eData;

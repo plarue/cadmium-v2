@@ -1,0 +1,30 @@
+<div class="modal fade" id="assetModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="assetDialogLabel">Assets</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="defAsset">
+                        <div id="assetInputs" class="form-group col-md-12">
+                            <label for="name">Name:</label>
+                            <input type="text" class="form-control spaced-bottom" id="name" size="30" required/>
+                            <label for="owner">Affiliation:</label>
+                            <select class="form-control spaced-bottom" id="owner">
+                                <option value="FRIEND">Friend</option>
+                                <option value="HOSTILE">Hostile</option>
+                            </select>
+                            <label for="valExp">Value:</label>
+                            <input type="text" class="form-control spaced-bottom" id="valExp" required/>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="">Create</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
