@@ -907,3 +907,6 @@ input[type=range]::-ms-thumb {
   display: inline-block;
   width: 100%;
 }
+.cesium-viewer-toolbar {
+  z-index: 999;
+}

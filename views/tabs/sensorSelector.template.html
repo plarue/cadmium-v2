@@ -1,0 +1,12 @@
+<h4>Selected Entity</h4>
+<div class="entityOutput">
+    <p id="noSelect">Click on an entity on the globe to view it's parameters.</p>
+    <p id="multipleSelect">You have selected multiple entities from the scene. Select the intended entity from the list below.</p>
+    <ul id="selections"></ul>
+    <div><form id="picked" onsubmit="return false"><div id="pickedO" class="form-group"></div></form></div>
+    <div id="entityControls">
+        <button class="btn btn-default" type="button" onclick="entHandler('update')">Update</button>
+        <button class="btn btn-default" type="button" onclick="entHandler('move')">Move</button>
+        <button class="btn btn-default" type="button" onclick="entHandler('delete')">Delete</button>
+    </div>
+</div>

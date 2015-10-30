@@ -1,9 +1,8 @@
 /**
  * Created by Brent on 10/16/2015.
  */
-function menuCtrl($scope) {
+function menuCtrl($scope, athenaFactory) {
     $scope.openScenario = function(){
-        console.log('works');
         socket.emit('openFile', function (dirs) {
             if (dirs.length > 0) {
                 var scene = $('#scenarios').html('');
@@ -58,84 +57,7 @@ function menuCtrl($scope) {
             socket.emit('generateThreats');
         }
     };
-    $scope.menu = [
-        {
-            title: 'File',
-            submenu: [
-                {
-                    title: 'Open Scenario',
-                    click: $scope.openScenario
-                },
-                {
-                    title: 'Import File',
-                    click: $scope.launchModal,
-                    val: '#importModal'
-                },
-                {
-                    title: 'Save Scenario',
-                    click: $scope.launchModal,
-                    val: '#saveModal'
-                },
-                {
-                    title: 'Clear Scenario',
-                    click: $scope.launchModal,
-                    val: '#clearConfirmModal'
-                },
-                {
-                    divider: 'true'
-                },
-                {
-                    title: 'Refresh Current',
-                    click: $scope.refreshData
-                },
-                {
-                    title: 'Screen Capture',
-                    click: $scope.screenShotModal
-                }
-            ]
-        },
-        {
-            title: 'Create',
-            submenu: [
-                {
-                    title: 'Sensors',
-                    click: $scope.launchModal,
-                    val: '#sensorModal'
-                },
-                {
-                    title: 'Weapons',
-                    click: $scope.launchModal,
-                    val: '#weaponModal'
-                },
-                {
-                    title: 'Assets',
-                    click: $scope.launchModal,
-                    val: '#assetModal'
-                }
-            ]
-        },
-        {
-            title: 'Algorithms',
-            submenu: [
-                {
-                    title: 'Optimize',
-                    click: $scope.launchModal,
-                    val: '#optimizeModal'
-                },
-                {
-                    title: 'Stop Optimization',
-                    click: $scope.stopOptimization
-                },
-                {
-                    divider: 'true'
-                },
-                {
-                    title: 'Generate Threats',
-                    click: $scope.generateThreats
-                }
-            ]
-        }
-    ];
+    $scope.menu = athenaFactory.getMenu();
 }
 
 function menu() {
@@ -201,4 +123,5 @@ angular
     .module('athena.menu', ['ui.bootstrap'])
     .directive('menu', menu)
     .directive('menuItem', menuItem)
+    .factory('athenaFactory', athenaFactory)
     .controller('menuCtrl', menuCtrl);

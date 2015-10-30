@@ -2,37 +2,14 @@
  * Created by Brent on 10/20/2015.
  */
 
-function footerCtrl($scope){
-
+function footerCtrl($scope, athenaFactory){
     $scope.slideDown = function(id, dist){
         var box = $('#' + id);
         ( box.css('bottom') == dist || box.css('bottom') == '' )
             ? box.css('bottom','1em')
             : box.css('bottom', dist);
     };
-
-    $scope.footer = [
-        {
-            id: 'surveillanceCont',
-            title: 'Surveillance Score',
-            height: '-271px'
-        },
-        {
-            id: 'fireControlCont',
-            title: 'Fire Control Score',
-            height: '-331px'
-        },
-        {
-            id: 'weaponCont',
-            title: 'Weapon Score',
-            height: '-311px'
-        },
-        {
-            id: 'evaluationCont',
-            title: 'Evaluation',
-            height: '-471px'
-        }
-    ];
+    $scope.footer = athenaFactory.getFooter()
 }
 
 function footer() {
@@ -57,4 +34,5 @@ function footer() {
 angular
     .module('athena.footer', ['ui.bootstrap'])
     .directive('footer', footer)
+    .factory('athenaFactory', athenaFactory)
     .controller('footerCtrl', footerCtrl);

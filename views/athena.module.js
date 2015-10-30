@@ -5,6 +5,8 @@ angular
     .module('athena', [
         'ui.bootstrap',
         'athena.menu',
+        'athena.leftUtil',
+        'athena.rightUtil',
         'athena.footer',
         'athena.modals'
     ]);

@@ -11,7 +11,7 @@ var viewer = new Cesium.Viewer('cesiumContainer', {
     animation : false,
     timeline : false,
     navigationHelpButton : false,
-    geocoder : false,
+    geocoder : true,
     //OFFLINE IMAGERY PROVIDER
     /*imageryProvider : new Cesium.TileMapServiceImageryProvider({
         //url : Cesium.buildModuleUrl('/Cesium/Assets/Textures/NaturalEarthII')
@@ -446,13 +446,13 @@ function clearData(callback) {
     console.log('Clearing existing data');
     var dbType = ['sensor', 'weapon', 'track', 'asset', 'truth'];
     for (var i=0; i < 5; i++){
-        socket.emit('findAll', dbType[i], null, function (cb) {
+        socket.emit('findAll', dbType[i], dbType[i], function (cb, pt) {
             if (cb.length > 0) {
                 for (var i = 0; i < cb.length; i++) {
                     DOM[cb[i].create]('remove', cb[i]);
                 }
-            }else{console.log('Database \"' + cb.cType + '\" contained no data')}
-            if (cb.cType == 'truth'){
+            }else{console.log('Database \"' + pt + '\" contained no data')}
+            if (pt == 'truth'){
                 $('#entityList').html('');
                 if(callback) {
                     callback();

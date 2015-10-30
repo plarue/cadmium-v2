@@ -28,7 +28,14 @@
 </head>
 <body id="body" ui-view="body">
 
+<!--DATA MODEL INIT-->
+<script src="../views/globalDataModel/globalDataModel.js"></script>
+<script src="../views/globalDataModel/modelTemplates.js"></script>
+<script src="../views/globalDataModel/Model.js"></script>
+
+<!--ANGULAR INIT-->
 <script src="../views/athena.module.js"></script>
+<script src="../views/athena.factory.js"></script>
 <script src="../views/UI/menu.directive.js"></script>
 <script src="../views/UI/leftUtil.directive.js"></script>
 <script src="../views/UI/rightUtil.directive.js"></script>
@@ -64,7 +71,7 @@
         </div>
     </div>
 </div>
-<div ng-controller="rightUtilCtrl">
+<divng-controller="rightUtilCtrl">
     <div id="rightHide" style="right: -19.75em">
         <div id="rightHideToggle" class="hideToggle">
             <a href="javascript:;" class ="ht" id="rhToggleA" onclick="slideRight();"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a>

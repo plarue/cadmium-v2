@@ -2,36 +2,94 @@
  * Created by Brent on 10/19/2015.
  */
 function athenaCtrl($scope) {
+    $scope.openScenario = function(){
+        socket.emit('openFile', function (dirs) {
+            if (dirs.length > 0) {
+                var scene = $('#scenarios').html('');
+                for (var i = 0; i < dirs.length; i++) {
+                    var opt = $('<option></option>')
+                        .attr({
+                            value: dirs[i],
+                            required: true
+                        })
+                        .html(dirs[i]);
+                    scene.attr('size', i + 1).append(opt);
+                }
+            }
+            $('#openModal').modal();
+        })
+    };
+    $scope.refreshData = function(){
+        clearData(function() {
+            console.log('Refreshing data');
+            var db = ['sensor', 'weapon', 'track', 'asset', 'truth'];
+            for (var i=0; i < 5; i++) {
+                socket.emit('refreshAll', db[i], function (cb) {
+                    for (var rA in cb) {
+                        DOM[cb[rA].create]('add', cb[rA]);
+                    }
+                });
+            }
+        });
+    };
+    $scope.screenShotModal = function() {
+        var ovCont = $('#scOverlay');
+        ovCont.html('');
+        viewer.render();
+        var overlay = viewer.canvas.toDataURL('image/png');
+        var image = $('<img>').attr('src', overlay);
+        ovCont.appendChild(image);
+        ovCont.show();
+        $('#save1').show();
+        $('#save2').hide();
+        $('saveImgDialog').modal();
+    };
+    $scope.launchModal = function(id){
+        $(id).modal();
+    };
+    $scope.stopOptimization = function() {
+        console.log("Stopping optimization");
+        socket.emit('stopOptimization');
+    };
+    $scope.generateThreats = function() {
+        if(!$("#generateThreatsItem").hasClass("disabled")) {
+            console.log("Generating threats");
+            socket.emit('generateThreats');
+        }
+    };
     $scope.menu = [
         {
             title: 'File',
             submenu: [
                 {
                     title: 'Open Scenario',
-                    funct: 'openScenario'
+                    click: $scope.openScenario
                 },
                 {
                     title: 'Import File',
-                    funct: 'importFile'
+                    click: $scope.launchModal,
+                    val: '#importModal'
                 },
                 {
                     title: 'Save Scenario',
-                    funct: 'saveScenario'
+                    click: $scope.launchModal,
+                    val: '#saveModal'
                 },
                 {
                     title: 'Clear Scenario',
-                    funct: 'clearScenario'
+                    click: $scope.launchModal,
+                    val: '#clearConfirmModal'
                 },
                 {
                     divider: 'true'
                 },
                 {
                     title: 'Refresh Current',
-                    funct: 'refreshCurrent'
+                    click: $scope.refreshData
                 },
                 {
                     title: 'Screen Capture',
-                    funct: 'screenCapture'
+                    click: $scope.screenShotModal
                 }
             ]
         },
@@ -40,15 +98,18 @@ function athenaCtrl($scope) {
             submenu: [
                 {
                     title: 'Sensors',
-                    funct: 'openScenario'
+                    click: $scope.launchModal,
+                    val: '#sensorModal'
                 },
                 {
                     title: 'Weapons',
-                    funct: 'importFile'
+                    click: $scope.launchModal,
+                    val: '#weaponModal'
                 },
                 {
                     title: 'Assets',
-                    funct: 'saveScenario'
+                    click: $scope.launchModal,
+                    val: '#assetModal'
                 }
             ]
         },
@@ -57,20 +118,83 @@ function athenaCtrl($scope) {
             submenu: [
                 {
                     title: 'Optimize',
-                    funct: 'openScenario'
+                    click: $scope.launchModal,
+                    val: '#optimizeModal'
                 },
                 {
                     title: 'Stop Optimization',
-                    funct: 'importFile'
+                    click: $scope.stopOptimization
                 },
                 {
                     divider: 'true'
                 },
                 {
                     title: 'Generate Threats',
-                    funct: 'clearScenario'
+                    click: $scope.generateThreats
                 }
             ]
+        }
+    ];
+    $scope.tabs = [
+        {
+            title: 'Scene',
+            contents: 'views/tabs/scene.template.html'
+        }
+    ];
+    $scope.utils = [
+        {
+            utilUrl: 'views/tabs/sensorSelector.template.html'
+        }
+    ];
+    $scope.modals = [
+        {
+            modalUrl: 'views/modals/file/openModal.template.html'
+        },
+        {
+            modalUrl: 'views/modals/file/importModal.template.html'
+        },
+        {
+            modalUrl: 'views/modals/file/saveModal.template.html'
+        },
+        {
+            modalUrl: 'views/modals/file/clearConfirmModal.template.html'
+        },
+        {
+            modalUrl: 'views/modals/file/saveImageModal.template.html'
+        },
+        {
+            modalUrl: 'views/modals/create/assetModal.template.html'
+        },
+        {
+            modalUrl: 'views/modals/create/sensorModal.template.html'
+        },
+        {
+            modalUrl: 'views/modals/create/weaponModal.template.html'
+        },
+        {
+            modalUrl: 'views/modals/algorithms/optimizeModal.template.html'
+        }
+    ];
+    $scope.footer = [
+        {
+            id: 'surveillanceCont',
+            title: 'Surveillance Score',
+            height: '-271px'
+        },
+        {
+            id: 'fireControlCont',
+            title: 'Fire Control Score',
+            height: '-331px'
+        },
+        {
+            id: 'weaponCont',
+            title: 'Weapon Score',
+            height: '-311px'
+        },
+        {
+            id: 'evaluationCont',
+            title: 'Evaluation',
+            height: '-471px'
         }
     ];
 }
