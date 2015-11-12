@@ -292,27 +292,45 @@
             <div class="modal-header">
                 <h4 class="modal-title" id="assetDialogLabel">Assets</h4>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <form id="defAsset">
+            <form id="defAsset">
+                <div class="modal-body">
+                    <div class="row">
                         <div id="assetInputs" class="form-group col-md-12">
-                            <label for="name">Name:</label>
-                            <input type="text" class="form-control spaced-bottom" id="name" size="30" required/>
+                            <label for="assetName">Name:</label>
+                            <input type="text" class="form-control spaced-bottom" id="assetName" size="30" required/>
+                            <label for="ftype">Type:</label>
+                            <select class="form-control spaced-bottom" id="ftype">
+                                <option selected disabled>Select</option>
+                                <option value="DefendedAreas.dat">Defended Area</option>
+                                <option value="DefendedAssets.dat">Defended Asset</option>
+                                <option value="ThreatAreas.dat">Threat Area</option>
+                            </select>
                             <label for="owner">Affiliation:</label>
                             <select class="form-control spaced-bottom" id="owner">
+                                <option selected disabled>Select</option>
                                 <option value="FRIEND">Friend</option>
                                 <option value="HOSTILE">Hostile</option>
                             </select>
-                            <label for="valExp">Value:</label>
-                            <input type="text" class="form-control spaced-bottom" id="valExp" required/>
+                            <label for="valexp">Value Exp:</label>
+                            <input type="text" class="form-control spaced-bottom" id="valexp" required/>
+                            <label for="valExp">nfz:</label>
+                            <input type="text" class="form-control spaced-bottom" id="nfz" required/>
+                            <label for="shape">Shape:</label>
+                            <select class="form-control spaced-bottom" id="shape">
+                                <option selected disabled>Select</option>
+                                <option value="Circle">Circle</option>
+                                <option value="Polygon">Polygon</option>
+                            </select>
+                            <p id="circleInst" style="display: none">How To:<br>Click to select center position. Click again to set Radius.</p>
+                            <p id="polygonInst" style="display: none">How To:<br>Click to select perimeter positions (3+ positions required). Double Click the final position to stop drawing.</p>
                         </div>
-                    </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="">Create</button>
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="createAsset();">Create</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
