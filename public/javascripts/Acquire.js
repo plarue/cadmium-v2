@@ -695,9 +695,9 @@ function deleteEntity(data){
  * ENTITY CREATION
  */
 function createModal(type){
-    (type == 'sensor')
-        ? sensorModalInit(function(){$('#sensorModal').modal()})
-        : $('#assetModal').modal();
+    (type == 'sensor') ? sensorModalInit(function(){$('#sensorModal').modal()}) :
+        (type == 'weapon')? weaponModalInit(function(){$('#weaponModal').modal()})
+            :$('#assetModal').modal();
 }
 function sensorModalInit(cb) {
     var cont = $('#weaponIDs');

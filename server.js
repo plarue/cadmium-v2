@@ -1002,7 +1002,9 @@ bigio.initialize(function() {
                 return;
             }
             line = line.match(/[^ \t\r]+/g);
-
+            if(line == null) {
+                return;
+            }
             var weaponType = line[2];
 
             mongoose.model('radarTypes').findOne({id: weaponType}, function(err, results) {
@@ -1055,7 +1057,9 @@ bigio.initialize(function() {
                 return;
             }
             line = line.match(/[^ \t\r]+/g);
-
+            if(line == null) {
+                return;
+            }
             var weaponType = line[2];
             mongoose.model('weaponTypes').findOne({id: weaponType}, function(err, results) {
                 var weaponData = results;
