@@ -16,6 +16,7 @@
     <script src="../public/javascripts/cubism/cubism.v1.min.js" type="text/javascript"></script>
     <script src="../public/javascripts/socket.io.js"></script>
     <script src="../public/javascripts/bootstrap.min.js"></script>
+    <script src="../public/javascripts/dynamicTable.js"></script>
 
     <style>
         @import url(../public/stylesheets/bootstrap.min.css);
@@ -27,7 +28,7 @@
     </style>
     <!--link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'-->
 </head>
-<body onload="start()" id="body" ng-controller="indexController">
+<body onload="start()" id="body">
 <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
 <div id="hidden" style="display: none;"></div>
 <div id="cesiumContainer"></div>
@@ -52,7 +53,6 @@
                 <li><a href="#" id="clearScenario" data-toggle="modal" data-target="#clearConfirmModal">Clear Scenario</a></li>
                 <li role="separator" class="bb divider"></li>
                 <li><a href="#" id="refreshData" onclick="refreshData();">Refresh Current</a></li>
-                <li><a href="#" id="screenCapture" onclick="screenshotDiag();">Screen Capture</a></li>
             </ul>
         </li>
         <li class="dropdown">
@@ -62,8 +62,19 @@
             </a>
             <ul class="dropdown-menu" role="menu" aria-labelledby="fileButton">
                 <li><a href="#" id="createSensor" onclick="createModal('sensor');">Sensors</a></li>
-                <li><a href="#" id="createWeapon" onclick="createModal('weapon');">Weapons</a></li>
                 <li><a href="#" id="createAsset" onclick="createModal('asset');">Assets</a></li>
+            </ul>
+        </li>
+        <li class="dropdown">
+            <a href="#" id="vaporButton" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                Vapor
+                <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="fileButton">
+                <li><a href="#" id="startVapor" onclick="startVapor();">Start Sim</a></li>
+                <li><a href="#" id="stopVapor" onclick="stopVapor();">Stop Sim</a></li>
+                <li role="separator" class="bb divider"></li>
+                <li><a href="#" id="vaporMetrics" onclick="vaporMetrics();">View Metrics</a></li>
             </ul>
         </li>
         <!--li><a href="javascript:;" class ="bl nondd" id="pause" onclick="openScenario();">PAUSE</a></li-->
@@ -92,20 +103,16 @@
                 <h4 class="modal-title" id="openDialogLabel">Load Scenario</h4>
             </div>
             <div class="modal-body">
-                <!--div class="row">
-                  <div class="col-md-12 col-md-offset-3">
-                    <h4 class="open-dialog">Load Scenario</h4>
-                  </div>
-                </div-->
                 <div class="row">
                     <div class="col-md-12">
                         <select class="open-dialog open-dialog-select" id="scenarios" size="0"></select>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="loadScenario()">Load</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="loadScenario()">Load</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
@@ -129,10 +136,31 @@
                         </form>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="loadFile()">Import</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="loadFile()">Import</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="vaporMetricsModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="vaporMetricsLabel">Vapor Metrics</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form>
+                            <p>Metrics Displayed Here</p>
+                        </form>
+                    </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -143,61 +171,29 @@
             <div class="modal-header">
                 <h4 class="modal-title" id="sensorDialogLabel">Sensors</h4>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <form id="defRadar">
+            <form id="sensorForm">
+                <div class="modal-body">
+                    <div class="row">
                         <div id="sensorInputs" class="form-group col-md-12">
-                            <label for="sensors">Type:</label>
-                            <select class="form-control spaced-bottom" id="sensors"></select>
                             <label for="sensorID">Sensor ID:</label>
                             <input type="text" class="form-control spaced-bottom" id="sensorID" required/>
-                            <label for="weaponIDs">Weapon IDs:</label>
-                            <input type="text" class="form-control spaced-bottom" id="weaponIDs" required/>
-                            <label for="KFactorClass">KFactorClass:</label>
-                            <input type="text" class="form-control spaced-bottom" id="KFactorClass" required/>
-                            <label for="KFactorType">KFactorType:</label>
-                            <input type="text" class="form-control spaced-bottom" id="KFactorType" required/>
-                            <label for="KFactorID">KFactorID:</label>
-                            <input type="text" class="form-control spaced-bottom" id="KFactorID" required/>
-                            <label for="sensorFixed">Fixed:</label>
-                            <input type="checkbox" class="form-control spaced-bottom" id="sensorFixed" />
+                            <label for="sensorType">Type:</label>
+                            <select class="form-control spaced-bottom" id="sensorType">
+                                <option selected disabled>Select</option>
+                                <option value="a">Type A</option>
+                                <option value="b">Type B</option>
+                                <option value="c">Type C</option>
+                            </select>
+                            <div id="sensorTypeContent"></div>
+                            <p id="sensorInst">How To:<br>Click to select sensor position. Click again to set azimuth angle.</p>
                         </div>
-                    </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="wsSubmit('sensor')">Create</button>
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="wsSubmit('sensor')">Create</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="weaponModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="weaponDialogLabel">Weapons</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <form id="defWeapon">
-                        <div id="weaponInputs" class="form-group col-md-12">
-                            <label for="sensors">Type:</label>
-                            <select class="form-control spaced-bottom" id="weapons"></select>
-                            <label for="weaponID">Weapon ID:</label>
-                            <input type="text" class="form-control spaced-bottom" id="weaponID" required/>
-                            <label for="sensorIDs">Sensor IDs:</label>
-                            <input type="text" class="form-control spaced-bottom" id="sensorIDs" required/>
-                            <label for="weaponFixed">Fixed:</label>
-                            <input type="checkbox" class="form-control spaced-bottom" id="weaponFixed" required/>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="wsSubmit('weapon')">Create</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
@@ -207,27 +203,45 @@
             <div class="modal-header">
                 <h4 class="modal-title" id="assetDialogLabel">Assets</h4>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <form id="defAsset">
+            <form id="defAsset">
+                <div class="modal-body">
+                    <div class="row">
                         <div id="assetInputs" class="form-group col-md-12">
-                            <label for="name">Name:</label>
-                            <input type="text" class="form-control spaced-bottom" id="name" size="30" required/>
+                            <label for="assetName">Name:</label>
+                            <input type="text" class="form-control spaced-bottom" id="assetName" size="30" required/>
+                            <label for="ftype">Type:</label>
+                            <select class="form-control spaced-bottom" id="ftype">
+                                <option selected disabled>Select</option>
+                                <option value="DefendedAreas.dat">Defended Area</option>
+                                <option value="DefendedAssets.dat">Defended Asset</option>
+                                <option value="ThreatAreas.dat">Threat Area</option>
+                            </select>
                             <label for="owner">Affiliation:</label>
                             <select class="form-control spaced-bottom" id="owner">
+                                <option selected disabled>Select</option>
                                 <option value="FRIEND">Friend</option>
                                 <option value="HOSTILE">Hostile</option>
                             </select>
-                            <label for="valExp">Value:</label>
-                            <input type="text" class="form-control spaced-bottom" id="valExp" required/>
+                            <label for="valexp">Value Exp:</label>
+                            <input type="text" class="form-control spaced-bottom" id="valexp" required/>
+                            <label for="valExp">nfz:</label>
+                            <input type="text" class="form-control spaced-bottom" id="nfz" required/>
+                            <label for="shape">Shape:</label>
+                            <select class="form-control spaced-bottom" id="shape">
+                                <option selected disabled>Select</option>
+                                <option value="Circle">Circle</option>
+                                <option value="Polygon">Polygon</option>
+                            </select>
+                            <p id="circleInst" style="display: none">How To:<br>Click to select center position. Click again to set Radius.</p>
+                            <p id="polygonInst" style="display: none">How To:<br>Click to select perimeter positions (3+ positions required). Double Click the final position to stop drawing.</p>
                         </div>
-                    </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="">Create</button>
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="createAsset();">Create</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
@@ -257,24 +271,26 @@
         </form>
     </div>
 </div>
-<div id="leftHide" style="left: -22.75em">
+<div id="leftHide" style="left: -22.75em;">
     <div id="tabContainer">
         <div id="tabs">
             <ul>
                 <li id="tabHeader_1" class="bl">Prioritization</li>
-                <li id="tabHeader_2" class="bl">Scene</li>
+                <!--<li id="tabHeader_2" class="bl">Scene</li>-->
             </ul>
         </div>
         <div id="tabscontent">
             <div class="tabpage" id="tabpage_1">
                 <div id="leftBar">
                     <h4>Track Prioritization</h4>
-                    <div class="bdrCont" id="trackPList">
+                    <div id="trackPList">
+                        <table id="gTPriority">
+                        </table>
                     </div>
-                    <button class="btn btn-default" type="button" onclick="vaporReturn()">Update</button>
+                    <!--<button class="btn btn-default" type="button" onclick="vaporReturn()">Update</button>-->
                 </div>
             </div>
-            <div class="tabpage" id="tabpage_2">
+            <div class="tabpage noShow" id="tabpage_2">
                 <div id="leftBar">
                     <h4>Scene Entities</h4>
                     <div class="bdrCont">
@@ -323,14 +339,14 @@
     <div id="rightBar">
         <h4>Simulation Parameter</h4>
         <div class="entityOutput">
-            <p id="noSelect">Click on an entity on the globe to view it's parameters.</p>
+            <p id="noSelect">Click on a sensor on the globe to view and edit it's parameters.</p>
             <p id="multipleSelect">You have selected multiple entities from the scene. Select the intended entity from the list below.</p>
             <ul id="selections"></ul>
-            <div><form id="picked" onsubmit="return false"><div id="pickedO" class="form-group"></div></form></div>
-            <div id="entityControls">
+            <div><form id="picked" onsubmit="return false"><div id="pickedList" class="form-group"></div></form></div>
+            <div id="entityControls" style="display: none">
                 <button class="btn btn-default" type="button" onclick="entHandler('update')">Update</button>
-                <!--<button class="btn btn-default" type="button" onclick="entHandler('move')">Move</button>
-                <button class="btn btn-default" type="button" onclick="entHandler('delete')">Delete</button>-->
+                <!--<button class="btn btn-default" type="button" onclick="entHandler('move')">Move</button>-->
+                <button class="btn btn-default" type="button" onclick="entHandler('delete')">Delete</button>
             </div>
         </div>
     </div>
