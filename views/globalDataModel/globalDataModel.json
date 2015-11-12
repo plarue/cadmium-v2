@@ -1,138 +1,157 @@
-/**
- * Created by Brent on 10/29/2015.
- */
 {
-    menu: {
-        File: {
-            title: 'File',
-            submenu: [
+    "menu": {
+        "File": {
+            "title": "File",
+            "submenu": [
                 {
-                    title: 'Open Scenario',
-                    click: $scope.openScenario,
-                    modalUrl: 'views/modals/file/openModal.template.html'
+                    "title": "Open Scenario",
+                    "click": $scope.openScenario,
+                    "modalUrl": "views/modals/file/openModal.template.html"
                 },
                 {
-                    title: 'Import File',
-                    click: $scope.launchModal,
-                    val: '#importModal',
-                    modalUrl: 'views/modals/file/importModal.template.html'
+                    "title": "Import File",
+                    "click": $scope.launchModal,
+                    "val": "#importModal",
+                    "modalUrl": "views/modals/file/importModal.template.html"
                 },
                 {
-                    title: 'Save Scenario',
-                    click: $scope.launchModal,
-                    val: '#saveModal',
-                    modalUrl: 'views/modals/file/saveModal.template.html'
+                    "title": "Save Scenario",
+                    "click": $scope.launchModal,
+                    "val": "#saveModal",
+                    "modalUrl": "views/modals/file/saveModal.template.html"
                 },
                 {
-                    title: 'Clear Scenario',
-                    click: $scope.launchModal,
-                    val: '#clearConfirmModal',
-                    modalUrl: 'views/modals/file/clearConfirmModal.template.html'
+                    "title": "Clear Scenario",
+                    "click": $scope.launchModal,
+                    "val": "#clearConfirmModal",
+                    "modalUrl": "views/modals/file/clearConfirmModal.template.html"
                 },
                 {
-                    divider: 'true'
+                    "divider": "true"
                 },
                 {
-                    title: 'Refresh Current',
-                    click: $scope.refreshData
+                    "title": "Refresh Current",
+                    "click": $scope.refreshData
                 },
                 {
-                    title: 'Screen Capture',
-                    click: $scope.screenShotModal,
-                    modalUrl: 'views/modals/file/saveImageModal.template.html'
+                    "title": "Screen Capture",
+                    "click": $scope.screenShotModal,
+                    "modalUrl": "views/modals/file/saveImageModal.template.html"
                 },
                 {
-                    title: 'Settings',
-                    click: $scope.launchModal,
-                    val: '#settingsModal',
-                    modalUrl: 'views/modals/file/settings.template.html'
+                    "title": "Settings",
+                    "click": $scope.launchModal,
+                    "val": "#settingsModal",
+                    "modalUrl": "views/modals/file/settings.template.html"
                 }
             ]
         },
-        Create: {
-            title: 'Create',
-            submenu: [
+        "Create": {
+            "title": "Create",
+            "submenu": [
                 {
-                    title: 'Sensors',
-                    click: $scope.launchModal,
-                    val: '#sensorModal',
-                    modalUrl: 'views/modals/create/sensorModal.template.html'
+                    "title": "Sensors",
+                    "click": $scope.launchModal,
+                    "val": "#sensorModal",
+                    "modalUrl": "views/modals/create/sensorModal.template.html"
                 },
                 {
-                    title: 'Weapons',
-                    click: $scope.launchModal,
-                    val: '#weaponModal',
-                    modalUrl: 'views/modals/create/weaponModal.template.html'
+                    "title": "Weapons",
+                    "click": $scope.launchModal,
+                    "val": "#weaponModal",
+                    "modalUrl": "views/modals/create/weaponModal.template.html"
                 },
                 {
-                    title: 'Assets',
-                    click: $scope.launchModal,
-                    val: '#assetModal',
-                    modalUrl: 'views/modals/create/assetModal.template.html'
+                    "title": "Assets",
+                    "click": $scope.launchModal,
+                    "val": "#assetModal",
+                    "modalUrl": "views/modals/create/assetModal.template.html"
                 }
             ]
         },
-        Algorithms: {
-            title: 'Algorithms',
-            submenu: [
+        "Algorithms": {
+            "title": "Algorithms",
+            "submenu": [
                 {
-                    title: 'Optimize',
-                    click: $scope.launchModal,
-                    val: '#optimizeModal',
-                    modalUrl: 'views/modals/algorithms/optimizeModal.template.html'
+                    "title": "Optimize",
+                    "click": $scope.launchModal,
+                    "val": "#optimizeModal",
+                    "modalUrl": "views/modals/algorithms/optimizeModal.template.html"
                 },
                 {
-                    title: 'Stop Optimization',
-                    click: $scope.stopOptimization
+                    "title": "Stop Optimization",
+                    "click": $scope.stopOptimization
                 },
                 {
-                    divider: 'true'
+                    "divider": "true"
                 },
                 {
-                    title: 'Generate Threats',
-                    click: $scope.generateThreats
+                    "title": "Generate Threats",
+                    "click": $scope.generateThreats
+                }
+            ]
+        },
+        "Vapor": {
+            "title": "Vapor",
+            "submenu": [
+                {
+                    "title": "Start Vapor",
+                    "click": $scope.startVapor
+                },
+                {
+                    "title": "Stop Vapor",
+                    "click": $scope.stopVapor
+                },
+                {
+                    "divider": "true"
+                },
+                {
+                    "title": "Metrics",
+                    "click": $scope.launchModal,
+                    "val": "#vaporModal",
+                    "modalUrl": "views/modals/algorithms/vaporModal.template.html"
                 }
             ]
         }
     },
-    tabs: {
-        Scene: {
-            title: 'Scene',
-            contents: 'views/tabs/scene.template.html'
+    "tabs": {
+        "Scene": {
+            "title": "Scene",
+            "contents": "views/tabs/scene.template.html"
         },
-        Prioritization: {
-            title: 'Prioritization',
-            contents: 'views/tabs/prioritization.template.html'
+        "Prioritization": {
+            "title": "Prioritization",
+            "contents": "views/tabs/prioritization.template.html"
         }
     },
-    utils: {
-        entitySelect: {
-            utilUrl: 'views/tabs/sensorSelector.template.html'
+    "utils": {
+        "entitySelect": {
+            "utilUrl": "views/tabs/sensorSelector.template.html"
         },
-        sensorEditor: {
-            utilUrl: 'views/tabs/sensorSelector.template.html'
+        "sensorEditor": {
+            "utilUrl": "views/tabs/sensorSelector.template.html"
         }
     },
-    footer: {
-        surveillanceScore: {
-            id: 'surveillanceCont',
-            title: 'Surveillance Score',
-            height: '-271px'
+    "footer": {
+        "surveillanceScore": {
+            "id": "surveillanceCont",
+            "title": "Surveillance Score",
+            "height": "-271px"
         },
-        fireControlScore: {
-            id: 'fireControlCont',
-            title: 'Fire Control Score',
-            height: '-331px'
+        "fireControlScore": {
+            "id": "fireControlCont",
+            "title": "Fire Control Score",
+            "height": "-331px"
         },
-        weaponScore: {
-            id: 'weaponCont',
-            title: 'Weapon Score',
-            height: '-311px'
+        "weaponScore": {
+            "id": "weaponCont",
+            "title": "Weapon Score",
+            "height": "-311px"
         },
-        evaluation: {
-            id: 'evaluationCont',
-            title: 'Evaluation',
-            height: '-471px'
+        "evaluation": {
+            "id": "evaluationCont",
+            "title": "Evaluation",
+            "height": "-471px"
         }
     }
 }

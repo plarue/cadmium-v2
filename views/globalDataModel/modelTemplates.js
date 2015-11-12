@@ -11,8 +11,8 @@ var acquireModel = {
 };
 
 var vaporModel = {
-    menu: ['File','Create'],
-    leftUtil: ['Prioritization', 'Scene'],
+    menu: ['File','Create', 'Vapor'],
+    leftUtil: ['Prioritization'],
     rightUtil: ['sensorEditor'],
     footer: [],
     modals: []
