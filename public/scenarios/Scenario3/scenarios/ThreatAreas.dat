@@ -1,0 +1,4 @@
+%Name       id  owner     valexp  height(m) NFZ shape   rad(m)/numVerts  Lat1, Lon1, Alt1, Lat2, Lon2, Alt2, ...
+ThreatAreaA      1   Hostile   1.0     0.0       0   Circle  32000             32.73850422870545            -105.6848257745083              0.0
+ThreatAreaB      2   Hostile   1.0     0.0       0   Circle  32000             32.32038568650336            -106.7205978477265              0.0
+ThreatAreaC      3   Hostile   1.0     0.0       0   Circle  40000             32.98934743010583            -106.2565644598316              0.0

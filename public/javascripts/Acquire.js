@@ -696,41 +696,12 @@ function deleteEntity(data){
  */
 function createModal(type){
     (type == 'sensor')
-        ? sensorModalInit(function(){
-        $('#sensorModal').modal()
-    })
+        ? sensorModalInit(function(){$('#sensorModal').modal()})
         : $('#assetModal').modal();
 }
 function sensorModalInit(cb) {
-    $('#sensorType').on('change', function () {
-        var val = this.value;
-        if (val == 'a') {
-            $('#sensorTypeContent').html(
-                [
-                    '<label for="posU">Position Uncertainty</label>',
-                    '<input type="text" class="form-control spaced-bottom" id="posU" required/>',
-                    '<label for="velU">Velocity Uncertainty:</label>',
-                    '<input type="text" class="form-control spaced-bottom" id="velU" required/>'
-                ].join('')
-            )
-        } else if (val == 'b') {
-            $('#sensorTypeContent').html(
-                [
-                    '<label for="azimuth">Azimuth Uncertainty:</label>',
-                    '<input type="text" class="form-control spaced-bottom" id="azimuth" required/>',
-                    '<label for="elevation">Elevation Uncertainty:</label>',
-                    '<input type="text" class="form-control spaced-bottom" id="elevation" required/>'
-                ].join('')
-            )
-        } else if (val == 'c') {
-            $('#sensorTypeContent').html(
-                [
-                    '<label for="range">Range Uncertainty:</label>',
-                    '<input type="text" class="form-control spaced-bottom" id="range" required/>'
-                ].join('')
-            )
-        }
-    });
+    var cont = $('#weaponIDs');
+
     if(cb){
         cb()
     }

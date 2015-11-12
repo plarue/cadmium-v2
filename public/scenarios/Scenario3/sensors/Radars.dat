@@ -1,0 +1,7 @@
+%Index  Identifier Type  Lat         Lon          Alt     BoresightAz NumWeaponIDs WeaponIDs  KFactorClass KFactorType KFactorID Fixed
+1       Sentinel_1     11     31.940578       -106.238031       0.0     0.0         3	           1 2 3      2.5          2.5         2.5       0
+2       Sentinel_2     11     31.856586       -106.493495       0.0     0.0         3	           1 2 3      2.5          2.5         2.5       0
+3       Sentinel_3     11     31.885681       -106.661664       0.0     0.0         3	           1 2 3      2.5          2.5         2.5       0
+4       Sentinel_4     11     31.810477       -106.607223       0.0     0.0         3	           1 2 3      2.5          2.5         2.5       0
+5       Sentinel_5     11     31.776558       -106.334958       0.0     0.0         3	           1 2 3      2.5          2.5         2.5       0
+6       Sentinel_6     11     31.850125       -106.128271       0.0     0.0         3	           1 2 3      2.5          2.5         2.5       0

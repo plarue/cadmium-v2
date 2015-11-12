@@ -1,0 +1,7 @@
+%Name     id   owner    valexp  height(m)  NFZ shape   rad(m)/numVerts  Lat1, Lon1, Alt1, Lat2, Lon2, Alt2, ...
+1AD1           2      Friend   4       0.0        0   Circle  1600             31.9581090856466            -106.1477920728304              0.0
+1AD2           3      Friend   4       0.0        0   Circle  1600             31.97263478478336           -106.4904462868607              0.0
+UK1            4      Friend   4       0.0        0   Circle  1600             31.79755570305256           -106.7109266587463              0.0
+UK2            5      Friend   4       0.0        0   Circle  1600             31.76283044244532           -106.4168761163636              0.0
+FARP           6      Friend   4       0.0        0   Circle  1600             31.68124745492118           -106.3198206596333              0.0
+

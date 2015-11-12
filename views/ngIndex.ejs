@@ -236,8 +236,7 @@
                             <select class="form-control spaced-bottom" id="sensors"></select>
                             <label for="sensorID">Sensor ID:</label>
                             <input type="text" class="form-control spaced-bottom" id="sensorID" required/>
-                            <label for="weaponIDs">Weapon IDs:</label>
-                            <input type="text" class="form-control spaced-bottom" id="weaponIDs" required/>
+                            <div id="weaponIDs"></div>
                             <label for="KFactorClass">KFactorClass:</label>
                             <input type="text" class="form-control spaced-bottom" id="KFactorClass" required/>
                             <label for="KFactorType">KFactorType:</label>
@@ -301,8 +300,10 @@
                             <label for="ftype">Type:</label>
                             <select class="form-control spaced-bottom" id="ftype">
                                 <option selected disabled>Select</option>
+                                <option value="AllowedRegions.dat">Allowed Region</option>
                                 <option value="DefendedAreas.dat">Defended Area</option>
                                 <option value="DefendedAssets.dat">Defended Asset</option>
+                                <option value="RestrictedRegion.dat">Restriceted Region</option>
                                 <option value="ThreatAreas.dat">Threat Area</option>
                             </select>
                             <label for="owner">Affiliation:</label>

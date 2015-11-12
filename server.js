@@ -931,9 +931,9 @@ bigio.initialize(function() {
 
         socket.on('getScenario', function(folder, cb){
             var scenarios = [
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'scenarios'), loadType: 'loadAsset', fNames: ['AllowedRegions_NK.dat', 'DefendedAreas_NK.dat', 'DefendedAssets_NK.dat','RestrictedRegions_NK.dat','ThreatAreas_NK.dat']},
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'sensors'), loadType: 'loadSensor', fNames: ['Radars_NK.dat']},
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'weapons'), loadType: 'loadWeapon', fNames: ['Launchers_NK.dat']}
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'scenarios'), loadType: 'loadAsset', fNames: ['AllowedRegions.dat', 'DefendedAreas.dat', 'DefendedAssets.dat','RestrictedRegions.dat','ThreatAreas.dat']},
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'sensors'), loadType: 'loadSensor', fNames: ['Radars.dat']},
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'weapons'), loadType: 'loadWeapon', fNames: ['Launchers.dat']}
             ];
             scenarios.forEach(function(scenario){
                 for (var file in scenario.fNames) {
@@ -962,7 +962,10 @@ bigio.initialize(function() {
             if(line == null || line == '' || line.slice(0, 1) == '%') {
                 return;
             }
-            line = line.match(/[^ ]+/g);
+            line = line.match(/[^ \t\r]+/g);
+            if(line == null) {
+                return;
+            }
             var pos = [];
             if (line[6] == 'Circle') {
                 pos = [+line[8], +line[9], +line[10]];
@@ -998,7 +1001,7 @@ bigio.initialize(function() {
             if(line == null || line == '' || line.slice(0, 1) == '%') {
                 return;
             }
-            line = line.match(/[^ ]+/g);
+            line = line.match(/[^ \t\r]+/g);
 
             var weaponType = line[2];
 
@@ -1051,7 +1054,7 @@ bigio.initialize(function() {
             if(line == null || line == '' || line.slice(0, 1) == '%') {
                 return;
             }
-            line = line.match(/[^ ]+/g);
+            line = line.match(/[^ \t\r]+/g);
 
             var weaponType = line[2];
             mongoose.model('weaponTypes').findOne({id: weaponType}, function(err, results) {
@@ -1116,8 +1119,8 @@ function saveScenario(dir, name, callback) {
     var root = path.join(__dirname, 'public', dir, name);
     var dirs = [
         {directory: 'scenarios', db: 'asset', filename: 'Assets.dat', obj: ['%', 'name', 'Index', 'owner', 'valexp', 'height', 'NFZ', 'shape', 'rad', 'latlonalt']},
-        {directory: 'sensors', db: 'sensor', filename: 'Radars_NK.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'BoresightAz', 'NumWeaponIDs', 'WeaponIDs', 'KFactorClass', 'KFactorType', 'KFactorID', 'Fixed']},
-        {directory: 'weapons', db: 'weapon', filename: 'Launchers_NK.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'Boresight', 'NumSensorIDs', 'SensorIDs', 'Fixed']}
+        {directory: 'sensors', db: 'sensor', filename: 'Radars.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'BoresightAz', 'NumWeaponIDs', 'WeaponIDs', 'KFactorClass', 'KFactorType', 'KFactorID', 'Fixed']},
+        {directory: 'weapons', db: 'weapon', filename: 'Launchers.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'Boresight', 'NumSensorIDs', 'SensorIDs', 'Fixed']}
     ];
     fs.mkdir(root, function(err){
         if(err)console.log(err);
