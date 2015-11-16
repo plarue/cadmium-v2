@@ -113,7 +113,7 @@ function entityListSelect(e){
     $('#pickedO').html('');
     $('#noSelect').hide();
     $('#multipleSelect').hide();
-    DOM.displayElementData(id, type);
+    DOM.displayElementData(id, type, '#pickedO');
 }
 var pickHandler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
 pickHandler.setInputAction(function(click) {
@@ -123,7 +123,7 @@ pickHandler.setInputAction(function(click) {
         var uldata = $('#pickedO');
         var noSelect = $('#noSelect');
         var multipleSelect = $('#multipleSelect');
-        $('#entityControls').show();
+        $('#entityControls').hide();
         ul.html('');
         uldata.html('');
         noSelect.show();
@@ -137,35 +137,25 @@ pickHandler.setInputAction(function(click) {
                 elements.push(elementType[0] + ' ' + elementType[1] + ' ' + elementType[2]);
             }
             var selections = DOM.removeDuplicates(elements);
-            if (selections.length == 1){
-                var element = selections[0].match(/[^ ]+/g);
-                if (element[0] != 'err' && element[0] != 'track'){
-                    multipleSelect.hide();
-                    DOM.displayElementData(element[1], element[0], '#pickedO')
-                }else if(element[1] == 'track'){
-                    noSelect.show();
-                    multipleSelect.hide();
-                }else{console.log('Unknown ElementType in selected Element.')}
+            var goodInputs = [];
+            for (i = 0; i < selections.length; i++) {
+                var element = selections[i].match(/[^ ]+/g);
+                if (element[0] != 'track' || element[0] != 'err'){
+                    goodInputs.push(element);
+                }
+            }
+            if (goodInputs.length == 1){
+                multipleSelect.hide();
+                DOM.displayElementData(goodInputs[0][1], goodInputs[0][0], '#pickedO');
+            }else if (goodInputs.length > 1){
+                for (i = 0; i < goodInputs.length; i++) {
+                    var element = goodInputs[i];
+                    var li = DOM.createSelection(element[1], element[2], element[0]);
+                    ul.append(li);
+                }
             }else{
-                var badInputs = [];
-                for (i = 0; i < selections.length; i++) {
-                    var element = selections[i].match(/[^ ]+/g);
-                    if (element[0] == 'track' || element[0] == 'err'){
-                        badInputs.push(1);
-                    }
-                }
-                if (badInputs.length != selections.length) {
-                    for (i = 0; i < selections.length; i++) {
-                        var element = selections[i].match(/[^ ]+/g);
-                        if (element[1] != 'track' && element[1] != 'err') {
-                            var li = DOM.createSelection(element[1], element[2], element[0]);
-                            ul.append(li);
-                        }
-                    }
-                }else{
-                    noSelect.show();
-                    multipleSelect.hide();
-                }
+                noSelect.show();
+                multipleSelect.hide();
             }
         } else if (pickedObjects.length == 1) {
             noSelect.hide();
@@ -177,7 +167,8 @@ pickHandler.setInputAction(function(click) {
                 noSelect.show();
                 multipleSelect.hide();
             } else {
-                console.log('Unknown ElementType in selected Element.')
+                console.log('Unknown ElementType in selected Element.');
+                loggingMessage('Unknown ElementType in selected Element.');
             }
         }
     }
@@ -602,21 +593,28 @@ function getFileType(name){
  * ENTITY HANDLING
  */
 function entHandler(action){
-    var id = $('#id').val();
-    var cType = $('#cType').val();
-    console.log(action);
-    socket.emit('searchID', action, cType, id, function(cb, msg){
-        console.log(msg);
-        (msg == 'update') ? updateEntity(cb) :
-            (msg == 'move') ? moveEntity(cb) :
-            (msg == 'delete') ? deleteEntity(cb) : '';
-    })
+    var data = {};
+    $('#pickedO :input').each(function(){
+        var id = this.id;
+        data[id] = $(this).val();
+    });
+    if (action == 'update') {
+        updateEntity(data)
+    }else if (action == 'move') {
+        socket.emit('searchID', action, data.cType, data.id, function(cb, msg){
+            moveEntity(cb)
+        })
+    }else if(action == 'delete') {
+        deleteEntity(data)
+    }
 }
 function updateEntity(data){
     DOM[data.create]('remove', data);
     (function(data) {
         socket.emit('updateData', data.id, data.cType, data, function (cb) {
             DOM[cb.create]('add', cb);
+            $('#pickedO').html('');
+            DOM.displayElementData(cb.id, cb.cType, '#pickedO');
         });
     })(data);
 }
@@ -679,6 +677,8 @@ function moveEntity(data){
                     data.latlonalt = [data.Lon, data.Lat, data.Alt];
                     socket.emit('updateData', data.id, data.cType, data, function(cb){
                         DOM.createVolume('add', cb);
+                        $('#pickedO').html('');
+                        DOM.displayElementData(cb.id, cb.cType, '#pickedO');
                     });
                     handler = handler && handler.destroy();
                 });
@@ -688,8 +688,9 @@ function moveEntity(data){
     );
 }
 function deleteEntity(data){
+    $('#pickedO').html('');
     DOM[data.create]('remove', data);
-    socket.emit('removeData', type, data.id);
+    socket.emit('removeData', data.cType, data.id);
 }
 /**
  * ENTITY CREATION

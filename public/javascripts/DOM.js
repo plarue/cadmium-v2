@@ -368,7 +368,7 @@ DOM.createArrayInput = function(name, values, iteration){
                 id: name + k,
                 value: values[k]
             })
-            .css('color', '#000')
+            .css('color', '#fff')
         );
     }
     return li;
@@ -392,13 +392,13 @@ DOM.createSelection = function(id, name, type){
 DOM.displayElementData = function(elementID, elementType, form) {
     socket.emit('searchID', form, elementType, elementID, function(result, pt) {
         var form = $(pt);
-        var ul = form.append('<ul></ul>');
+        var ul = $('<ul></ul>');
         var ov = result;
         console.log(ov);
         var eData;
         for (var key in ov) {
             if (key == '_id' || key == '__v') { continue; }
-            if (key == 'id' || key == 'cType' || key == 'create'){
+            if (key == 'Index' || key == 'id' || key == 'cType' || key == 'create' || key == 'latlonalt'){
                 eData = DOM.createInput(key, ov[key], true);
                 ul.append(eData);
                 continue;
@@ -408,26 +408,27 @@ DOM.displayElementData = function(elementID, elementType, form) {
                 ul.append(eData);
             } else if(Array.isArray(ov[key])) {
                 var oa = ov[key];
-                if(elementType == 'asset') {
-                    for (var i = 0, j = 1; i < oa.length; i += 3, j++) {
-                        eData = DOM.createArrayInput((key + j), [oa[i],oa[i+1],oa[i+2]]);
+                if (oa.length > 0) {
+                    if (elementType == 'asset') {
+                        for (var i = 0, j = 1; i < oa.length; i += 3, j++) {
+                            eData = DOM.createArrayInput((key + j), [oa[i], oa[i + 1], oa[i + 2]]);
+                            ul.append(eData);
+                        }
+                    } else {
+                        eData = DOM.createArrayInput(key, oa);
                         ul.append(eData);
                     }
-                }else{
-                    eData = DOM.createArrayInput(key, oa);
-                    ul.append(eData);
                 }
             }
         }
-        socket.emit('getParams', elementType, elementID, function(result) {
-            for(var key in result) {
-                if(key != 'id' && key != 'Id' && key != '_id' && key != 'name' && key != 'Name') {
-                    ul.append(DOM.createInput(key, result[key]));
-                }
-            }
-            form.append(ul);
+        form.append(ul);
+        if (ov.cType === 'asset') {
             $('#entityControls').show();
-        });
+            $('#move').hide();
+        }else{
+            $('#entityControls').show();
+            $('#move').show();
+        }
     });
 
 };
@@ -463,7 +464,7 @@ DOM.elType = function(pickedObject) {
             return ['err'];
         }
     }
-}
+};
 
 DOM.removeDuplicates = function(a) {
     var seen = {};
