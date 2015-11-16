@@ -17,6 +17,7 @@ var weapon = new Schema({
     NumSensorIDs: Number,
     SensorIDs: [],
     Fixed: Number,
+    Inventory: Number,
     minEl: Number,
     max_Range: Number,
     boresight_Half_Ang_Az: Number,

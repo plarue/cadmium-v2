@@ -800,20 +800,24 @@ bigio.initialize(function() {
             console.log("All databases cleared");
         });
 
-        socket.on('searchName', function(msg, database, input, callback){
+        socket.on('searchName', function(pt, database, input, callback){
             mongoose.model(database).findOne({name: input}, function(err, results){
-                callback(results, msg);
+                (pt)
+                    ? callback(results, pt)
+                    : callback(results);
             })
         });
 
-        socket.on('searchID', function(msg, database, input, callback){
+        socket.on('searchID', function(pt, database, input, callback){
             mongoose.model(database).findOne({id: input}, function(err, results){
-                callback(results, msg);
+                (pt)
+                    ? callback(results, pt)
+                    : callback(results);
             })
         });
 
-        socket.on('findAll', function(db, pt, callback){
-            mongoose.model(db).find({}, '-_id -__v', function(err, results){
+        socket.on('findAll', function(db, pt, callback) {
+            mongoose.model(db).find({}, '-_id -__v', function (err, results) {
                 if (err) return callback(err);
                 (pt)
                     ? callback(results, pt)
@@ -931,9 +935,9 @@ bigio.initialize(function() {
 
         socket.on('getScenario', function(folder, cb){
             var scenarios = [
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'scenarios'), loadType: 'loadAsset', fNames: ['AllowedRegions.dat', 'DefendedAreas.dat', 'DefendedAssets.dat','RestrictedRegions.dat','ThreatAreas.dat']},
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'sensors'), loadType: 'loadSensor', fNames: ['Radars.dat']},
-                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'weapons'), loadType: 'loadWeapon', fNames: ['Launchers.dat']}
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'scenarios'), loadType: 'loadAsset', fNames: ['AllowedRegions_NK.dat', 'DefendedAreas_NK.dat', 'DefendedAssets_NK.dat','RestrictedRegions_NK.dat','ThreatAreas_NK.dat']},
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'sensors'), loadType: 'loadSensor', fNames: ['Radars_NK.dat']},
+                {dirPath: path.join(__dirname, 'public/scenarios', folder, 'weapons'), loadType: 'loadWeapon', fNames: ['Launchers_NK.dat']}
             ];
             scenarios.forEach(function(scenario){
                 for (var file in scenario.fNames) {
@@ -1082,6 +1086,7 @@ bigio.initialize(function() {
                     NumSensorIDs: line[7],
                     SensorIDs: sensorIds,
                     Fixed: line[8 + num],
+                    Inventory: line[9 + num],
                     minEl: 0,
                     max_Range: (weaponData.maxFanAlt + weaponData.maxFanDR) / 2,
                     minRng: weaponData.Min_Alt_Int,
@@ -1123,8 +1128,8 @@ function saveScenario(dir, name, callback) {
     var root = path.join(__dirname, 'public', dir, name);
     var dirs = [
         {directory: 'scenarios', db: 'asset', filename: 'Assets.dat', obj: ['%', 'name', 'Index', 'owner', 'valexp', 'height', 'NFZ', 'shape', 'rad', 'latlonalt']},
-        {directory: 'sensors', db: 'sensor', filename: 'Radars.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'BoresightAz', 'NumWeaponIDs', 'WeaponIDs', 'KFactorClass', 'KFactorType', 'KFactorID', 'Fixed']},
-        {directory: 'weapons', db: 'weapon', filename: 'Launchers.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'Boresight', 'NumSensorIDs', 'SensorIDs', 'Fixed']}
+        {directory: 'sensors', db: 'sensor', filename: 'Radars_NK.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'BoresightAz', 'NumWeaponIDs', 'WeaponIDs', 'KFactorClass', 'KFactorType', 'KFactorID', 'Fixed']},
+        {directory: 'weapons', db: 'weapon', filename: 'Launchers_NK.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'Boresight', 'NumSensorIDs', 'SensorIDs', 'Fixed', 'Inventory']}
     ];
     fs.mkdir(root, function(err){
         if(err)console.log(err);
@@ -1155,6 +1160,10 @@ function saveScenario(dir, name, callback) {
                                         comObj.push(p[cLine[j]].join(' '));
                                     } else if (cLine[j] == 'Index') {
                                         comObj.push(i+1);
+                                    } else if (cLine[j] == 'Alt' || cLine[j].indexOf('Boresight') > -1){
+                                        (p[cLine[j]] === 0)
+                                            ? comObj.push('0.0')
+                                            : comObj.push(p[cLine[j]])
                                     } else {
                                         comObj.push(p[cLine[j]]);
                                     }

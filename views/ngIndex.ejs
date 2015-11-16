@@ -8,7 +8,7 @@
     <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-    <title>Athena</title>
+    <title>Acquire</title>
 
     <script src="../public/javascripts/jquery-2.1.4.min.js"></script>
     <script src="../public/javascripts/d3/d3.min.js" type="text/javascript"></script>
@@ -237,6 +237,11 @@
                             <label for="sensorID">Sensor ID:</label>
                             <input type="text" class="form-control spaced-bottom" id="sensorID" required/>
                             <div id="weaponIDs"></div>
+                            <div class="createIdCtrl">
+                                <p>Add or Remove additional Weapon IDs</p>
+                                <button type="button" class="btn btn-default" onclick="addID('weapon', true)">+</button>
+                                <button type="button" class="btn btn-default" onclick="addID('weapon', false)">-</button>
+                            </div>
                             <label for="KFactorClass">KFactorClass:</label>
                             <input type="text" class="form-control spaced-bottom" id="KFactorClass" required/>
                             <label for="KFactorType">KFactorType:</label>
@@ -266,12 +271,16 @@
                 <div class="row">
                     <form id="defWeapon">
                         <div id="weaponInputs" class="form-group col-md-12">
-                            <label for="sensors">Type:</label>
+                            <label for="weapons">Type:</label>
                             <select class="form-control spaced-bottom" id="weapons"></select>
                             <label for="weaponID">Weapon ID:</label>
                             <input type="text" class="form-control spaced-bottom" id="weaponID" required/>
-                            <label for="sensorIDs">Sensor IDs:</label>
-                            <input type="text" class="form-control spaced-bottom" id="sensorIDs" required/>
+                            <div id="sensorIDs"></div>
+                            <div class="createIdCtrl">
+                                <p>Add or Remove additional Weapon IDs</p>
+                                <button type="button" class="btn btn-default" onclick="addID('sensor', true)">+</button>
+                                <button type="button" class="btn btn-default" onclick="addID('sensor', false)">-</button>
+                            </div>
                             <label for="weaponFixed">Fixed:</label>
                             <input type="checkbox" class="form-control spaced-bottom" id="weaponFixed" required/>
                         </div>
@@ -303,7 +312,7 @@
                                 <option value="AllowedRegions.dat">Allowed Region</option>
                                 <option value="DefendedAreas.dat">Defended Area</option>
                                 <option value="DefendedAssets.dat">Defended Asset</option>
-                                <option value="RestrictedRegion.dat">Restriceted Region</option>
+                                <option value="RestrictedRegion.dat">Restricted Region</option>
                                 <option value="ThreatAreas.dat">Threat Area</option>
                             </select>
                             <label for="owner">Affiliation:</label>

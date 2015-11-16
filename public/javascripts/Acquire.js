@@ -695,41 +695,101 @@ function deleteEntity(data){
  * ENTITY CREATION
  */
 function createModal(type){
-    (type == 'sensor') ? sensorModalInit(function(){$('#sensorModal').modal()}) :
-        (type == 'weapon')? weaponModalInit(function(){$('#weaponModal').modal()})
+    (type === 'sensor') ? volumeModalInit(type, function(){$('#sensorModal').modal()}) :
+        (type === 'weapon')? volumeModalInit(type, function(){$('#weaponModal').modal()})
             :$('#assetModal').modal();
 }
-function sensorModalInit(cb) {
-    var cont = $('#weaponIDs');
-
+function volumeModalInit(type, cb) {
+    var db;
+    $('#' + type + 's').html('');
+    if (type === 'sensor') {
+        db = 'radarTypes';
+        $('#weaponIDs').html('');
+    }else {
+        db = 'weaponTypes';
+        $('#sensorIDs').html('');
+    }
+    socket.emit('findAll', db, type, function(results, type){
+        var dd = $('#' + type + 's'),
+            labelText, idType;
+        dd.append($('<option selected disabled>Select..</option>'))
+        for (var i=0; i < results.length; i++){
+            dd.append($('<option>' + results[i].name + '</option>')
+                    .attr('id', results[i].name)
+                    .attr('value', results[i].id)
+            );
+        }
+        if (type === 'sensor'){
+            labelText = 'Weapon IDs';
+            idType = 'weapon';
+        }else {
+            labelText = 'Sensor IDs';
+            idType = 'sensor';
+        }
+        $('#' + idType + 'IDs')
+            .append($('<label>' + labelText + '</label>').attr('for', idType + 'ID0'))
+            .append($('<input class="form-control spaced-bottom" maxlength="3" required/>')
+                .attr('id', idType + 'ID0')
+        );
+    });
     if(cb){
         cb()
     }
 }
-function wsSubmit(type) {
-    var id = $('#sensorID').val(),
-        sensor = {
-            id: 'S' + id,
-            name: id,
-            posU: 0,
-            velU: 0,
-            azimuth: 0,
-            elevation: 0,
-            range: 0
-        };
-    if (sensor.type == 'a'){
-        sensor.posU = $('#posU').val();
-        sensor.velU = $('#velU').val();
-    }else if( sensor.type == 'b'){
-        sensor.azimuth = $('#azimuth').val();
-        sensor.elevation = $('#elevation').val();
-    }else if( sensor.type == 'c'){
-        sensor.range = $('#range').val();
+function addID(type, pm){
+    var id = '#' + type + 'IDs';
+    var len = $(id + ' input').length;
+    var n;
+    if (pm){
+        n = type + 'ID' + len;
+        $(id)
+            .append($('<label class="noShow"></label>')
+                .attr('for', n)
+                .addClass(n)
+            )
+            .append($('<input class="form-control spaced-bottom" maxlength="3" required/>')
+                .attr('id', n)
+                .addClass(n)
+        );
+    }else{
+        n = type + 'ID' + (len -1);
+        $('.' + n).remove();
     }
-
+}
+function wsSubmit(type) {
+    var id = $('#' + type + 'ID').val(),
+        db = (type === 'sensor') ? 'radarTypes' : 'weaponTypes',
+        element = {
+            Index: 0,
+            name: id,
+            Type: $('#' + type + 's').val(),
+            Identifier: id,
+            Fixed: ($('#' + type + 'Fixed').is(':checked')) ? 1 : 0,
+            cType: type,
+            create: 'createVolume'
+        },
+        elementIDs = [];
+    if (type === 'sensor'){
+        $('#weaponIDs input').each(function(){
+            elementIDs.push($(this).val());
+        });
+        element.id = 'S' + id;
+        element.numWeaponIDs = elementIDs.length;
+        element.WeaponIDs = elementIDs;
+        element.KFactorClass = $('#KFactorClass').val();
+        element.KFactorType = $('#KFactorType').val();
+        element.KFactorID = $('#KFactorID').val();
+    }else {
+        $('#sensorIDs input').each(function () {
+            elementIDs.push($(this).val());
+        });
+        element.id = 'W' + id;
+        element.numSensorIDs = elementIDs.length;
+        element.SensorIDs = elementIDs;
+    }
     var geoID = Object.keys(currentGeometry);
     for (var i = 0; i < geoID.length; i++) {
-        if ((sensor.id) == geoID[i]) {
+        if ((element.id) == geoID[i]) {
             console.log('ID already in use!');
             loggingMessage('ID already in use!');
             return;
@@ -784,7 +844,7 @@ function wsSubmit(type) {
 
                 entity.position = mousePositionProperty;
                 entity.label.show = true;
-                entity.label.text = '(' + longitudeString + ', ' + latitudeString + ')';
+                entity.label.text = '( ' + longitudeString + ', ' + latitudeString + ' )';
             } else {
                 entity.label.show = false;
             }
@@ -801,12 +861,12 @@ function wsSubmit(type) {
                 Cesium.Cartesian2.clone(movement.endPosition, mousePosition);
                 entity.position = mousePositionProperty;
                 entity.label.show = true;
-                entity.label.text = '(Rotation: ' + degree + ')';
+                entity.label.text = '( Rotation: ' + degree + ' Degrees )';
                 entitytwo.polyline.positions = new Cesium.CallbackProperty(function(){
                     return [cartesian, cartesiantwo];
                 }, false);
                 entitytwo.polyline.show = true;
-                entitythree.polyline.positions = Cesium.Cartesian3.fromDegreesArray([lla[1], lla[0], lla[1], 90]);
+                entitythree.polyline.positions = Cesium.Cartesian3.fromDegreesArray([element.Lon, element.Lat, element.Lon, 90]);
                 entitythree.polyline.show = true;
             } else {
                 entity.label.show = false;
@@ -819,45 +879,45 @@ function wsSubmit(type) {
             cartesian = scene.camera.pickEllipsoid(click.position, ellipsoid);
             if (cartesian) {
                 cartographic = ellipsoid.cartesianToCartographic(cartesian);
-                lla = [
-                    Cesium.Math.toDegrees(cartographic.latitude),
-                    Cesium.Math.toDegrees(cartographic.longitude),
-                    Cesium.Math.toDegrees(cartographic.height)
-                ];
+                element.Lat = Cesium.Math.toDegrees(cartographic.latitude);
+                element.Lon = Cesium.Math.toDegrees(cartographic.longitude);
+                element.Alt = Cesium.Math.toDegrees(cartographic.height);
                 Cesium.sampleTerrain(terrainProvider, 11, [cartographic])
                     .then(function (updatedPositions) {
                         stage = 1;
                         entity.label.show = false;
-                        lla[2] = updatedPositions[0].height;
+                        element.Alt = updatedPositions[0].height;
                     });
-                //stage = 1;
-                //entity.label.show = false;
             }
         }else if (stage === 1) {
-            var data = {
-                Index: 0,
-                id: sensor.id,
-                name: sensor.name,
-                Identifier: sensor.name,
-                Type: 0,
-                Lat: lla[0],
-                Lon: lla[1],
-                Alt: lla[2],
-                latlonalt: lla,
-                BoresightAz: +degree,
-                positionUncert: sensor.posU,
-                velocityUncert: sensor.velU,
-                azimuthUncert: sensor.azimuth,
-                elevationUncert: sensor.elevation,
-                rangeUncert: sensor.range,
-                cType: 'sensor',
-                create: 'createVolume'
-            };
-            console.log("Creating sensor");
-            loggingMessage("Creating Sensor");
-            DOM.createIcon('SFGPESR---*****', sensor.id, sensor.name, lla[1], lla[0], lla[2]);
-            socket.emit('newElement', data.cType, data);
-
+            socket.emit('searchID', element, db, element.Type, function(cb, element){
+                element.latlonalt = [element.Lat, element.Lon, element.Alt];
+                if (type === 'sensor') {
+                    element.BoresightAz = +degree;
+                    element.minEl = cb.minEl;
+                    element.maxEl = cb.maxEl;
+                    element.max_Range = cb.max_Range;
+                    element.minRng = cb.minRng;
+                    element.boresight_Half_Ang_Az = cb.boresight_Half_Ang_Az;
+                    element.boresight_Half_Ang_El = +degree;
+                    element.nFaces = cb.nFaces;
+                    element.boresightEl = cb.boresightEl;
+                }else{
+                    element.Boresight = +degree;
+                    element.minEl = 0;
+                    element.max_Range = (cb.maxFanAlt + cb.maxFanDR) / 2;
+                    element.minRng = cb.Min_Alt_Int;
+                    element.boresight_Half_Ang_Az = cb.FOF_halfangle;
+                    element.boresight_Half_Ang_El = +degree;
+                    element.nFaces = 2;
+                    element.maxEl = 90;
+                    element.boresightEl = 0;
+                }
+                console.log("Creating " + type);
+                loggingMessage("Creating " + type);
+                DOM.createVolume('add', element);
+                socket.emit('newElement', type, element);
+            });
             viewer.entities.remove(entity);
             viewer.entities.remove(entitytwo);
             viewer.entities.remove(entitythree);

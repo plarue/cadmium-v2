@@ -907,6 +907,14 @@ input[type=range]::-ms-thumb {
   display: inline-block;
   width: 100%;
 }
+.createIdCtrl {
+  width: 100%;
+  margin-bottom: 15px;
+  text-align: center;
+}
+.createIdCtrl button{
+  margin: 0 2%;
+}
 .cesium-viewer-toolbar {
   z-index: 999;
 }

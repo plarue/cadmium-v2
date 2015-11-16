@@ -26,7 +26,7 @@ DOM.createAsset = function(){
                 }
             });
             var newLabel = viewer.entities.add({
-                position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[1], asset.latlonalt[0]),
+                position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[1], asset.latlonalt[0], 3000),
                 name: asset.id,
                 label: {
                     text: asset.name,
@@ -57,7 +57,7 @@ DOM.createAsset = function(){
                 }
             });
             var newLabel = viewer.entities.add({
-                position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[1], asset.latlonalt[0]),
+                position: Cesium.Cartesian3.fromDegrees(asset.latlonalt[1], asset.latlonalt[0], 3000),
                 name: asset.id,
                 label: {
                     text: asset.name,
@@ -182,8 +182,8 @@ DOM.createVolume = function(){
                 new Cesium.Matrix4()
             );
             var transformMatrix = Cesium.Matrix4.multiplyByTranslation(
-                Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(volume.latlonalt[0], volume.latlonalt[1])),
-                new Cesium.Cartesian3(0.0, 0.0, (volume.latlonalt[2] + volume.boresightEl)),
+                Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(volume.Lon, volume.Lat)),
+                new Cesium.Cartesian3(0.0, 0.0, (volume.Alt + volume.boresightEl)),
                 new Cesium.Matrix4()
             );
             var modelMatrix = Cesium.Matrix4.multiply(
@@ -231,7 +231,7 @@ DOM.createVolume = function(){
         }
 
         //ADD ICON
-        DOM.createIcon(volType[2], volume.id, volume.name, +volume.latlonalt[0], +volume.latlonalt[1], +volume.latlonalt[2]);
+        DOM.createIcon(volType[2], volume.id, volume.name, +volume.Lon, +volume.Lat, +volume.Alt);
 
     }else if(arguments[0] == 'remove'){
         //REMOVE SENSOR VOLUME
@@ -265,9 +265,7 @@ DOM.createIcon = function(icon, id, name, lon, lat, alt){
         },
         label : {
             text : name,
-            font : '14pt monospace',
-            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-            outlineWidth : 2,
+            font : '16px Helvetica',
             verticalOrigin : Cesium.VerticalOrigin.TOP,
             pixelOffset : new Cesium.Cartesian2(0, 32)
         }
@@ -392,10 +390,11 @@ DOM.createSelection = function(id, name, type){
 };
 
 DOM.displayElementData = function(elementID, elementType, form) {
-    socket.emit('searchID', '', elementType, elementID, function(result) {
-        var form = $(form);
+    socket.emit('searchID', form, elementType, elementID, function(result, pt) {
+        var form = $(pt);
         var ul = form.append('<ul></ul>');
         var ov = result;
+        console.log(ov);
         var eData;
         for (var key in ov) {
             if (key == '_id' || key == '__v') { continue; }
