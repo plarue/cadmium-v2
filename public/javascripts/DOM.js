@@ -394,7 +394,6 @@ DOM.displayElementData = function(elementID, elementType, form) {
         var form = $(pt);
         var ul = $('<ul></ul>');
         var ov = result;
-        console.log(ov);
         var eData;
         for (var key in ov) {
             if (key == '_id' || key == '__v') { continue; }
