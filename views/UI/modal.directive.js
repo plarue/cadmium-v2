@@ -2,7 +2,12 @@
  * Created by Brent on 10/26/2015.
  */
 function modalCtrl($scope, athenaFactory){
-    $scope.modals = athenaFactory.getModals;
+    $scope.model = athenaFactory;
+    $scope.data = $scope.model.data;
+
+    $scope.serveModel = function(){
+        athenaFactory.modelInit($('#backEnd').val());
+    };
 }
 function modals(){
     return {

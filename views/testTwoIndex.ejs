@@ -27,10 +27,19 @@
     </style>
 </head>
 <body id="body" ui-view="body">
+<div id="dependencies">
 
-<!--DATA MODEL INIT-->
-<script src="../views/globalDataModel/modelTemplates.js"></script>
+</div>
+<!--DEPENDENCY INIT-->
+<script src="../views/dependencies/Cs.js"></script>
+<script src="../views/dependencies/Common.js"></script>
+<script src="../views/dependencies/Acquire.js"></script>
+<script src="../views/dependencies/Vapor.js"></script>
+
+<!--GLOBAL DATA MODEL INIT-->
 <script src="../views/globalDataModel/Model.js"></script>
+<script src="../views/globalDataModel/globalDataModel.js"></script>
+<script src="../views/globalDataModel/modelTemplates.js"></script>
 
 <!--ANGULAR INIT-->
 <script src="../views/athena.module.js"></script>
@@ -48,7 +57,7 @@
         <img id="mainLogo" src="../public/images/athenaLogo.svg" />
     </div>
     <div id="menu" ng-controller="menuCtrl">
-        <div menu="menu"></div>
+        <div menu data="data.getMenu"></div>
     </div>
     <div id="trOne"></div>
     <div id="trTwo"></div>
@@ -58,11 +67,11 @@
         <div id="tabContainer">
             <div id="tabs">
                 <ul>
-                    <li id="tabHeader_1" class="bl" ng-repeat="tab in tabs">{{tab.title}}</li>
+                    <li id="tabHeader_1" class="bl" ng-repeat="tab in data.getLeftUtil">{{tab.title}}</li>
                 </ul>
             </div>
             <div id="tabscontent">
-                <div leftutil="leftutil" ng-repeat="item in tabs"></div>
+                <div leftutil="leftutil" ng-repeat="item in data.getLeftUtil"></div>
             </div>
         </div>
         <div id="leftHideToggle" class="hideToggle">
@@ -70,24 +79,24 @@
         </div>
     </div>
 </div>
-<divng-controller="rightUtilCtrl">
+<div ng-controller="rightUtilCtrl">
     <div id="rightHide" style="right: -19.75em">
         <div id="rightHideToggle" class="hideToggle">
             <a href="javascript:;" class ="ht" id="rhToggleA" onclick="slideRight();"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a>
         </div>
         <div id="rightBar">
-            <div rightutil="rightutil" ng-repeat="item in utils"></div>
+            <div rightutil="rightutil" ng-repeat="item in data.getRightUtil"></div>
         </div>
     </div>
 </div>
 <div ng-controller="footerCtrl">
     <div id="footer"></div>
     <div id="bottom">
-        <div footer="footer" ng-repeat="item in footer"></div>
+        <div footer="footer" ng-repeat="item in data.getFooter"></div>
     </div>
 </div>
 <div ng-controller="modalCtrl">
-    <div modals="modals" ng-repeat="item in modals"></div>
+    <div modals="modals" ng-repeat="item in data.getModals"></div>
 </div>
 <script src="../public/javascripts/html2canvas.js" type="text/javascript"></script>
 <script src="../public/javascripts/milstd2525/sm-bc.min.js" type="text/javascript"></script>

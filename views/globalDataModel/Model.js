@@ -4,30 +4,57 @@
 
 (function(exports) {
 
-    function Model(model) {
-        this.menu = fill('menu', model.menu);
-        this.leftUtil = fill('tabs', model.leftUtil);
-        this.rightUtil = fill('utils', model.rightUtil);
-        this.footer = fill('footer', model.footer);
-        this.modals = fillModals();
+    function Model(model, gdm) {
+        this.data = {
+            getMenu: [],
+            getLeftUtil: [],
+            getRightUtil: [],
+            getFooter: [],
+            getModals: []
+        };
+        this.init(model, gdm);
     }
 
-     function fill(lookTo, modelAttr){
+    Model.prototype.init = function(model, gdm){
+        //Load Dependencies
+        load(model.dependencies, gdm);
+        //Construct Model
+        var dataModel = gdm.globalModel(this);
+        //Load Model
+        var menu = fill('menu', model.menu, dataModel);
+        this.data.getMenu = menu;
+        this.data.getLeftUtil = fill('leftUtil', model.leftUtil, dataModel);
+        this.data.getRightUtil = fill('rightUtil', model.rightUtil, dataModel);
+        this.data.getFooter = fill('footer', model.footer, dataModel);
+        this.data.getModals = fillModals(menu);
+    };
+
+    function load(modelAttr, gdm){
+        for (var i = 0; i < modelAttr.length; i++) {
+            if(gdm[modelAttr[i]]) {
+                var p = gdm[modelAttr[i]];
+                Model.prototype[modelAttr[i]] = p();
+            }
+        }
+    }
+
+    function fill(lookTo, modelAttr, gdm){
         var filled = [];
         for (var i = 0; i < modelAttr.length; i++) {
-            console.log(gdm);
-            filled.push(gdm[lookTo][modelAttr])
+            filled.push(gdm[lookTo][modelAttr[i]])
         }
         return filled
     }
 
-    function fillModals(){
+    function fillModals(menu){
         var modals = [];
-        var menus = this.menu;
+        var menus = menu;
         for (var i in menus) {
             if (menus[i].submenu) {
                 for (var j in menus[i].submenu) {
-                    modals.push({modalUrl: menus[i].submenu[j].modalUrl})
+                    if (menus[i].submenu[j].modalUrl) {
+                        modals.push({modalUrl: menus[i].submenu[j].modalUrl})
+                    }
                 }
             }
         }

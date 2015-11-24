@@ -2,7 +2,7 @@
  * Created by Brent on 10/20/2015.
  */
 function rightUtilCtrl($scope, athenaFactory){
-    $scope.utils = athenaFactory.getRightUtils()
+    $scope.data = athenaFactory.data;
 }
 function rightUtil(){
     return {

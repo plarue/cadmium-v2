@@ -3,13 +3,7 @@
  */
 
 function footerCtrl($scope, athenaFactory){
-    $scope.slideDown = function(id, dist){
-        var box = $('#' + id);
-        ( box.css('bottom') == dist || box.css('bottom') == '' )
-            ? box.css('bottom','1em')
-            : box.css('bottom', dist);
-    };
-    $scope.footer = athenaFactory.getFooter()
+    $scope.data = athenaFactory.data;
 }
 
 function footer() {

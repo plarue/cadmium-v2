@@ -12,7 +12,8 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                        <select>
+                        <select id="backEnd">
+                            <option value="default" selected>Default</option>
                             <option value="acquire">Acquire</option>
                             <option value="vapor">Vapor</option>
                         </select>
@@ -20,7 +21,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="serveModel()">Create</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="serveModel()">Save</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>
         </div>
