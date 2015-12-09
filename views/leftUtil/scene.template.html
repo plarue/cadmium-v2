@@ -1,4 +1,4 @@
-<div class="tabpage" id="tabpage_1">
+<div>
     <div id="leftBar">
         <h4>Scene Entities</h4>
         <div class="bdrCont">
@@ -10,7 +10,13 @@
                         <th><h5 class="fr">Visibility</h5></th>
                     </tr></table>
                 </div>
-                <ul id="entityList"></ul>
+                <ul id="entityList">
+                    <li ng-repeat="item in toggle.entities">
+                        <label for="{{item.id}}">{{item.name}}</label>
+                        <div class="indicator" id="{{item.indId}}" ng-style="{backgroundColor: item.light}"></div>
+                        <input ng-model="item.ov" ng-change="$parent.$parent.model[item.f](item.ov, item.id)" type="range" id="{{item.id}}" min="0" max="1" step="1">
+                    </li>
+                </ul>
                 <div id="weaponTitle">
                     <p>Weapons</p>
                     <table><tr>
@@ -18,7 +24,13 @@
                         <th><h5 class="fr">Volume Visibility</h5></th>
                     </tr></table>
                 </div>
-                <ul id="weaponList"></ul>
+                <ul id="weaponList">
+                    <li ng-repeat="item in toggle.weapons">
+                        <label for="{{item.id}}">{{item.name}}</label>
+                        <div class="indicator" id="{{item.indId}}" ng-style="{backgroundColor: item.light}"></div>
+                        <input ng-model="item.ov" ng-change="$parent.$parent.model[item.f](item.ov, item.id)" type="range" id="{{item.id}}" min="0" max="1" step="1">
+                    </li>
+                </ul>
                 <div id="sensorTitle">
                     <p>Sensors</p>
                     <table><tr>
@@ -26,7 +38,13 @@
                         <th><h5 class="fr">Volume Visibility</h5></th>
                     </tr></table>
                 </div>
-                <ul id="sensorList"></ul>
+                <ul id="sensorList">
+                    <li ng-repeat="item in toggle.sensors">
+                        <label for="{{item.id}}">{{item.name}}</label>
+                        <div class="indicator" id="{{item.indId}}" ng-style="{backgroundColor: item.light}"></div>
+                        <input ng-model="item.ov" ng-change="$parent.$parent.model[item.f](item.ov, item.id)" type="range" id="{{item.id}}" min="0" max="1" step="1">
+                    </li>
+                </ul>
             </div>
         </div>
     </div>

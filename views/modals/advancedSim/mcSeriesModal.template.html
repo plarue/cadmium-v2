@@ -1,0 +1,28 @@
+<div class="modal fade" id="mcSeriesModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="seriesDialogLabel">Monte Carlo Series</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="defRadar">
+                        <div id="mcInputs" class="form-group col-md-12">
+                            <label for="seriesID">Series:</label>
+                            <input type="text" class="form-control spaced-bottom" id="seriesID" value="1" readonly/>
+                            <div class="createIdCtrl">
+                                <p>Add or Remove to the series</p>
+                                <button type="button" class="btn btn-default" ng-click="model.mcAR(true)">+</button>
+                                <button type="button" class="btn btn-default" ng-click="model.mcAR(false)">-</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="model.mcSeries()">Create</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,6 +2,7 @@
  * Created by Brent on 11/19/2015.
  */
 (function(exports) {
+
     function Cs(){
         this.currentGeometry = {};
         //createAsset
@@ -50,8 +51,8 @@
                 self.currentGeometry[asset.id] = {shape: newEllipse, label: newLabel};
             }else{
                 if (self.currentGeometry[asset.id]) {
-                    viewer.entities.remove(currentGeometry[asset.id].shape);
-                    viewer.entities.remove(currentGeometry[asset.id].label);
+                    viewer.entities.remove(self.currentGeometry[asset.id].shape);
+                    viewer.entities.remove(self.currentGeometry[asset.id].label);
                     delete self.currentGeometry[asset.id];
                 }
             }
@@ -81,8 +82,8 @@
                 self.currentGeometry[asset.id] = {shape: newPolygon, label: newLabel};
             }else{
                 if (self.currentGeometry[asset.id]) {
-                    viewer.entities.remove(currentGeometry[asset.id].shape);
-                    viewer.entities.remove(currentGeometry[asset.id].label);
+                    viewer.entities.remove(self.currentGeometry[asset.id].shape);
+                    viewer.entities.remove(self.currentGeometry[asset.id].label);
                     delete self.currentGeometry[asset.id];
                 }
             }
@@ -119,8 +120,7 @@
             var list = $('#entityList');
             var trackSlider = document.getElementById('tracks');
             if (trackSlider == null) {
-                var li = self.createSlider('tracks', 'Tracks', 'track', 1);
-                list.append(li);
+                self.createSlider('tracks', 'Tracks', 'track', 1);
             }
             if (list.innerHTML != '' || list.innerHTML != null){
                 $('#entityTitle').show();
@@ -150,8 +150,7 @@
             var list = $('#entityList');
             var trackSlider = document.getElementById('tracks');
             if (trackSlider == null) {
-                var li = self.createSlider('tracks', 'Tracks', 'track', 1);
-                list.append(li);
+                self.createSlider('tracks', 'Tracks', 'track', 1);
             }
             if (list.innerHTML != '' || list.innerHTML != null){
                 $('#entityTitle').show();
@@ -240,9 +239,8 @@
             scene.primitives.add(newPrimitive);
 
             //ADD VISIBILITY SLIDER
-            var list = $("#" + volType[0]);
-            var li = self.createSlider(volume.id, volume.name, 'volume', 0);
-            list.append(li);
+            var list = $('#' + volume.cType + 'List');
+            self.createSlider(volume.id, volume.name, volume.cType, 0);
             if (list.innerHTML != '' || list.innerHTML != null) {
                 $("#" + volType[1]).show();
             }
@@ -256,10 +254,11 @@
             delete self.currentGeometry[volume.id];
 
             //REMOVE VISIBILITY SLIDER
-            var item = document.getElementById(volume.id);
-            if (item != null) {
-                var slide = item.parentNode;
-                slide.parentNode.removeChild(slide);
+            var t = volume.cType + 's';
+            for (var i=0; i < self.toggle[t].length; i++){
+                if (self.toggle[t][i].id === volume.id){
+                    self.toggle[t].splice(i,1);
+                }
             }
 
             //REMOVE ICON
@@ -268,6 +267,7 @@
     };
 
     Cs.prototype.createIcon = function(icon, id, name, lon, lat, alt){
+        console.log(icon);
         var modifiers = {};
         modifiers[msa.SymbologyStandard] = RendererSettings.Symbology_2525C;
 
@@ -293,40 +293,27 @@
 //DOM CREATION
 
     Cs.prototype.createSlider = function(id, name, type, ov){
-        var light, f;
-        var indId = 'ind' + id;
-        (ov === 0) ? light = '#ff0000' : light = '#adff2f';
+        var self = this;
+        var sType, f;
         if (type == 'asset'){
-            f = assetCollection;
+            f = 'assetCollection';
+            sType = 'entities';
         }else if(type == 'track'){
-            f = trackCollection;
+            f = 'trackCollection';
+            sType = 'entities';
         }else{
-            f = selectInputs;
+            f = 'selectInputs';
+            sType = type + 's';
         }
-        var li = $('<li></li>')
-            .append($('<label></label>')
-                .attr('for', id)
-                .html(name)
-        )
-            .append($('<div></div>')
-                .attr({
-                    class: 'indicator',
-                    id: indId
-                })
-                .css('background-color', light)
-        )
-            .append($('<input></input>')
-                .attr({
-                    type: 'range',
-                    id: id,
-                    value: ov,
-                    min: 0,
-                    max: 1,
-                    step: 1
-                })
-                .on('change',f)
-        );
-        return li;
+        var slider = {
+            id: id,
+            name: name,
+            light: (ov === 0) ? '#ff0000' : '#adff2f',
+            f: f,
+            indId: 'ind' + id,
+            ov: ov
+        };
+        self.toggle[sType].push(slider);
     };
 
     Cs.prototype.listItem = function(name){

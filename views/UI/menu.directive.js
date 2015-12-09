@@ -1,26 +1,28 @@
 /**
  * Created by Brent on 10/16/2015.
  */
-function menuCtrl($scope, athenaFactory) {
-    $scope.model = athenaFactory;
+
+function menuCtrl($scope, cadmiumFactory) {
+    $scope.model = cadmiumFactory;
     $scope.data = $scope.model.data;
+    $scope.proto = $scope.model;
 }
 
 function menu() {
     return {
         restrict: 'AE',
         scope: {
-            menu: '=data'
+            menu: '=data',
+            model: '=model'
         },
         replace: true,
         template: [
             '<ul>',
-                '<li ng-repeat="item in menu" menu-item="item"></li>',
+                '<li ng-repeat="item in menu" menu-item="item" model="model"></li>',
             '</ul>'
         ].join(''),
         link: function(scope, element, attrs) {
-            //element.addClass(attrs.class);
-            //element.addClass(scope.cls);
+
         }
     };
 }
@@ -30,7 +32,8 @@ function menuItem($compile) {
         restrict: 'AE',
         replace: true,
         scope: {
-            item: '=menuItem'
+            item: '=menuItem',
+            model: '=model'
         },
         template: [
             '<li active-link >',
@@ -52,13 +55,13 @@ function menuItem($compile) {
                 var $a = $('<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">'+text+'<span class="caret"></span></a>');
                 element.append($a);
 
-                var $submenu = $('<div menu data="item.submenu" class="dropdown-menu" role="menu"></div>');
+                var $submenu = $('<div menu data="item.submenu" class="dropdown-menu" role="menu" model="model"></div>');
                 element.append($submenu);
             }
             if (scope.item.click) {
                 (!scope.item.val)
-                ? element.find('a').attr('ng-click', 'item.click()')
-                : element.find('a').attr('ng-click', 'item.click(item.val)');
+                ? element.find('a').attr('ng-click', 'model[item.click]()')
+                : element.find('a').attr('ng-click', 'model[item.click](item.val)');
             }
             $compile(element.contents())(scope);
         }
@@ -66,8 +69,8 @@ function menuItem($compile) {
 }
 
 angular
-    .module('athena.menu', ['ui.bootstrap'])
+    .module('cadmium.menu', ['ui.bootstrap'])
     .directive('menu', menu)
     .directive('menuItem', menuItem)
-    .factory('athenaFactory', athenaFactory)
+    .factory('cadmiumFactory', cadmiumFactory)
     .controller('menuCtrl', menuCtrl);

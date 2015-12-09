@@ -12,40 +12,57 @@
         this.Common = function(){
             return new Common();
         };
+        this.Create = function(){
+            return new Create();
+        };
         this.Acquire = function(){
             return new Acquire();
         };
         this.Vapor = function(){
             return new Vapor();
         };
+        this.AdvancedSim = function(){
+            return new AdvancedSim();
+        };
 
         //GDM
-        this.globalModel = function(that) {
+        this.globalModel = function() {
             return {
                 "menu": {
+                    "Default": {
+                        "title": "File",
+                        "submenu": [
+                            {
+                                "title": "Settings",
+                                "click": 'launchModal',
+                                "val": "#settingsModal",
+                                "modalUrl": "views/modals/file/settingsModal.template.html"
+                            }
+                        ]
+                    },
                     "File": {
                         "title": "File",
                         "submenu": [
                             {
                                 "title": "Open Scenario",
-                                "click": that.Common.openScenario,
+                                "click": 'openScenario',
                                 "modalUrl": "views/modals/file/openModal.template.html"
                             },
                             {
                                 "title": "Import File",
-                                "click": that.Common.launchModal,
+                                "click": 'launchModal',
                                 "val": "#importModal",
                                 "modalUrl": "views/modals/file/importModal.template.html"
                             },
                             {
                                 "title": "Save Scenario",
-                                "click": that.Common.launchModal,
+                                "click": 'launchModal',
                                 "val": "#saveModal",
                                 "modalUrl": "views/modals/file/saveModal.template.html"
                             },
                             {
                                 "title": "Clear Scenario",
-                                "click": that.Common.launchModal,
+                                "click": 'launchModal',
                                 "val": "#clearConfirmModal",
                                 "modalUrl": "views/modals/file/clearConfirmModal.template.html"
                             },
@@ -54,16 +71,16 @@
                             },
                             {
                                 "title": "Refresh Current",
-                                "click": that.Common.refreshData
+                                "click": 'refreshData'
                             },
                             {
                                 "title": "Screen Capture",
-                                "click": that.Common.screenShotModal,
+                                "click": 'screenShotModal',
                                 "modalUrl": "views/modals/file/saveImageModal.template.html"
                             },
                             {
                                 "title": "Settings",
-                                "click": that.Common.launchModal,
+                                "click": 'launchModal',
                                 "val": "#settingsModal",
                                 "modalUrl": "views/modals/file/settingsModal.template.html"
                             }
@@ -74,20 +91,20 @@
                         "submenu": [
                             {
                                 "title": "Sensors",
-                                "click": that.Common.launchModal,
-                                "val": "#sensorModal",
+                                "click": 'createModal',
+                                "val": "sensor",
                                 "modalUrl": "views/modals/create/sensorModal.template.html"
                             },
                             {
                                 "title": "Weapons",
-                                "click": that.Common.launchModal,
-                                "val": "#weaponModal",
+                                "click": 'createModal',
+                                "val": "weapon",
                                 "modalUrl": "views/modals/create/weaponModal.template.html"
                             },
                             {
                                 "title": "Assets",
-                                "click": that.Common.launchModal,
-                                "val": "#assetModal",
+                                "click": 'createModal',
+                                "val": "asset",
                                 "modalUrl": "views/modals/create/assetModal.template.html"
                             }
                         ]
@@ -97,20 +114,20 @@
                         "submenu": [
                             {
                                 "title": "Optimize",
-                                "click": that.Common.launchModal,
+                                "click": 'launchModal',
                                 "val": "#optimizeModal",
                                 "modalUrl": "views/modals/algorithms/optimizeModal.template.html"
                             },
                             {
                                 "title": "Stop Optimization",
-                                "click": (typeof that.Acquire != 'undefined') ? that.Acquire.stopOptimization : null
+                                "click": 'stopOptimization'
                             },
                             {
                                 "divider": "true"
                             },
                             {
                                 "title": "Generate Threats",
-                                "click": (typeof that.Acquire != 'undefined') ? that.Acquire.generateThreats : null
+                                "click": 'generateThreats'
                             }
                         ]
                     },
@@ -119,20 +136,39 @@
                         "submenu": [
                             {
                                 "title": "Start Vapor",
-                                "click": (typeof that.Vapor != 'undefined') ? that.Vapor.startVapor : null
+                                "click": 'startVapor'
                             },
                             {
                                 "title": "Stop Vapor",
-                                "click": (typeof that.Vapor != 'undefined') ? that.Vapor.stopVapor : null
+                                "click": 'stopVapor'
                             },
                             {
                                 "divider": "true"
                             },
                             {
                                 "title": "Metrics",
-                                "click": that.Common.launchModal,
+                                "click": 'launchModal',
                                 "val": "#vaporModal",
                                 "modalUrl": "views/modals/vapor/vaporModal.template.html"
+                            }
+                        ]
+                    },
+                    "Simulation": {
+                        "title": "Simulation",
+                        "submenu": [
+                            {
+                                "title": "Start Sim",
+                                "click": 'startSim'
+                            },
+                            {
+                                "title": "Stop Vapor",
+                                "click": 'stopSim'
+                            },
+                            {
+                                "title": "Monte Carlo Series",
+                                "click": 'launchModal',
+                                "val": "#mcSeriesModal",
+                                "modalUrl": "views/modals/advancedSim/mcSeriesModal.template.html"
                             }
                         ]
                     }
@@ -158,21 +194,25 @@
                 "footer": {
                     "surveillanceScore": {
                         "id": "surveillanceCont",
+                        "graphId": "surveillanceScore",
                         "title": "Surveillance Score",
                         "height": "-271px"
                     },
                     "fireControlScore": {
                         "id": "fireControlCont",
+                        "graphId": "fireControlScore",
                         "title": "Fire Control Score",
                         "height": "-331px"
                     },
                     "weaponScore": {
                         "id": "weaponCont",
+                        "graphId": "weaponScore",
                         "title": "Weapon Score",
                         "height": "-311px"
                     },
                     "evaluation": {
                         "id": "evaluationCont",
+                        "graphId": "evaluation",
                         "title": "Evaluation",
                         "height": "-471px"
                     }

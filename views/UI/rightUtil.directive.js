@@ -1,8 +1,10 @@
 /**
  * Created by Brent on 10/20/2015.
  */
-function rightUtilCtrl($scope, athenaFactory){
-    $scope.data = athenaFactory.data;
+function rightUtilCtrl($scope, cadmiumFactory){
+    $scope.model = cadmiumFactory;
+    $scope.data = $scope.model.data;
+    $scope.proto = $scope.model;
 }
 function rightUtil(){
     return {
@@ -16,7 +18,7 @@ function rightUtil(){
     };
 }
 angular
-    .module('athena.rightUtil',['ui.bootstrap'])
+    .module('cadmium.rightUtil',['ui.bootstrap'])
     .directive('rightutil', rightUtil)
-    .factory('athenaFactory', athenaFactory)
+    .factory('cadmiumFactory', cadmiumFactory)
     .controller('rightUtilCtrl', rightUtilCtrl);

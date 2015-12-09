@@ -1,23 +1,32 @@
 /**
  * Created by Brent on 10/20/2015.
  */
-function leftUtilCtrl($scope, athenaFactory){
-    $scope.data = athenaFactory.data;
+function leftUtilCtrl($scope, cadmiumFactory){
+    $scope.model = cadmiumFactory;
+    $scope.data = $scope.model.data;
+    $scope.proto = $scope.model;
+    $scope.toggle = $scope.model.toggle;
 }
 
-function leftUtil(){
+function leftUtil($compile){
+    var tp = "tabpage_";
     return {
         restrict: 'AE',
         replace: true,
-        scope: true,
+        scope: {
+            item: "=item",
+            model: "=model",
+            toggle: '=toggle'
+        },
         template: '<div ng-include="item.contents"></div>',
         link: function (scope, element, attrs) {
-
+            $compile(element.contents())(scope);
         }
     };
 }
+
 angular
-    .module('athena.leftUtil', ['ui.bootstrap'])
+    .module('cadmium.leftUtil', ['ui.bootstrap'])
     .directive('leftutil', leftUtil)
-    .factory('athenaFactory', athenaFactory)
+    .factory('cadmiumFactory', cadmiumFactory)
     .controller('leftUtilCtrl', leftUtilCtrl);

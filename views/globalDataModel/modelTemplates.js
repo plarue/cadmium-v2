@@ -5,14 +5,14 @@
 var modelTemplates = {
     default:{
         dependencies: ['Common'],
-        menu: ['File'],
+        menu: ['Default'],
         leftUtil: ['Scene'],
         rightUtil: ['entitySelect'],
         footer: [],
         modals: []
     },
     acquire:{
-        dependencies: ['Common', 'Acquire'],
+        dependencies: ['Cs', 'Common', 'Create', 'Acquire'],
         menu: ['File', 'Create', 'Algorithms'],
         leftUtil: ['Scene'],
         rightUtil: ['entitySelect'],
@@ -20,10 +20,18 @@ var modelTemplates = {
         modals: []
     },
     vapor: {
-        dependencies: ['Cs', 'Common', 'Vapor'],
+        dependencies: ['Cs', 'Common', 'Create', 'Vapor'],
         menu: ['File', 'Create', 'Vapor'],
-        leftUtil: ['Prioritization'],
+        leftUtil: ['Prioritization', 'Scene'],
         rightUtil: ['sensorEditor'],
+        footer: [],
+        modals: []
+    },
+    advancedSim: {
+        dependencies: ['Cs', 'Common', 'Create', 'AdvancedSim'],
+        menu: ['File', 'Create', 'Simulation'],
+        leftUtil: ['Scene'],
+        rightUtil: ['entitySelect'],
         footer: [],
         modals: []
     }

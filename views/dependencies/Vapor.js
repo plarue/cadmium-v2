@@ -3,6 +3,7 @@
  */
 
 (function (exports) {
+
     function Vapor(){
         //optimize
         //stopOptimization

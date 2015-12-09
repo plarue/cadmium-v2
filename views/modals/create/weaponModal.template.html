@@ -12,17 +12,21 @@
                             <select class="form-control spaced-bottom" id="weapons"></select>
                             <label for="weaponID">Weapon ID:</label>
                             <input type="text" class="form-control spaced-bottom" id="weaponID" required/>
-                            <label for="sensorIDs">Sensor IDs:</label>
-                            <input type="text" class="form-control spaced-bottom" id="sensorIDs" required/>
+                            <div id="sensorIDs"></div>
+                            <div class="createIdCtrl">
+                                <p>Add or Remove additional Weapon IDs</p>
+                                <button type="button" class="btn btn-default" ng-click="model.addID('sensor', true)">+</button>
+                                <button type="button" class="btn btn-default" ng-click="model.addID('sensor', false)">-</button>
+                            </div>
                             <label for="weaponFixed">Fixed:</label>
                             <input type="checkbox" class="form-control spaced-bottom" id="weaponFixed" required/>
                         </div>
                     </form>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="wsSubmit('weapon')">Create</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="model.wsVolume('weapon')">Create</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
             </div>
         </div>
     </div>

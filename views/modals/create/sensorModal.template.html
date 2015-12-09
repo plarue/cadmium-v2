@@ -12,8 +12,12 @@
                             <select class="form-control spaced-bottom" id="sensors"></select>
                             <label for="sensorID">Sensor ID:</label>
                             <input type="text" class="form-control spaced-bottom" id="sensorID" required/>
-                            <label for="weaponIDs">Weapon IDs:</label>
-                            <input type="text" class="form-control spaced-bottom" id="weaponIDs" required/>
+                            <div id="weaponIDs"></div>
+                            <div class="createIdCtrl">
+                                <p>Add or Remove additional Weapon IDs</p>
+                                <button type="button" class="btn btn-default" ng-click="model.addID('weapon', true)">+</button>
+                                <button type="button" class="btn btn-default" ng-click="model.addID('weapon', false)">-</button>
+                            </div>
                             <label for="KFactorClass">KFactorClass:</label>
                             <input type="text" class="form-control spaced-bottom" id="KFactorClass" required/>
                             <label for="KFactorType">KFactorType:</label>
@@ -25,10 +29,10 @@
                         </div>
                     </form>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="wsSubmit('sensor')">Create</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="model.wsVolume('sensor')">Create</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
             </div>
         </div>
     </div>

@@ -4,70 +4,87 @@
 
 (function (exports) {
 
+
     function Common(){
         //MENU
-        //openScenario
-        //loadScenario
-        //refreshData
-        //screenShotModal
-        //launchModal
+            /*
+            refreshData
+            screenShotModal
+            launchModal
+            saveFile
+            handleFileSelect
+            loadFile
+            getFileType
+            openScenario
+            loadScenario
+            */
 
         //SLIDE
-        //slideDown
-        //slideLeft
-        //slideRight
+         /*
+            slideDown
+            slideLeft
+            slideRight
+        */
 
         //SCREENSHOT
-        //screenshotDiag
-        //screenshot
+        /*
+            screenshotDiag
+            screenshot
+        */
+
+        //USER MESSAGES
+        /*
+            loggingMessage
+        */
     }
+
 
     /**
      * MENU
      */
-    Common.prototype.openScenario = function(){
-        console.log('clicked');
-        socket.emit('openFile', function (dirs) {
-            if (dirs.length > 0) {
-                var scene = $('#scenarios').html('');
-                for (var i = 0; i < dirs.length; i++) {
-                    var opt = $('<option></option>')
-                        .attr({
-                            value: dirs[i],
-                            required: true
-                        })
-                        .html(dirs[i]);
-                    scene.attr('size', i + 1).append(opt);
-                }
-            }
-            $('#openModal').modal();
-        })
-    };
-
-    Common.prototype.loadScenario = function(){
-        var e = document.getElementById('scenarios');
-        var sel = e.options[e.selectedIndex].value;
-        clearData(function() {
-            socket.emit('getScenario', sel, function (msg) {
-                $('#generateThreatsItem').removeClass('disabled');
-                if (msg == 'pop') {
-                    console.log(msg);
-                }
-            })
-        })
-    };
 
     Common.prototype.refreshData = function() {
-        clearData(function () {
+        var self = this;
+        self.clearData(function () {
             console.log('Refreshing data');
             var db = ['sensor', 'weapon', 'track', 'asset', 'truth'];
             for (var i = 0; i < 5; i++) {
                 socket.emit('refreshAll', db[i], function (cb) {
                     for (var rA in cb) {
-                        DOM[cb[rA].create]('add', cb[rA]);
+                        self[cb[rA].create]('add', cb[rA]);
                     }
                 });
             }
+        });
+    };
+
+    Common.prototype.clearData = function (callback) {
+        console.log('Clearing existing data');
+        var self = this;
+        var dbType = ['sensor', 'weapon', 'track', 'asset'];
+        for (var i=0; i < 4; i++){
+            socket.emit('findAll', dbType[i], dbType[i], function (cb, pt) {
+                if (cb.length > 0) {
+                    for (var i = 0; i < cb.length; i++) {
+                        self[cb[i].create]('remove', cb[i]);
+                    }
+                }else{console.log('Database \"' + pt + '\" contained no data')}
+                if (pt == 'asset'){
+                    if ($('#entityList').length > 0) {
+                        $('#entityList').html('');
+                    }
+                    if(callback) {
+                        callback();
+                    }
+                }
+            });
+        }
+    };
+
+    Common.prototype.newScenario = function() {
+        var self = this;
+        self.clearData(function(){
+            socket.emit('newF');
         });
     };
 
@@ -86,6 +103,87 @@
 
     Common.prototype.launchModal = function(id) {
         $(id).modal();
+    };
+
+     //SAVING
+    Common.prototype.saveFile = function() {
+        document.getElementById('saveDialog').style.display = 'none';
+        var name = document.getElementById('scenarioName').value;
+        socket.emit('saveScenario', name, function(cb){
+            console.log(cb);
+        });
+    };
+
+    //IMPORT FILES
+
+    Common.prototype.loadFile = function(){
+        var self = this;
+        var inp = document.getElementById('files');
+        for (var i=0; i < inp.files.length; i++) {
+            var file = inp.files[i];
+            var r = new FileReader();
+            r.i = i;
+            r.ftype = self.getFileType(inp.files.item(i).name);
+            r.onload = function(e) {
+                var text = e.target.result;
+                var dataArray = text.split(/\r\n|\n|\r/);
+                for (var i=0; i < dataArray.length; i++) {
+                    var line = dataArray[i];
+                    socket.emit('importFile', this.ftype, line);
+                }
+            };
+            r.readAsText(file);
+        }
+    };
+
+    Common.prototype.getFileType = function(name){
+        var nm = name.toLowerCase();
+        if (nm.indexOf('radar') > -1){
+            return 'loadSensor';
+        }else if(nm.indexOf('launcher') > -1){
+            return 'loadWeapon';
+        }else if(nm.indexOf('threat') > -1){
+            if (nm.indexOf('area') > -1){
+                return 'loadAsset';
+            }else {
+                return 'loadThreat';
+            }
+        }else if(nm.indexOf('region') > -1 || nm.indexOf('area') > -1 || nm.indexOf('asset') > -1){
+            return 'loadAsset';
+        }else{
+            console.log('File type unidentifiable')
+        }
+    };
+
+    //SCENARIO LOADING
+    Common.prototype.openScenario = function() {
+        socket.emit('openFile', function (dirs) {
+            if (dirs.length > 0) {
+                var scene = document.getElementById('scenarios');
+                scene.innerHTML = '';
+                for (var i = 0; i < dirs.length; i++) {
+                    var opt = document.createElement('option');
+                    opt.setAttribute('value', dirs[i]);
+                    opt.innerHTML = dirs[i];
+                    opt.required = true;
+                    scene.size = i + 1;
+                    scene.appendChild(opt);
+                }
+            }
+            $('#openModal').modal();
+        })
+    };
+
+    Common.prototype.loadScenario = function(){
+        var self = this;
+        var e = document.getElementById('scenarios');
+        var sel = e.options[e.selectedIndex].value;
+        self.clearData(function() {
+            console.log('send scenario');
+            socket.emit('getScenario', sel, function (msg) {
+                $('#generateThreatsItem').removeClass('disabled');
+            })
+        })
     };
 
     /**
@@ -153,6 +251,168 @@
                 $('#scOverlay').hide();
             }
         });
+    };
+
+    /**
+     * USER MESSAGES
+     */
+
+    Common.prototype.loggingMessage = function (message) {
+        var logging = $('#logging');
+        logging.html(message);
+        setTimeout(function(){
+            logging.html('');
+        }, 5000)
+    };
+
+    /**
+     * SELECT ENTITY
+     */
+
+    Common.prototype.assetCollection = function(e){
+        var indId = 'ind' + e.target.id;
+        var indicator = document.getElementById(indId);
+        if (e.target.value == 0) {
+            viewer.dataSources.remove(assetStream);
+            indicator.style.backgroundColor = '#ff0000';
+        }else{
+            viewer.dataSources.add(assetStream);
+            indicator.style.backgroundColor = '#adff2f';
+        }
+    };
+
+    Common.prototype.trackCollection = function(e){
+        var value = e.target.value;
+        var keys = Object.keys(currentGeometry);
+        var targetKey = [];
+        for (var i=0; i < keys.length; i++) {
+            var current = keys[i].slice(0,1);
+            if (current == 'T'){
+                targetKey.push(keys[i]);
+            }
+        }
+        var indId = 'ind' + e.target.id;
+        var indicator = document.getElementById(indId);
+        for (var i=0; i < targetKey.length; i++) {
+            var attributes = currentGeometry[targetKey[i]].getGeometryInstanceAttributes(targetKey[i]);
+            if (value == 0) {
+                attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(false);
+                indicator.style.backgroundColor = '#ff0000';
+            } else {
+                attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(true);
+                indicator.style.backgroundColor = '#adff2f';
+            }
+        }
+    };
+
+    Common.prototype.selectInputs = function(e, id) {
+        var self = this;
+        console.log(self);
+        var value = e;
+        var instances = self.currentGeometry[id]._numberOfInstances;
+        var indId = 'ind' + id;
+        var indicator = document.getElementById(indId);
+        for (var i=0; i < instances; i++) {
+            var targetId = ("" + id) + i;
+            var attributes = self.currentGeometry[id].getGeometryInstanceAttributes(targetId);
+            if (value == 0) {
+                attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(false);
+                indicator.style.backgroundColor = '#ff0000';
+            } else {
+                attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(true);
+                indicator.style.backgroundColor = '#adff2f';
+            }
+        }
+    };
+
+    Common.prototype.entityListSelect = function(e){
+        var self = this;
+        var type = e.target.value;
+        var id = e.target.id;
+        $('#selections').html('');
+        $('#pickedO').html('');
+        $('#noSelect').hide();
+        $('#multipleSelect').hide();
+        self.displayElementData(id, type, '#pickedO');
+    };
+
+    Common.prototype.listeners = function() {
+        var self = this;
+        return {
+            initialized: false,
+            init: function () {
+                var pickHandler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+                pickHandler.setInputAction(function (click) {
+                    var pickedObjects = scene.drillPick(click.position);
+                    if (Cesium.defined(pickedObjects)) {
+                        var ul = $('#selections');
+                        var uldata = $('#pickedO');
+                        var noSelect = $('#noSelect');
+                        var multipleSelect = $('#multipleSelect');
+                        $('#entityControls').hide();
+                        ul.html('');
+                        uldata.html('');
+                        noSelect.show();
+                        multipleSelect.hide();
+                        if (pickedObjects.length > 1) {
+                            noSelect.hide();
+                            multipleSelect.show();
+                            var elements = [];
+                            for (var i = 0; i < pickedObjects.length; i++) {
+                                var elementType = self.elType(pickedObjects[i].id);
+                                elements.push(elementType[0] + ' ' + elementType[1] + ' ' + elementType[2]);
+                            }
+                            var selections = self.removeDuplicates(elements);
+                            var goodInputs = [];
+                            for (var i = 0; i < selections.length; i++) {
+                                var element = selections[i].match(/[^ ]+/g);
+                                if (element[0] != 'track' || element[0] != 'err') {
+                                    goodInputs.push(element);
+                                }
+                            }
+                            if (goodInputs.length == 1) {
+                                multipleSelect.hide();
+                                self.displayElementData(goodInputs[0][1], goodInputs[0][0], '#pickedO');
+                            } else if (goodInputs.length > 1) {
+                                for (i = 0; i < goodInputs.length; i++) {
+                                    var element = goodInputs[i];
+                                    var li = self.createSelection(element[1], element[2], element[0]);
+                                    ul.append(li);
+                                }
+                            } else {
+                                noSelect.show();
+                                multipleSelect.hide();
+                            }
+                        } else if (pickedObjects.length == 1) {
+                            noSelect.hide();
+                            var elementType = self.elType(pickedObjects[0].id);
+                            var elementID = elementType[1];
+                            if (elementType[0] != 'err' && elementType[0] != 'track') {
+                                self.displayElementData(elementID, elementType[0], '#pickedO');
+                            } else if (elementType[0] == 'track') {
+                                noSelect.show();
+                                multipleSelect.hide();
+                            } else {
+                                console.log('Unknown ElementType in selected Element.');
+                                self.loggingMessage('Unknown ElementType in selected Element.');
+                            }
+                        }
+                    }
+                }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+                socket.on('loadElement', function (dbData) {
+                    if (dbData) {
+                        self[dbData.create]('add', dbData);
+                    }
+                });
+                socket.on('updateElement', function (dbData) {
+                    if (dbData) {
+                        self[dbData.create]('remove', dbData);
+                        self[dbData.create]('add', dbData);
+                    }
+                });
+            }
+        }
     };
 
     exports.Common = Common;

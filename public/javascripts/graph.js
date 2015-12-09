@@ -1,7 +1,7 @@
 /**
  * Created by Brent on 6/10/2015.
  */
-(function() {
+angular.element(document).ready(function() {
     var weaponKeyMetrics = {
       /* 'NumberEngaged' : {
         title: 'Number Engaged',
@@ -186,7 +186,6 @@
         .clientDelay(0)
         .step(1e3)
         .size(800);
-
     d3.select('#weaponScore').selectAll('.axis')
       .data(['top', 'bottom'])
       .enter().append('div')
@@ -250,7 +249,7 @@
         maxValue: 1.0,
         levels: 6,
         ExtraWidthX: 0
-    }
+    };
     //RadarChart.draw('#evaluation', evalData, mycfg);
     var chart = RadarChart.chart();
     chart.config(mycfg);
@@ -329,4 +328,4 @@
     function getFireControlData(name) {
         return getData(name, fireControlData, fireControlKeyMetrics[name].title);
     }
-})();
+});

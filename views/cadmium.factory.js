@@ -1,7 +1,7 @@
 /**
  * Created by Brent on 10/29/2015.
  */
-function athenaFactory(){
+function cadmiumFactory(){
     var _GDM = new GDM();
     var _templateModel = modelTemplates;
     var _template = _templateModel.default;
@@ -15,5 +15,6 @@ function athenaFactory(){
     }
 
     Model.prototype.modelInit = modelInit;
+
     return _model
 }

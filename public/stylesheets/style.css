@@ -130,7 +130,7 @@ input, select, option{
 #mainLogo {
   position: relative;
   float: left;
-  padding: 6px 20px;
+  padding: 6px 14px;
   height: 100%;
   z-index: 1;
 }
@@ -379,8 +379,9 @@ a:active {
 
 .tabpage{
   /* overflow: hidden; */
-  height: 40em;
+  max-height: 40em;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 #tabscontent {
@@ -683,8 +684,9 @@ input[type='range'] {
 #bottom {
   position: absolute;
   bottom: 0;
-  /* left: 50%;
-  margin-left: -420px; */
+  width: 50%;
+  height: 29px;
+  background: #0d313f;
 }
 #surveillanceCont {
   position: absolute;
@@ -802,6 +804,7 @@ input[type='range'] {
   position: absolute;
   bottom: 0;
   right: 29px;
+  z-index: 2;
 }
 
 .spaced-bottom {
