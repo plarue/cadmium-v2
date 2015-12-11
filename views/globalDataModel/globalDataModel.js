@@ -6,6 +6,9 @@
 
     function GDM() {
         //DEPENDENCIES
+        this.Listeners = function(){
+            return new Listeners();
+        };
         this.Cs = function(){
             return new Cs();
         };
@@ -23,6 +26,9 @@
         };
         this.AdvancedSim = function(){
             return new AdvancedSim();
+        };
+        this.BirdsEye = function(){
+            return new BirdsEye();
         };
 
         //GDM
@@ -196,25 +202,35 @@
                         "id": "surveillanceCont",
                         "graphId": "surveillanceScore",
                         "title": "Surveillance Score",
-                        "height": "-271px"
+                        "height": "-271px",
+                        "template": "views/footer/graph.template.html"
                     },
                     "fireControlScore": {
                         "id": "fireControlCont",
                         "graphId": "fireControlScore",
                         "title": "Fire Control Score",
-                        "height": "-331px"
+                        "height": "-331px",
+                        "template": "views/footer/graph.template.html"
                     },
                     "weaponScore": {
                         "id": "weaponCont",
                         "graphId": "weaponScore",
                         "title": "Weapon Score",
-                        "height": "-311px"
+                        "height": "-311px",
+                        "template": "views/footer/graph.template.html"
                     },
                     "evaluation": {
                         "id": "evaluationCont",
                         "graphId": "evaluation",
                         "title": "Evaluation",
-                        "height": "-471px"
+                        "height": "-471px",
+                        "template": "views/footer/graph.template.html"
+                    },
+                    "clouds": {
+                        "id": "weatherCont",
+                        "title": "Cloud Coverage",
+                        "height": "-101px",
+                        "template": "views/footer/clouds.template.html"
                     }
                 }
             }

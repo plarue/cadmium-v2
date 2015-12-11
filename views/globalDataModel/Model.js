@@ -4,6 +4,7 @@
 
 (function(exports) {
 
+
     function Model(model, gdm) {
         this.data = {
             getMenu: [],
@@ -13,7 +14,12 @@
             getModals: []
         };
         this.dependencies = [];
+        this.initialized = {
+            Common: false,
+            Cs: false
+        };
         this.currentGeometry = {};
+        this.imageryModel = {};
         this.toggle = {
             entities: [],
             weapons: [],
@@ -22,19 +28,21 @@
         this.init(model, gdm);
     }
 
+
     Model.prototype.init = function(model, gdm){
         //Clear Unused Dependencies
         var oldDependencies = $(this.dependencies).not(model.dependencies).get();
-        console.log(oldDependencies);
         if (oldDependencies.length > 0) {
             dropUnused(oldDependencies, gdm);
         }
+
         //Load New Dependencies
         var newDependencies = $(model.dependencies).not(this.dependencies).get();
-        console.log(newDependencies);
-        load(newDependencies, gdm);
+        load(newDependencies, gdm, this);
+
         //Construct Model
         var dataModel = gdm.globalModel();
+
         //Load Model
         var menu = fill('menu', model.menu, dataModel);
         this.data.getMenu = menu;
@@ -44,14 +52,6 @@
         this.data.getModals = fillModals(menu);
 
         this.dependencies = model.dependencies;
-
-        if (typeof this.listeners === 'function'){
-            this.listeners = this.listeners();
-            if (!this.listeners.initialized) {
-                this.listeners.init();
-                this.listeners.initialized = true;
-            }
-        }
     };
 
     function dropUnused(a, gdm){
@@ -63,13 +63,20 @@
             }
         }
     }
-    function load(modelAttr, gdm){
-        for (var i = 0; i < modelAttr.length; i++) {
-            if(gdm[modelAttr[i]]) {
-                var d = gdm[modelAttr[i]](this);
+
+    function load(a, gdm, self){
+        for (var i = 0; i < a.length; i++) {
+            if(gdm[a[i]]) {
+                var d = gdm[a[i]]();
                 var proto = Object.getPrototypeOf(d);
                 for (var key in proto){
                     Model.prototype[key] = proto[key];
+                }
+                if (self.listeners) {
+                    if (typeof self.listeners[a[i]] === 'function' && self.initialized[a[i]] === false) {
+                        self.listeners[a[i]](self);
+                        self.initialized[a[i]] = true;
+                    }
                 }
             }
         }

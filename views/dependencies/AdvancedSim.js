@@ -4,14 +4,15 @@
 
 (function (exports) {
 
+
     function AdvancedSim(){
         //AdvancedSim
-        //optimize
-        //stopOptimization
-        //generateThreats
-        //evaluateScenario
-        //clearHeatmap
+        //mcSeries
+        //startSim
+        //stopSim
+        //mcAR
     }
+
 
     AdvancedSim.prototype.mcSeries = function() {
         var self = this;

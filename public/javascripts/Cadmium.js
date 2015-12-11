@@ -50,53 +50,6 @@ var socket = io();
 var camera = scene.camera;
 var imageryLayers = viewer.scene.imageryLayers;
 
-var imageryModel = [];
-
-/*var blackMarble = imageryLayers.addImageryProvider(new Cesium.WebMapTileServiceImageryProvider({
-    url : 'http://a.tile.openweathermap.org/map/clouds/0/0/0',
-    layer: 'clouds',
-    style: 'default',
-    format : 'image/png',
-    tileMatrixSetID : 'a'
-}));
-
-blackMarble.alpha = 0.5;
-
-blackMarble.brightness = 2.0;*/
-
-function setupLayers(){
-    addAdditionalLayerOption(
-        'USA NEXRAD - Base Reflectivity',
-        new Cesium.WebMapServiceImageryProvider({
-            url : '//mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?',
-            layers : 'nexrad-n0r',
-            parameters : {
-                transparent : 'true',
-                format : 'image/png'
-            },
-            proxy : new Cesium.DefaultProxy('/proxy/')
-        })
-    );
-    addAdditionalLayerOption(
-        'USA NEXRAD - Ridge2 Mosaics',
-        new Cesium.WebMapServiceImageryProvider({
-            url: 'http://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer',
-            parameters: {
-                transparent: 'true',
-                format: 'image/png'
-            }
-        })
-    );
-}
-
-function addAdditionalLayerOption(name, imageryProvider) {
-    var layer = imageryLayers.addImageryProvider(imageryProvider);
-    layer.alpha = 1.0;
-    layer.show = true;
-    layer.name = name;
-    imageryModel.push({layer: layer, properties: ['alpha', 'show', 'name']});
-}
-
 //MIL STD 2525
 var RendererSettings = armyc2.c2sd.renderer.utilities.RendererSettings;
 var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;

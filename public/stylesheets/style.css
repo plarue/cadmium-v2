@@ -921,3 +921,20 @@ input[type=range]::-ms-thumb {
 .cesium-viewer-toolbar {
   z-index: 999;
 }
+.weather {
+  background-color: #004f65;
+  height: 200px;
+  padding: 15px 20px;
+}
+#weatherCont {
+  position: absolute;
+  border-top: 0.5em #0D313F solid;
+  background-color: #0D313F;
+  height: 130px;
+  bottom: -101px;
+  transition:         bottom 500ms ease;
+  -moz-transition:    bottom 500ms ease;
+  -ms-transition:     bottom 500ms ease;
+  -o-transition:      bottom 500ms ease;
+  -webkit-transition: bottom 500ms ease;
+}

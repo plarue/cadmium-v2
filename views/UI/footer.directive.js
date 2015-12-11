@@ -6,7 +6,7 @@ function footerCtrl($scope, cadmiumFactory){
     $scope.model = cadmiumFactory;
     $scope.data = $scope.model.data;
     $scope.proto = $scope.model;
-    console.log('ctrl')
+    $scope.imageryModel = $scope.model.imageryModel;
 }
 
 function footer() {
@@ -19,13 +19,11 @@ function footer() {
                 '<div id="{{\'ht\' + ($index + 1)}}" class="center topHideToggle">',
                     '<a href="#" class ="bht" id="ht1ToggleA" ng-click="proto.slideDown(item.id, item.height)">{{item.title}}</a>',
                 '</div>',
-                '<div id="{{item.graphId}}" class="graph"></div>',
+                '<div ng-include="item.template"></div>',
             '</div>'
         ].join(''),
         link: function(scope, element, attrs) {
-            console.log('a');
-            if (scope.$last){
-                console.log('link');
+            if (scope.$last && typeof scope.model.graph === 'function'){
                 setTimeout(function(){
                     scope.model.graph();
                 }, 1000)
