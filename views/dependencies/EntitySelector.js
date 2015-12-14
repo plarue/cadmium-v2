@@ -1,63 +1,22 @@
 /**
- * Created by Brent on 11/19/2015.
+ * Created by Brent on 12/14/2015.
  */
+(function(exports){
 
-(function (exports) {
 
-    function Vapor(){
+    function EntitySelector(){
         /*
-            optimize
-            stopOptimization
-            generateThreats
-            evaluateScenario
-            clearHeatmap
-        */
+            entHandler
+            updateEntity
+            moveEntity
+            deleteEntity
+         */
     }
 
-    Vapor.prototype.optimize = function() {
-        var algorithm = $("#optimizeModal").find("#psoAlgorithm").is(':checked') ? 'PARTICLE_SWARM' :
-            $("#optimizeModal").find("#evolutionaryAlgorithm").is(':checked') ? 'EVOLUTIONARY' :
-                $("#optimizeModal").find("#greedyAlgorithm").is(':checked') ? 'GREEDY' :
-                    $("#optimizeModal").find("#stadiumAlgorithm").is(':checked') ? 'STADIUM' : '';
 
-        var type = $("#optimizeModal").find("#sensorsType").is(':checked') ? 'SENSORS' :
-            $("#optimizeModal").find("#sensorsTypeTwo").is(':checked') ? 'SENSORS' :
-                $("#optimizeModal").find("#weaponsType").is(':checked') ? 'WEAPONS' :
-                    $("#optimizeModal").find("#weaponsSensorsType").is(':checked') ? 'WEAPONS_SENSORS' :
-                        $("#optimizeModal").find("#stadiumType").is(':checked') ? 'STADIUM' : '';
-
-        console.log('Optimizing ' + type + ' and ' + algorithm);
-        socket.emit('startOptimization', algorithm, type);
-    };
-
-    Vapor.prototype.stopOptimization = function() {
-        console.log("Stopping optimization");
-        socket.emit('stopOptimization');
-    };
-
-    Vapor.prototype.generateThreats = function() {
-        if (!$("#generateThreatsItem").hasClass("disabled")) {
-            console.log("Generating threats");
-            socket.emit('generateThreats');
-        }
-    };
-
-    Vapor.prototype.evaluateScenario = function() {
-        console.log("Evaluating scenario");
-        clearHeatmap();
-        socket.emit('evaluateScenario');
-    };
-
-    Vapor.prototype.clearHeatmap = function() {
-        for(var p in heatMap) {
-            scene.primitives.remove(heatMap[p]);
-        }
-        heatMap = [];
-    };
-
-    Vapor.prototype.entHandler = function(action){
+    EntitySelector.prototype.entHandler = function(action){
         var data = {};
-        $('#pickedList :input').each(function(){
+        $('#pickedO :input').each(function(){
             var id = this.id;
             data[id] = $(this).val();
         });
@@ -71,21 +30,19 @@
             deleteEntity(data)
         }
     };
-    
-    Vapor.prototype.updateEntity = function(data){
-        var self = this;
-        self[data.create]('remove', data);
+
+    EntitySelector.prototype.updateEntity = function(data){
+        DOM[data.create]('remove', data);
         (function(data) {
             socket.emit('updateData', data.id, data.cType, data, function (cb) {
-                self[cb.create]('add', cb);
-                $('#pickedList').html('');
-                self.displayElementData(cb.id, cb.cType, '#pickedList');
+                DOM[cb.create]('add', cb);
+                $('#pickedO').html('');
+                DOM.displayElementData(cb.id, cb.cType, '#pickedO');
             });
         })(data);
     };
-    
-    Vapor.prototype.moveEntity = function(data){
-        var self = this;
+
+    EntitySelector.prototype.moveEntity = function(data){
         var mousePosition = new Cesium.Cartesian2();
         var mousePositionProperty = new Cesium.CallbackProperty(
             function(time, result){
@@ -108,8 +65,8 @@
                 if (Cesium.defined(pickedObject)) {
                     dragging = true;
                     scene.screenSpaceCameraController.enableRotate = false;
-                    self.createVolume('remove', rem);
-                    dt = self.createIcon(icon, 'dragTemp', data.name, data.Lon, data.Lat, 0);
+                    DOM.createVolume('remove', rem);
+                    dt = DOM.createIcon(icon, 'dragTemp', data.name, data.Lon, data.Lat, 0);
                     Cesium.Cartesian2.clone(click.position, mousePosition);
                     dt.position = mousePositionProperty;
                 }
@@ -143,7 +100,9 @@
                         data.Alt = cartographic.height;
                         data.latlonalt = [data.Lon, data.Lat, data.Alt];
                         socket.emit('updateData', data.id, data.cType, data, function(cb){
-                            self.createVolume('add', cb);
+                            DOM.createVolume('add', cb);
+                            $('#pickedO').html('');
+                            DOM.displayElementData(cb.id, cb.cType, '#pickedO');
                         });
                         handler = handler && handler.destroy();
                     });
@@ -152,27 +111,12 @@
             Cesium.ScreenSpaceEventType.LEFT_UP
         );
     };
-    
-    Vapor.prototype.deleteEntity = function(data){
-        var self = this;
-        self[data.create]('remove', data);
+
+    EntitySelector.prototype.deleteEntity = function(data){
+        $('#pickedO').html('');
+        DOM[data.create]('remove', data);
         socket.emit('removeData', data.cType, data.id);
     };
 
-    exports.Vapor = Vapor;
+    exports.EntitySelector = EntitySelector;
 })(this);
-
-$(document).ready(function() {
-    $('input[type=radio][name=algorithmRadio]').change(function() {
-        if (this.value == 'algStadium') {
-            $('#algOne').hide();
-            $('#algTwo').show();
-            $('#sensorsTypeTwo').prop('checked','true');
-        }
-        else{
-            $('#algOne').show();
-            $('#algTwo').hide();
-            $('#sensorsType').prop('checked','true');
-        }
-    });
-});

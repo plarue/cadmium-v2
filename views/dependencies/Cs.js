@@ -5,17 +5,19 @@
 
     function Cs(){
         this.currentGeometry = {};
-        //createAsset
-        //createTrack
-        //createTruth
-        //createVolume
-        //createIcon
-        //createSlider
-        //listItem
-        //createSelection
-        //displayElementData
-        //removeDuplicates
-        //prettify
+        /*
+            createAsset
+            createTrack
+            createTruth
+            createVolume
+            createIcon
+            createSlider
+            listItem
+            createSelection
+            displayElementData
+            removeDuplicates
+            prettify
+        */
     }
 
     Cs.prototype.createAsset = function(){

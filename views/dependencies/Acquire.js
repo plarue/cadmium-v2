@@ -5,12 +5,15 @@
 (function (exports) {
 
     function Acquire(){
-        //ACQUIRE
-        //optimize
-        //stopOptimization
-        //generateThreats
-        //evaluateScenario
-        //clearHeatmap
+        /*
+            optimize
+            stopOptimization
+            generateThreats
+            evaluateScenario
+            clearHeatmap
+            graph
+            RadarChart
+        */
     }
 
     Acquire.prototype.optimize = function() {

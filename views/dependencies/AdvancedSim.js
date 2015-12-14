@@ -8,8 +8,7 @@
     function AdvancedSim(){
         //AdvancedSim
         //mcSeries
-        //startSim
-        //stopSim
+        //simControl
         //mcAR
     }
 
@@ -21,18 +20,11 @@
         socket.emit('startMCSeries');
     };
 
-    AdvancedSim.prototype.startSim = function() {
+    AdvancedSim.prototype.simControl = function(msg) {
         var self = this;
-        console.log("Starting Simulation");
-        self.loggingMessage("Starting Simulation");
-        socket.emit('startSimulation');
-    };
-
-    AdvancedSim.prototype.stopSim = function() {
-        var self = this;
-        console.log("Stopping Simulation");
-        self.loggingMessage("Stopping Simulation");
-        socket.emit('stopSimulation');
+        console.log("Sending app command: " + msg);
+        self.loggingMessage("Sending app command: " + msg);
+        socket.emit('controlSim', msg);
     };
 
     AdvancedSim.prototype.mcAR = function(pm) {

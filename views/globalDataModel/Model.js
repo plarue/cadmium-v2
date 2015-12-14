@@ -16,7 +16,8 @@
         this.dependencies = [];
         this.initialized = {
             Common: false,
-            Cs: false
+            Cs: false,
+            Vapor: false
         };
         this.currentGeometry = {};
         this.imageryModel = {};

@@ -163,12 +163,32 @@
                         "title": "Simulation",
                         "submenu": [
                             {
-                                "title": "Start Sim",
-                                "click": 'startSim'
+                                "title": "Initialize",
+                                "click": "simControl",
+                                "val": "INITIALIZE"
                             },
                             {
-                                "title": "Stop Vapor",
-                                "click": 'stopSim'
+                                "title": "Start",
+                                "click": "simControl",
+                                "val": "START"
+                            },
+                            {
+                                "title": "Stop",
+                                "click": "simControl",
+                                "val": "STOP"
+                            },
+                            {
+                                "title": "Reset",
+                                "click": "simControl",
+                                "val": "RESET"
+                            },
+                            {
+                                "title": "Shutdown",
+                                "click": "simControl",
+                                "val": "SHUTDOWN"
+                            },
+                            {
+                                "divider": "true"
                             },
                             {
                                 "title": "Monte Carlo Series",

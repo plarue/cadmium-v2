@@ -6,7 +6,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('testTwoIndex', { title: 'Athena' });
+  res.render('Index', { title: 'Cadmium' });
 });
 
 module.exports = router;

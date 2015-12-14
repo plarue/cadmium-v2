@@ -7,9 +7,12 @@
 
     function Create(){
         /*
-        createModal
-        volumeModalInit
-        addID
+            createModal
+            volumeModalInit
+            addID
+            wsVolume
+            wsAsset
+            haversine
         */
     }
 

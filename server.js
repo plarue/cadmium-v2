@@ -874,6 +874,15 @@ bigio.initialize(function() {
             });
         });
 
+        socket.on('controlSim', function(msg){
+            console.log("Sending app command: " + msg);
+            bigio.send({
+                topic: 'ENTITY_CMD_TOPIC',
+                message: msg,
+                javaclass: "com.a2i.sim.SimulationControllerBase"
+            })
+        });
+
         socket.on('evaluateScenario', function() {
             console.log("Evaluating scenario");
             var name = makeid();

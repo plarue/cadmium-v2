@@ -93,6 +93,7 @@
 
             self.initialized.Common = true;
         },
+
         Cs: function(self){
             socket.on('loadElement', function (dbData) {
                 if (dbData) {
@@ -107,6 +108,42 @@
             });
 
             self.initialized.Cs = true;
+        },
+
+        Vapor: function(self) {
+            socket.on('vapor', function (msg) {
+                if (!self.currentGeometry[msg.id]) {
+                    self.createTruth('add', msg);
+                } else {
+                    self.createTruth('update', msg);
+                }
+            });
+
+            var dt = dynamicTable.config('gTPriority',
+                ['num', 'id', 'val'],
+                ['Priority', 'Track ID', 'Priority Value'],
+                'There are no items to list...');
+            var prioritization = [];
+            (function(p){
+                socket.on('priority', function(msg){
+                    if (!p.hasOwnProperty(msg.truthID)){
+                        p[msg.truthID] = msg;
+                    }else{
+                        p[msg.truthID].priority = msg.priority;
+                    }
+                    var ordered = [];
+                    for (var key in p){
+                        ordered.push({num: 0, id: p[key].truthID, val: p[key].priority});
+                    }
+                    ordered.sort(function(a, b){
+                        return b.val - a.val;
+                    });
+                    for (var i=0; i < ordered.length; i++){
+                        ordered[i].num = i + 1;
+                    }
+                    dt.load(ordered);
+                });
+            })(prioritization);
         }
     };
 

@@ -9,6 +9,8 @@
         //MENU
             /*
             refreshData
+            clearData
+            newScenario
             screenShotModal
             launchModal
             saveFile
@@ -36,6 +38,14 @@
         /*
             loggingMessage
         */
+
+        //ENTITY HANDLERS
+        /*
+            assetCollection
+            trackCollection
+            selectInputs
+            entityListSelect
+         */
     }
 
 
