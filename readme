@@ -33,8 +33,10 @@ While installing, any dependency that prints a "WARN" message can be ignored, ho
 A common error is with "node-gyp", if you recieve this error follow the instructions in the link below:
 https://www.robertkehoe.com/2015/03/fix-node-gyp-rebuild-error-on-windows/
 
-6.	The GUI is now configured and can be run from a shell. The previous configuration steps only need to be completed once, from now on you will only need this step.
-Navigate to the cadmium-v2 root directory and type the following:
+6.	The GUI is now configured and can be run from a console. The previous configuration steps only need to be completed once.
+To start the GUI you will need to make sure that MongoDB is running (run the mongo.bat file that you configured earlier)
+
+In a new console navigate to the cadmium-v2 root directory and type the following:
 
 node server.js
 
