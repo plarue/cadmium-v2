@@ -18,17 +18,23 @@ In that dialog type the following:
 
 use acquire
 
-Then type the following using your directory to the c2-gui project’s loadData.js:
+Then type the following using your directory to the c2-gui project’s loadData.js 
+(the syntax is very important, make sure to include the quotation marks and use forward slashes in the directory path):
 
 load(“<directory to cadmium-v2/bin/initData/loadData.js>”)
 
-I believe it should say “true” if it worked successfully
+It will return “true” if it worked successfully. If it did not print "true" check the syntax and try again.
 
 5.	From the cadmium-v2 root project folder open a terminal and type the following to download the dependencies:
 
 npm install
 
-6.	The GUI is now configured and can be run from a shell. Navigate to the cadmium-v2 root directory and type the following:
+While installing, any dependency that prints a "WARN" message can be ignored, however, if it prints "ERR" the error will need to be resolved before continuing. 
+A common error is with "node-gyp", if you recieve this error follow the instructions in the link below:
+https://www.robertkehoe.com/2015/03/fix-node-gyp-rebuild-error-on-windows/
+
+6.	The GUI is now configured and can be run from a shell. The previous configuration steps only need to be completed once, from now on you will only need this step.
+Navigate to the cadmium-v2 root directory and type the following:
 
 node server.js
 

@@ -700,6 +700,7 @@ bigio.initialize(function() {
                 });
             }
         });
+
         bigio.addListener({
             topic: 'system_track_topic',
             listener: function(message){
@@ -763,10 +764,67 @@ bigio.initialize(function() {
             }
         });
 
-//TODO: ASSET REFACTOR FROM CZML
         bigio.addListener({
             topic: 'threat_truth',
+            listener: function(message){
+                console.log(message);
+
+                /*mongoose.model('truth').findOne({name: message[1]}, function(err, result){
+                    if (err) return console.log(err);
+                    var id = message[1],
+                        identity, classification, positions, velocity, exists, type;
+
+                    if (result){
+                        result.positions.push({x: message[3][0], y: message[3][1], z: message[3][2]});
+                        result.velocity.push(message[3][3], message[3][4], message[3][5]);
+                        positions = result.positions;
+                        velocity = result.velocity;
+                        exists = true;
+                    }else{
+                        positions = [{x: message[3][0], y: message[3][1], z: message[3][2]}];
+                        velocity = [message[3][3], message[3][4], message[3][5]];
+                        exists = false;
+                    }
+                    var threat = {};
+
+                    (message[4] == 1) ? type = 'RAM' : type = '';
+                    (message[8] == 2) ? identity = 'HOSTILE' : identity = 'FRIEND';
+                    (message[9] == 1) ? classification = 'GROUND_VEHICLE' : classification = '';
+
+                    threat.hdr = message[0];
+                    threat.id = 'Tr' + id;
+                    threat.name = id;
+                    threat.positions = positions;
+                    threat.color = {red: 255, green: 0, blue: 0, alpha: 255};
+                    threat.velocity = velocity;
+                    threat.beta = message[4];
+                    threat.rcs = message[5];
+                    threat.radIntensity = message[6];
+                    threat.identity = identity;
+                    threat.classification = classification;
+                    threat.lastThreatTruth = message[9];
+                    threat.cType = 'truth';
+                    threat.create = 'createTruth';
+
+                    if (exists){
+                        mongoose.model('truth').findOneAndUpdate({id: threat.id}, threat, function(err) {
+                            if (err) return console.log(err);
+                        });
+                        socket.emit('vapor', threat);
+                    }else{
+                        var entry = new truth(threat);
+                        entry.save(function (err) {
+                            if (err) return console.log(err);
+                        });
+                    }
+                });*/
+            }
+        });
+//TODO: REFACTOR FROM CZML
+        /*bigio.addListener({
+            topic: 'threat_truth',
             listener: function(message) {
+
                 for (var key in Object.keys(message)) {
                     if (key == 2) {
                         var objType = message[7];
@@ -849,7 +907,7 @@ bigio.initialize(function() {
                 };
                 socket.emit('threatTruth', JSON.stringify(threatTruth));
             }
-        });
+        });*/
 
         socket.on('startOptimization', function(algorithm, type) {
             console.log("Saving scenario for the run");

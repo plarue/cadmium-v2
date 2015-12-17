@@ -15,6 +15,9 @@
         this.Common = function(){
             return new Common();
         };
+        this.EntitySelector = function(){
+            return new EntitySelector();
+        };
         this.Create = function(){
             return new Create();
         };
@@ -106,6 +109,23 @@
                                 "click": 'createModal',
                                 "val": "weapon",
                                 "modalUrl": "views/modals/create/weaponModal.template.html"
+                            },
+                            {
+                                "title": "Assets",
+                                "click": 'createModal',
+                                "val": "asset",
+                                "modalUrl": "views/modals/create/assetModal.template.html"
+                            }
+                        ]
+                    },
+                    "vaporCreate": {
+                        "title": "Create",
+                        "submenu": [
+                            {
+                                "title": "Sensors",
+                                "click": 'createModal',
+                                "val": "sensor",
+                                "modalUrl": "views/modals/create/vaporSensor.template.html"
                             },
                             {
                                 "title": "Assets",

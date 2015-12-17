@@ -1,0 +1,63 @@
+<div class="modal fade" id="sensorModal" tabindex="-1" role="dialog" aria-labelledby="openDialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="sensorDialogLabel">Sensors</h4>
+            </div>
+            <form id="sensorForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div id="sensorInputs" class="form-group col-md-12">
+                            <label for="sensorID">Sensor ID:</label>
+                            <input type="text" class="form-control spaced-bottom" id="sensorID" required/>
+                            <label for="sensorType">Type:</label>
+                            <select class="form-control spaced-bottom" id="sensorType">
+                                <option selected disabled>Select</option>
+                                <option value="a">Type A</option>
+                                <option value="b">Type B</option>
+                                <option value="c">Type C</option>
+                            </select>
+                            <div id="sensorTypeContent"></div>
+                            <p id="sensorInst">How To:<br>Click to select sensor position. Click again to set azimuth angle.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" ng-click="model.wsVaporVolume()">Create</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $('#sensorType').on('change', function () {
+        var val = this.value;
+        if (val == 'a') {
+            $('#sensorTypeContent').html(
+                    [
+                        '<label for="posU">Position Uncertainty</label>',
+                        '<input type="text" class="form-control spaced-bottom" id="posU" required/>',
+                        '<label for="velU">Velocity Uncertainty:</label>',
+                        '<input type="text" class="form-control spaced-bottom" id="velU" required/>'
+                    ].join('')
+            )
+        } else if (val == 'b') {
+            $('#sensorTypeContent').html(
+                    [
+                        '<label for="azimuth">Azimuth Uncertainty:</label>',
+                        '<input type="text" class="form-control spaced-bottom" id="azimuth" required/>',
+                        '<label for="elevation">Elevation Uncertainty:</label>',
+                        '<input type="text" class="form-control spaced-bottom" id="elevation" required/>'
+                    ].join('')
+            )
+        } else if (val == 'c') {
+            $('#sensorTypeContent').html(
+                    [
+                        '<label for="range">Range Uncertainty:</label>',
+                        '<input type="text" class="form-control spaced-bottom" id="range" required/>'
+                    ].join('')
+            )
+        }
+    });
+</script>

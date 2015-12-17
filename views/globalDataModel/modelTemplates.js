@@ -21,7 +21,7 @@ var modelTemplates = {
     },
     vapor: {
         dependencies: ['Listeners', 'Cs', 'Common', 'Create', 'Vapor'],
-        menu: ['File', 'Create', 'Vapor'],
+        menu: ['File', 'vaporCreate', 'Vapor'],
         leftUtil: ['Prioritization', 'Scene'],
         rightUtil: ['sensorEditor'],
         footer: [],

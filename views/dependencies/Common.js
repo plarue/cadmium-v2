@@ -317,7 +317,6 @@
 
     Common.prototype.selectInputs = function(e, id) {
         var self = this;
-        console.log(self);
         var value = e;
         var instances = self.currentGeometry[id]._numberOfInstances;
         var indId = 'ind' + id;

@@ -1,6 +1,6 @@
-%Index   Identifier  Type  Lat         Lon           Alt      Boresight    NumSensorIDs  SensorIDs  Fixed
-1        Aegis_1     22    32.25       -90.0         0.0      0.0          2             1 3        0
-2        Aegis_2     22    29.0        -78.25        0.0      0.0          2             1 3        0
-3        Aegis_3     22    32.1        -81.1         0.0      0.0          2             1 3        0
-4        THAAD_1     3     27.77       -86.5         0.0      0.0          3             2 4 5      0
-5        THAAD_WF    3     25.7700     -80.20        0.0      0.0          1             5          1
+%Index   Identifier  Type  Lat         Lon           Alt      Boresight    NumSensorIDs  SensorIDs  Fixed  Inventory
+1        Aegis_1     22    32.25       -90.0         0.0      0.0          2             1 3        0      24
+2        Aegis_2     22    29.0        -78.25        0.0      0.0          2             1 3        0      24
+3        Aegis_3     22    32.1        -81.1         0.0      0.0          2             1 3        0      24
+4        THAAD_1     3     27.77       -86.5         0.0      0.0          3             2 4 5      0      24
+5        THAAD_WF    3     25.7700     -80.20        0.0      0.0          1             5          1      24

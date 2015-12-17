@@ -1,3 +1,3 @@
-%Index   Identifier  Type  Lat         Lon           Alt      Boresight    NumSensorIDs  SensorIDs  Fixed
+%Index   Identifier  Type  Lat         Lon           Alt      Boresight    NumSensorIDs  SensorIDs  Fixed  Inventory
 1        Aegis_1     22    31.940578000       -106.238031000        0.0      0.0          2             1 3        0      24
 2        Aegis_2     22    31.856586000       -106.493495000        0.0      0.0          2             1 3        0      24
