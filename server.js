@@ -1004,6 +1004,15 @@ bigio.initialize(function() {
             })
         });
 
+        socket.on('find', function(db, searchParam,  pt, callback) {
+            mongoose.model(db).find(searchParam, '-_id -__v', function (err, results) {
+                if (err) return callback(err);
+                (pt)
+                    ? callback(results, pt)
+                    : callback(results);
+            })
+        });
+
         socket.on('refreshAll', function(database, callback){
             (function(db){
                 mongoose.model(db).find({}, function (err, results) {

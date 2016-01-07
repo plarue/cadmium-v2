@@ -93,7 +93,13 @@
 
             self.initialized.Common = true;
         },
+        Acquire: function(self){
+            socket.on('defendedArea', function(grid) {
+                self.heatMap.concat(self.hexbin(grid));
+            });
 
+            self.initialized.Acquire = true;
+        },
         Cs: function(self){
             socket.on('loadElement', function (dbData) {
                 if (dbData) {

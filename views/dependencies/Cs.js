@@ -119,13 +119,10 @@
             scene.primitives.add(primitive);
 
             //ADD VISIBILITY SLIDER
-            var list = $('#entityList');
-            var trackSlider = document.getElementById('tracks');
-            if (trackSlider == null) {
-                self.createSlider('tracks', 'Tracks', 'track', 1);
-            }
-            if (list.innerHTML != '' || list.innerHTML != null){
+            var entityToggle = $.grep(self.toggle.entities, function(e){ return e.id == 'tracks'; });
+            if (entityToggle.length === 0) {
                 $('#entityTitle').show();
+                self.createSlider('tracks', 'Tracks', 'track', 1);
             }
         }else if (arguments[0] == 'remove'){
             scene.primitives.remove(self.currentGeometry[track.id]);
@@ -149,13 +146,10 @@
             self.currentGeometry[truth.id] = polyline;
 
             //ADD VISIBILITY SLIDER
-            var list = $('#entityList');
-            var trackSlider = document.getElementById('tracks');
-            if (trackSlider == null) {
-                self.createSlider('tracks', 'Tracks', 'track', 1);
-            }
-            if (list.innerHTML != '' || list.innerHTML != null){
+            var entityToggle = $.grep(self.toggle.entities, function(e){ return e.id == 'truths'; });
+            if (entityToggle.length === 0) {
                 $('#entityTitle').show();
+                self.createSlider('truths', 'Truths', 'track', 1);
             }
         }else if (arguments[0] == 'remove'){
             if (self.currentGeometry[truth.id]) {
@@ -269,18 +263,18 @@
     };
 
     Cs.prototype.createIcon = function(icon, id, name, lon, lat, alt){
-        console.log(icon);
         var modifiers = {};
         modifiers[msa.SymbologyStandard] = RendererSettings.Symbology_2525C;
 
         var ii = armyc2.c2sd.renderer.MilStdIconRenderer.Render(icon, modifiers);
+        var image = ii.getImage();
 
         var icon = viewer.entities.add({
             id: id,
             name: id,
             position: Cesium.Cartesian3.fromDegrees(lon, lat, alt),
             billboard: {
-                image: ii.getImage()
+                image: image
             },
             label : {
                 text : name,

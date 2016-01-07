@@ -270,6 +270,7 @@ function hexbinTwo(grid){
     var polygons = hexbin(grid.points);
 
     console.log(polygons);
+    var primitives = [];
 
     for (var i in polygons){
         var pkArray = [];

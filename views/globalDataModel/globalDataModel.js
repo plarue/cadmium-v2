@@ -149,6 +149,10 @@
                                 "click": 'stopOptimization'
                             },
                             {
+                                "title": "Evaluate Laydown",
+                                "click": 'evaluateScenario'
+                            },
+                            {
                                 "divider": "true"
                             },
                             {

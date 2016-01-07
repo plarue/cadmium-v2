@@ -45,16 +45,226 @@
     };
 
     Acquire.prototype.evaluateScenario = function() {
+        var self = this;
         console.log("Evaluating scenario");
-        clearHeatmap();
+        self.clearHeatmap();
         socket.emit('evaluateScenario');
     };
 
-    Acquire.prototype.clearHeatmap = function() {
-        for(var p in heatMap) {
-            scene.primitives.remove(heatMap[p]);
+    Acquire.prototype.hexbin = function(grid){
+        console.log("Displaying Grid");
+        var b = grid.bounds,
+            left = (b.west > b.east) ? b.west : b.east,
+            right = (b.west > b.east) ? b.east :b.west,
+            top = (b.north > b.south) ? b.north : b.south,
+            bottom = (b.north > b.south) ? b.south : b.north,
+            chartWidth = left - right,
+            chartHeight = top - bottom,
+            avgDist = bruteAvg(grid.points);
+        for (var i=right; i < left; i+=avgDist[0]){
+            for (var j=bottom; j < top; j+=avgDist[0]){
+                grid.points.push({
+                    maxPk: 1,
+                    lon: i,
+                    lat: j
+                })
+            }
         }
-        heatMap = [];
+        socket.emit('find', 'asset', {ftype: 'DefendedAreas_NK.dat'}, {points: grid.points, dist: avgDist[0]}, function(result, pt){
+            var interiorPoints = [];
+            for (var i=0; i < result.length; i++){
+                var poly = result[i],
+                    polyCorners = 0,
+                    polyX = [],
+                    polyY = [];
+                for(var j=0; j < poly.latlonalt.length; j+=3){
+                    polyCorners += 1;
+                    polyX.push(poly.latlonalt[j]);
+                    polyY.push(poly.latlonalt[j+1]);
+                }
+                for (var j=0; j < pt.points.length; j++){
+                    var x = pt.points[j].lat;
+                    var y = pt.points[j].lon;
+                    var interiorPoint = pointInPoly(polyCorners, polyX, polyY, x, y);
+                    if (interiorPoint) {
+                        interiorPoints.push(pt.points[j]);
+                    }
+                }
+            }
+
+            var hex = d3.hexbin()
+                .size([chartWidth, chartHeight])
+                .radius(pt.dist);
+
+            var polygons = hex(interiorPoints);
+
+            console.log(polygons);
+            var primitives = [];
+
+            for (var i in polygons){
+                var pkArray = [],
+                    points = [],
+                    avgPk;
+
+                for (var j in polygons[i]){
+                    if (typeof polygons[i][j] === 'object'){
+                        points.push(polygons[i][j])
+                    }
+                }
+                if (points.length > 1){
+                    for (var j=0; j < points.length; j++){
+                        if (points[j].maxPk !== 0) {
+                            pkArray.push(points[j].maxPk);
+                        }
+                    }
+                    if (pkArray.length !== 1) {
+                        var sum = pkArray.reduce(function (a, b) {return a + b;});
+                        avgPk = sum / pkArray.length;
+                    }else{avgPk = 1}
+                }else{
+                    avgPk = points[0].maxPk;
+                }
+
+                var vertices = hexagon(polygons[i].y, polygons[i].x, avgDist[1]);
+                var rgba = new Cesium.Color(
+                    red(2 * (1 - avgPk) - 1),
+                    green(2 * (1 - avgPk) - 1),
+                    blue(2 * (1 - avgPk) - 1),
+                    0.8
+                );
+                var entity = viewer.entities.add({
+                    polygon : {
+                        hierarchy : Cesium.Cartesian3.fromDegreesArray(vertices),
+                        material : rgba
+                    }
+                });
+                primitives.push(entity);
+            }
+            return primitives;
+        });
+
+        function toRad(x) {
+            return x * Math.PI / 180;
+        }
+
+        function haversine(p1, p2){
+            var R = 6371000; // metres
+            var L1 = toRad(p1[0]);
+            var L2 = toRad(p2[0]);
+            var dLat = toRad((p2[0]-p1[0]));
+            var dLon = toRad((p2[1]-p1[1]));
+
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(L1) * Math.cos(L2) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c;
+        }
+
+        function bruteAvg(points) {
+            var minDist = null,
+                currDeg = {},
+                currHav = {},
+                allMinDeg = [],
+                allMinHav = [];
+
+            for (var i = 0; i < points.length; i++) {
+                for (var j = 0; j < points.length; j++) {
+                    if (j !== i) {
+                        var deg = Math.sqrt(Math.pow(points[i].lat - points[j].lat, 2) + Math.pow(points[i].lon - points[j].lon, 2));
+                        var hav = haversine([points[i].lat, points[i].lon], [points[j].lat, points[j].lon]);
+                        if (minDist === null || deg < minDist) {
+                            minDist = deg;
+                            currDeg = {i: j, dist: deg};
+                            currHav = {i: j, dist: hav};
+                        }
+                    }
+                }
+                if(minDist !== null) {
+                    allMinDeg.push(currDeg);
+                    allMinHav.push(currHav);
+                    minDist = null;
+                    currDeg = {};
+                    currHav = {};
+                }
+            }
+            allMinDeg.sort(function(a,b){return parseFloat(a.dist) - parseFloat(b.dist);});
+            var lookup = {};
+            for (var i = 0, len = allMinHav.length; i < len; i++) {
+                lookup[allMinHav[i].i] = allMinHav[i];
+            }
+
+            var maxDeg = allMinDeg[allMinDeg.length - 1].dist,
+                maxIndex = allMinDeg[allMinDeg.length - 1].i,
+                minDeg = allMinDeg[0].dist,
+                minIndex = allMinDeg[0].i,
+                maxHav = lookup[maxIndex].dist,
+                minHav = lookup[minIndex].dist;
+            return [((minDeg + maxDeg)/2), ((minHav + maxHav)/2)];
+        }
+
+        function pointInPoly(polyCorners, polyX, polyY, x, y){
+            var j = polyCorners - 1,
+                oddNodes= false;
+
+            for (var i=0; i < polyCorners; i++) {
+                if ((polyY[i]< y && polyY[j]>=y
+                    ||   polyY[j]< y && polyY[i]>=y)
+                    &&  (polyX[i]<=x || polyX[j]<=x)) {
+                    if (polyX[i]+(y-polyY[i])/(polyY[j]-polyY[i])*(polyX[j]-polyX[i])<x) {
+                        oddNodes = !oddNodes; }}
+                j=i; }
+
+            return oddNodes;
+        }
+        function hexagon(lat, lon, radius){
+            var vertices = [],
+                R=6378137,
+                x = lat,
+                y = lon,
+                nOffset = radius,
+                dy = nOffset/(R*Math.cos(Math.PI*x/180)),
+                cx = x,
+                cy = y + dy * 180/Math.PI;
+            for (var i=0; i <= 360; i+=60){
+                var theta = (Math.PI / 180) * i,
+                    cos = Math.cos(theta),
+                    sin = Math.sin(theta),
+                    nx = (sin * (cx - x)) + (cos * (cy - y)) + x,
+                    ny = (sin * (cy - y)) + (cos * (cx - x)) + y;
+                vertices.push(ny, nx);
+            }
+            return vertices;
+        }
+
+        function base(val) {
+            if ( val <= -0.75 ) return 0;
+            else if ( val <= -0.25 ) return interpolate( val, 0.0, -0.75, 1.0, -0.25 );
+            else if ( val <= 0.25 ) return 1.0;
+            else if ( val <= 0.75 ) return interpolate( val, 1.0, 0.25, 0.0, 0.75 );
+            else return 0.0;
+        }
+        function interpolate(val, y0, x0, y1, x1) {
+            return (val-x0)*(y1-y0)/(x1-x0) + y0;
+        }
+        function red(val) {
+            return base(val - 0.5);
+        }
+        function green(val) {
+            return base(val);
+        }
+        function blue(val) {
+            return base(val + 0.5);
+        }
+    };
+
+    Acquire.prototype.clearHeatmap = function() {
+        var self = this;
+        for(var p in self.heatMap) {
+            scene.primitives.remove(self.heatMap[p]);
+        }
+        self.heatMap = [];
     };
 
     Acquire.prototype.graph = function() {

@@ -71,8 +71,8 @@
     Common.prototype.clearData = function (callback) {
         console.log('Clearing existing data');
         var self = this;
-        var dbType = ['sensor', 'weapon', 'track', 'asset'];
-        for (var i=0; i < 4; i++){
+        var dbType = ['sensor', 'weapon', 'track', 'truth', 'asset'];
+        for (var i=0; i < dbType.length; i++){
             socket.emit('findAll', dbType[i], dbType[i], function (cb, pt) {
                 if (cb.length > 0) {
                     for (var i = 0; i < cb.length; i++) {
@@ -81,7 +81,7 @@
                 }else{console.log('Database \"' + pt + '\" contained no data')}
                 if (pt == 'asset'){
                     if ($('#entityList').length > 0) {
-                        $('#entityList').html('');
+                        self.toggle.entities = [];
                     }
                     if(callback) {
                         callback();
@@ -291,9 +291,10 @@
         }
     };
 
-    Common.prototype.trackCollection = function(e){
-        var value = e.target.value;
-        var keys = Object.keys(currentGeometry);
+    Common.prototype.trackCollection = function(e, id){
+        var self = this;
+        var value = e;
+        var keys = Object.keys(self.currentGeometry);
         var targetKey = [];
         for (var i=0; i < keys.length; i++) {
             var current = keys[i].slice(0,1);
@@ -301,10 +302,10 @@
                 targetKey.push(keys[i]);
             }
         }
-        var indId = 'ind' + e.target.id;
+        var indId = 'ind' + id;
         var indicator = document.getElementById(indId);
         for (var i=0; i < targetKey.length; i++) {
-            var attributes = currentGeometry[targetKey[i]].getGeometryInstanceAttributes(targetKey[i]);
+            var attributes = self.currentGeometry[targetKey[i]].getGeometryInstanceAttributes(targetKey[i]);
             if (value == 0) {
                 attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(false);
                 indicator.style.backgroundColor = '#ff0000';

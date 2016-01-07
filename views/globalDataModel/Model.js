@@ -16,9 +16,11 @@
         this.dependencies = [];
         this.initialized = {
             Common: false,
+            Acquire: false,
             Cs: false,
             Vapor: false
         };
+        this.heatMap = [];
         this.currentGeometry = {};
         this.imageryModel = {};
         this.toggle = {
