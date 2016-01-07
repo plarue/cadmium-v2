@@ -767,7 +767,7 @@ bigio.initialize(function() {
         bigio.addListener({
             topic: 'threat_truth',
             listener: function(message){
-                console.log('ACQUIRE MSG:');
+                console.log('Advanced Sim MSG:');
                 console.log(message);
 
                 /*mongoose.model('truth').findOne({name: message[1]}, function(err, result){

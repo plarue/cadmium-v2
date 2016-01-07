@@ -4,17 +4,20 @@
 
 (function (exports) {
 
+
     function Acquire(){
         /*
             optimize
             stopOptimization
             generateThreats
             evaluateScenario
+            hexbin
             clearHeatmap
             graph
             RadarChart
         */
     }
+
 
     Acquire.prototype.optimize = function() {
         var algorithm = $("#optimizeModal").find("#psoAlgorithm").is(':checked') ? 'PARTICLE_SWARM' :
@@ -97,8 +100,6 @@
                 .radius(pt.dist);
 
             var polygons = hex(interiorPoints);
-
-            console.log(polygons);
             var primitives = [];
 
             for (var i in polygons){

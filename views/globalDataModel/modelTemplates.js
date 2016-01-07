@@ -37,7 +37,7 @@ var modelTemplates = {
     },
     birdsEye: {
         dependencies: ['Listeners', 'Cs', 'Common', 'EntitySelector', 'Create', 'BirdsEye'],
-        menu: ['File', 'Create'],
+        menu: ['File', 'Create', 'BirdsEye'],
         leftUtil: ['Scene'],
         rightUtil: ['entitySelect'],
         footer: ['clouds'],

@@ -183,6 +183,19 @@
                             }
                         ]
                     },
+                    "BirdsEye": {
+                        "title": "Simulation",
+                        "submenu": [
+                            {
+                                "title": "Start Sim",
+                                "click": 'startBirdsEye'
+                            },
+                            {
+                                "title": "Stop Sim",
+                                "click": 'stopBirdsEye'
+                            }
+                        ]
+                    },
                     "Simulation": {
                         "title": "Simulation",
                         "submenu": [

@@ -1,9 +1,5 @@
-target
 *.log
-*.swp
 *~
 .idea
 node_modules
 *.iml
-public/tmp
-
