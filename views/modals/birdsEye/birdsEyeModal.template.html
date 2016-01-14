@@ -1,9 +1,9 @@
-<div class="modal fade" id="birdseyeModal" tabindex="-1" role="dialog" aria-labelledby="optimizeModalLabel">
+<div class="modal fade" id="birdsEyeModal" tabindex="-1" role="dialog" aria-labelledby="optimizeModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <!--button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button-->
-                <h4 class="modal-title" id="optimizeModalLabel">Run Optimization</h4>
+                <h4 class="modal-title" id="optimizeModalLabel">Run Simulation</h4>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -11,32 +11,47 @@
                         <h4>Sat Manager Algorithm</h4>
                         <div class="radio">
                             <label>
-                                <input type="radio" name="satAlgorithmRadio" id="Algorithm1" value="Particle Swarm" checked>Option 1</input>
+                                <input type="radio" name="satAlgorithmRadio" id="satGreedy" value="GREEDY" checked>Greedy</input>
                             </label>
                         </div>
                         <div class="radio">
                             <label>
-                                <input type="radio" name="satAlgorithmRadio" id="Algorithm2" value="Particle Swarm" checked>Option 1</input>
+                                <input type="radio" name="satAlgorithmRadio" id="sliced_JVC" value="SLICED_JVC">Sliced JVC</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="satAlgorithmRadio" id="satP2P" value="P2P">P2P</input>
                             </label>
                         </div>
                     </div>
-                    <div class="col-md-6" id="algOne">
+                    <div class="col-md-6">
                         <h4>Battle Manager Algorithm</h4>
                         <div class="radio">
                             <label>
-                                <input type="radio" name="bmAlgorithmRadio" id="option1" value="Sensors" checked>Option 1</input>
+                                <input type="radio" name="bmAlgorithmRadio" id="bmGreedy" value="GREEDY" checked>Greedy</input>
                             </label>
                         </div>
                         <div class="radio">
                             <label>
-                                <input type="radio" name="bmAlgorithmRadio" id="option2" value="Sensors" checked>Option 2</input>
+                                <input type="radio" name="bmAlgorithmRadio" id="murty" value="MURTY">Murty</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="bmAlgorithmRadio" id="bmP2P" value="P2P">P2P</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="bmAlgorithmRadio" id="sliced_murty" value="SLICED_MURTY">Sliced Murty</input>
                             </label>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" ng-click="model.optimize();" data-dismiss="modal">Optimize</button>
+                <button type="button" class="btn btn-primary" ng-click="model.startBirdsEye();" data-dismiss="modal">Run</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>
         </div>

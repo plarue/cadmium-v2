@@ -188,7 +188,9 @@
                         "submenu": [
                             {
                                 "title": "Start Sim",
-                                "click": 'startBirdsEye'
+                                "click": 'launchModal',
+                                "val": "#birdsEyeModal",
+                                "modalUrl": "views/modals/birdsEye/birdsEyeModal.template.html"
                             },
                             {
                                 "title": "Stop Sim",

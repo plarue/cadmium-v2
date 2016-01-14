@@ -910,16 +910,18 @@ bigio.initialize(function() {
             }
         });*/
 
-        socket.on('startOptimization', function(algorithm, type) {
+        socket.on('startOptimization', function(msgDetails) {
             console.log("Saving scenario for the run");
             var name = makeid();
             saveScenario('tmp', name, function() {
-                console.log('Starting Optimization: ' + algorithm);
-                var message = {relativePath: path.join(__dirname, 'public/tmp', name), algorithm: algorithm, type: type};
+                console.log('Starting Optimization');
+                var message = {relativePath: path.join(__dirname, 'public/tmp', name)};
+                for (var key in msgDetails){message[key] = msgDetails[key];}
+                console.log(message);
                 bigio.send({
                     topic: 'acquire_start',
                     message: message,
-                    type: "com.a2i.messages.StartMessage"
+                    type: msgDetails.bigioType
                 });
             });
         });
