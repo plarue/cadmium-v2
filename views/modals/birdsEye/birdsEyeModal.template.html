@@ -1,0 +1,44 @@
+<div class="modal fade" id="birdseyeModal" tabindex="-1" role="dialog" aria-labelledby="optimizeModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!--button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button-->
+                <h4 class="modal-title" id="optimizeModalLabel">Run Optimization</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Sat Manager Algorithm</h4>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="satAlgorithmRadio" id="Algorithm1" value="Particle Swarm" checked>Option 1</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="satAlgorithmRadio" id="Algorithm2" value="Particle Swarm" checked>Option 1</input>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6" id="algOne">
+                        <h4>Battle Manager Algorithm</h4>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="bmAlgorithmRadio" id="option1" value="Sensors" checked>Option 1</input>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="bmAlgorithmRadio" id="option2" value="Sensors" checked>Option 2</input>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="model.optimize();" data-dismiss="modal">Optimize</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
