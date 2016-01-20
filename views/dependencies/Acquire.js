@@ -32,7 +32,7 @@
             $("#optimizeModal").find("#stadiumType").is(':checked') ? 'STADIUM' : '';
 
         console.log('Optimizing ' + type + ' and ' + algorithm);
-        socket.emit('startOptimization', {algorithm: algorithm, type: type, bigioType: "com.a2i.messages.StartMessage"});
+        socket.emit('startOptimization', {topic: 'acquire_start', algorithm: algorithm, type: type, bigioType: "com.a2i.messages.StartMessage"});
     };
 
     Acquire.prototype.stopOptimization = function() {

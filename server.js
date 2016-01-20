@@ -919,7 +919,7 @@ bigio.initialize(function() {
                 for (var key in msgDetails){message[key] = msgDetails[key];}
                 console.log(message);
                 bigio.send({
-                    topic: 'acquire_start',
+                    topic: msgDetails.topic,
                     message: message,
                     type: msgDetails.bigioType
                 });

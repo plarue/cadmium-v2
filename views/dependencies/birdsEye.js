@@ -18,7 +18,7 @@
         var bmAlgorithm = $("input[name=bmAlgorithmRadio]:checked").val();
 
         console.log('Starting Simulation');
-        socket.emit('startOptimization', {sat_algorithm: satAlgorithm, bm_algorithm: bmAlgorithm, bigioType: "com.a2i.message.StartMessage"});
+        socket.emit('startOptimization', {topic: 'birds_eye_start', sat_algorithm: satAlgorithm, bm_algorithm: bmAlgorithm, bigioType: "com.a2i.message.StartMessage"});
     };
 
     BirdsEye.prototype.stopBirdsEye = function() {
