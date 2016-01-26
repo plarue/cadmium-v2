@@ -940,7 +940,7 @@ bigio.initialize(function() {
                 bigio.send({
                     topic: msgDetails.topic,
                     message: msgDetails.msg,
-                    type: msgDetails.javaclass
+                    javaclass: msgDetails.javaclass
                 });
             });
         });

@@ -38,7 +38,8 @@
                 algorithm: algorithm,
                 type: type
             },
-            javaclass: "com.a2i.messages.StartMessage"});
+            javaclass: "com.a2i.messages.StartMessage"
+        });
     };
 
     Acquire.prototype.stopOptimization = function() {
