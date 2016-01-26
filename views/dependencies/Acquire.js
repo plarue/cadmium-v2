@@ -19,7 +19,7 @@
     }
 
 
-    Acquire.prototype.optimize = function() {
+    /*Acquire.prototype.optimize = function() {
         var algorithm = $("#optimizeModal").find("#psoAlgorithm").is(':checked') ? 'PARTICLE_SWARM' :
             $("#optimizeModal").find("#evolutionaryAlgorithm").is(':checked') ? 'EVOLUTIONARY' :
             $("#optimizeModal").find("#greedyAlgorithm").is(':checked') ? 'GREEDY' :
@@ -40,6 +40,22 @@
             },
             javaclass: "com.a2i.messages.StartMessage"
         });
+    };*/
+
+    Acquire.prototype.optimize = function() {
+        var algorithm = $("#optimizeModal").find("#psoAlgorithm").is(':checked') ? 'PARTICLE_SWARM' :
+            $("#optimizeModal").find("#evolutionaryAlgorithm").is(':checked') ? 'EVOLUTIONARY' :
+                $("#optimizeModal").find("#greedyAlgorithm").is(':checked') ? 'GREEDY' :
+                    $("#optimizeModal").find("#stadiumAlgorithm").is(':checked') ? 'STADIUM' : '';
+
+        var type = $("#optimizeModal").find("#sensorsType").is(':checked') ? 'SENSORS' :
+            $("#optimizeModal").find("#sensorsTypeTwo").is(':checked') ? 'SENSORS' :
+                $("#optimizeModal").find("#weaponsType").is(':checked') ? 'WEAPONS' :
+                    $("#optimizeModal").find("#weaponsSensorsType").is(':checked') ? 'WEAPONS_SENSORS' :
+                        $("#optimizeModal").find("#stadiumType").is(':checked') ? 'STADIUM' : '';
+
+        console.log('Optimizing ' + type + ' and ' + algorithm);
+        socket.emit('startOptimization', algorithm, type);
     };
 
     Acquire.prototype.stopOptimization = function() {

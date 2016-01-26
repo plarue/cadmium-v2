@@ -930,17 +930,38 @@ bigio.initialize(function() {
         });*/
 
         //GENERAL START
-        socket.on('startOptimization', function(msgDetails) {
+        socket.on('startBirdsEye', function(sat_algorithm, bm_algorithm) {
             console.log("Saving scenario for the run");
             var name = makeid();
             saveScenario('tmp', name, function() {
                 console.log('Starting Optimization');
-                msgDetails.msg.relativePath = path.join(__dirname, 'public/tmp', name);
-                console.log(msgDetails.msg);
+                var message = {
+                    relativePath: path.join(__dirname, 'public/tmp', name),
+                    sat_algorithm: sat_algorithm,
+                    bm_algorithm: bm_algorithm
+                };
                 bigio.send({
-                    topic: msgDetails.topic,
-                    message: msgDetails.msg,
-                    javaclass: msgDetails.javaclass
+                    topic: 'birds_eye_start',
+                    message: message,
+                    type: "com.a2i.messages.StartMessage"
+                });
+            });
+        });
+
+        socket.on('startOptimization', function(algorithm, type) {
+            console.log("Saving scenario for the run");
+            var name = makeid();
+            saveScenario('tmp', name, function() {
+                console.log('Starting Optimization: ' + algorithm);
+                var message = {
+                    relativePath: path.join(__dirname, 'public/tmp', name),
+                    algorithm: algorithm,
+                    type: type
+                };
+                bigio.send({
+                    topic: 'acquire_start',
+                    message: message,
+                    type: "com.a2i.messages.StartMessage"
                 });
             });
         });
