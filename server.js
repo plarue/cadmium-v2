@@ -825,14 +825,6 @@ bigio.initialize(function() {
         //BIRDS-EYE SPECIFIC
 
         bigio.addListener({
-            topic: 'satellite_state_ecef',
-            listener: function (message) {
-                console.log('Satellite state ecef: ');
-                console.log(message);
-            }
-        });
-
-        bigio.addListener({
             topic: 'sensor_task',
             listener: function (message){
                 console.log('Sensor Task: ');
@@ -943,17 +935,12 @@ bigio.initialize(function() {
             var name = makeid();
             saveScenario('tmp', name, function() {
                 console.log('Starting Optimization');
-                var message = {relativePath: path.join(__dirname, 'public/tmp', name)};
-                for (var key in msgDetails){
-                    if (key != 'topic' && key != 'bigioType'){
-                        message[key] = msgDetails[key];
-                    }
-                }
-                console.log(message);
+                msgDetails.msg.relativePath = path.join(__dirname, 'public/tmp', name);
+                console.log(msgDetails.msg);
                 bigio.send({
                     topic: msgDetails.topic,
-                    message: message,
-                    type: msgDetails.bigioType
+                    message: msgDetails.msg,
+                    type: msgDetails.javaclass
                 });
             });
         });
