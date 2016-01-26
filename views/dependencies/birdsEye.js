@@ -23,7 +23,11 @@
 
     BirdsEye.prototype.stopBirdsEye = function() {
         console.log("Stopping Simulation");
-        socket.emit('stopOptimization');
+        socket.emit('bigioMsg', {
+            topic: 'birds_eye_stop',
+            msg: {},
+            javaclass: "com.a2i.message.StopMessage"
+        });
     };
 
     exports.BirdsEye = BirdsEye;

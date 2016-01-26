@@ -37,7 +37,11 @@
 
     Acquire.prototype.stopOptimization = function() {
         console.log("Stopping optimization");
-        socket.emit('stopOptimization');
+        socket.emit('bigioMsg', {
+            topic: 'acquire_stop',
+            msg: {},
+            javaclass: "com.a2i.messages.StopMessage"
+        });
     };
 
     Acquire.prototype.generateThreats = function() {

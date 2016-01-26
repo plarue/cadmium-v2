@@ -767,7 +767,7 @@ bigio.initialize(function() {
         bigio.addListener({
             topic: 'threat_truth',
             listener: function(message){
-                console.log('Advanced Sim MSG:');
+                console.log('THREAT TRUTH MSG:');
                 console.log(message);
 
                 /*mongoose.model('truth').findOne({name: message[1]}, function(err, result){
@@ -821,6 +821,33 @@ bigio.initialize(function() {
                 });*/
             }
         });
+
+        //BIRDS-EYE SPECIFIC
+
+        bigio.addListener({
+            topic: 'satellite_state_ecef',
+            listener: function (message) {
+                console.log('Satellite state ecef: ');
+                console.log(message);
+            }
+        });
+
+        bigio.addListener({
+            topic: 'sensor_task',
+            listener: function (message){
+                console.log('Sensor Task: ');
+                console.log(message);
+            }
+        });
+
+        bigio.addListener({
+            topic: 'uas_model',
+            listener: function (message){
+                console.log('UAS Model: ');
+                console.log(message);
+            }
+        });
+
 //TODO: REFACTOR FROM CZML
         /*bigio.addListener({
             topic: 'threat_truth',
@@ -910,13 +937,18 @@ bigio.initialize(function() {
             }
         });*/
 
+        //GENERAL START
         socket.on('startOptimization', function(msgDetails) {
             console.log("Saving scenario for the run");
             var name = makeid();
             saveScenario('tmp', name, function() {
                 console.log('Starting Optimization');
                 var message = {relativePath: path.join(__dirname, 'public/tmp', name)};
-                for (var key in msgDetails){message[key] = msgDetails[key];}
+                for (var key in msgDetails){
+                    if (key != 'topic' && key != 'bigioType'){
+                        message[key] = msgDetails[key];
+                    }
+                }
                 console.log(message);
                 bigio.send({
                     topic: msgDetails.topic,
@@ -926,12 +958,12 @@ bigio.initialize(function() {
             });
         });
 
-        socket.on('stopOptimization', function() {
-            var message = {};
+        //CLIENT CONSTRUCTED MESSAGE
+        socket.on('bigioMsg', function(msgDetails) {
             bigio.send({
-                topic: 'acquire_stop',
-                message: message,
-                javaclass: "com.a2i.messages.StopMessage"
+                topic: msgDetails.topic,
+                message: msgDetails.msg,
+                javaclass: msgDetails.javaclass
             });
         });
 
