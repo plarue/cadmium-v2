@@ -940,6 +940,7 @@ bigio.initialize(function() {
                     sat_algorithm: sat_algorithm,
                     bm_algorithm: bm_algorithm
                 };
+                console.log(message);
                 bigio.send({
                     topic: 'birds_eye_start',
                     message: message,
