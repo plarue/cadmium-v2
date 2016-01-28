@@ -829,6 +829,19 @@ bigio.initialize(function() {
             listener: function (message){
                 console.log('Sensor Task: ');
                 console.log(message);
+                var msg = {
+                    taskId: message[0],
+                    taskType: message[1],
+                    satelliteId: message[2],
+                    sensorId: message[3],
+                    trackId: message[4],
+                    trackValue: message[5],
+                    trackUrgency: message[6],
+                    cost: message[7],
+                    tSlew: message[8],
+                    tStartCollect: message[9],
+                    tStopCollect: message[10]
+                }
             }
         });
 
@@ -929,11 +942,11 @@ bigio.initialize(function() {
             }
         });*/
 
-        //GENERAL START
+        //START SCENARIOS
         socket.on('startBirdsEye', function(sat_algorithm, bm_algorithm) {
             console.log("Saving scenario for the run");
             var name = makeid();
-            saveScenario('tmp', name, function() {
+            saveScenario('tmp', name, 'birdsEye', function() {
                 console.log('Starting Optimization');
                 var message = {
                     relativePath: path.join(__dirname, 'public/tmp', name),
@@ -952,7 +965,7 @@ bigio.initialize(function() {
         socket.on('startOptimization', function(algorithm, type) {
             console.log("Saving scenario for the run");
             var name = makeid();
-            saveScenario('tmp', name, function() {
+            saveScenario('tmp', name, 'acquire', function() {
                 console.log('Starting Optimization: ' + algorithm);
                 var message = {
                     relativePath: path.join(__dirname, 'public/tmp', name),
@@ -988,7 +1001,7 @@ bigio.initialize(function() {
         socket.on('evaluateScenario', function() {
             console.log("Evaluating scenario");
             var name = makeid();
-            saveScenario('tmp', name, function() {
+            saveScenario('tmp', name, 'acquire', function() {
                 console.log('Starting Evaluation');
                 var message = {relativePath: path.join(__dirname, 'public/tmp', name)};
                 bigio.send({
@@ -1001,7 +1014,7 @@ bigio.initialize(function() {
 
         socket.on('generateThreats', function() {
             var name = makeid();
-            saveScenario('tmp', name, function() {
+            saveScenario('tmp', name, 'acquire', function() {
                 console.log("Generating threats.");
                 var message = {relativePath: path.join(__dirname, 'public/tmp', name)};
                 bigio.send({
@@ -1101,8 +1114,8 @@ bigio.initialize(function() {
             });
         });
 
-        socket.on('saveScenario', function(name, callback) {
-            saveScenario('scenarios', name, callback);
+        socket.on('saveScenario', function(name, process, callback) {
+            saveScenario('scenarios', name, process, callback);
         });
 
         socket.on('openFile', function(cb){
@@ -1221,7 +1234,7 @@ bigio.initialize(function() {
                 shape: line[6],
                 rad: line[7],
                 latlonalt: pos,
-                ftype: ftype,
+                ftype: ftype.replace('_NK', ''),
                 cType: 'asset',
                 create: 'createAsset'
             };
@@ -1327,6 +1340,8 @@ bigio.initialize(function() {
                     maxEl: 90,
                     boresightEl: 0,
                     latlonalt: [+line[4], +line[3], +line[5]],
+                    Fan: 'FlyoutFan_' + line[3] + '_' + line[4] + '_' + line[5] + '.dat',
+                    Table: 'FiringTable_' + line[3] + '_' + line[4] + '_' + line[5] + '.dat',
                     cType: 'weapon',
                     create: 'createVolume'
                 };
@@ -1355,18 +1370,25 @@ function copyRecursiveSync(src, dest) {
   }
 };
 
-function saveScenario(dir, name, callback) {
+function saveScenario(dir, name, process, callback) {
     var root = path.join(__dirname, 'public', dir, name);
-    var dirs = [
-        {directory: 'scenarios', db: 'asset', filename: 'Assets.dat', obj: ['%', 'name', 'Index', 'owner', 'valexp', 'height', 'NFZ', 'shape', 'rad', 'latlonalt']},
-        {directory: 'sensors', db: 'sensor', filename: 'Radars_NK.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'BoresightAz', 'NumWeaponIDs', 'WeaponIDs', 'KFactorClass', 'KFactorType', 'KFactorID', 'Fixed']},
-        {directory: 'weapons', db: 'weapon', filename: 'Launchers_NK.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'Boresight', 'NumSensorIDs', 'SensorIDs', 'Fixed', 'Inventory']}
-    ];
+    var dirs = {
+        acquire: [
+            {directory: 'scenarios', db: 'asset', filename: 'Assets.dat', suffix: '_NK', obj: ['%', 'name', 'Index', 'owner', 'valexp', 'height', 'NFZ', 'shape', 'rad', 'latlonalt']},
+            {directory: 'sensors', db: 'sensor', filename: 'Radars_NK.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'BoresightAz', 'NumWeaponIDs', 'WeaponIDs', 'KFactorClass', 'KFactorType', 'KFactorID', 'Fixed']},
+            {directory: 'weapons', db: 'weapon', filename: 'Launchers_NK.dat', obj: ['%', 'Index', 'Identifier', 'Type', 'Lat', 'Lon', 'Alt', 'Boresight', 'NumSensorIDs', 'SensorIDs', 'Fixed', 'Inventory']}
+        ],
+        birdsEye: [
+            {directory: 'scenarios', db: 'asset', filename: 'Assets.dat', obj: ['%', 'name', 'Index', 'owner', 'valexp', 'height', 'shape', 'rad', 'latlonalt']},
+            {directory: 'sensors', db: 'sensor', filename: 'Radars.dat', obj: ['%', 'Index', 'Type', 'Lat', 'Lon', 'Alt', 'BoresightAz', 'NumWeaponIDs', 'WeaponIDs']},
+            {directory: 'weapons', db: 'weapon', filename: 'Launchers.dat', obj: ['%', 'Index', 'Type', 'Lat', 'Lon', 'Alt', 'Boresight', 'Fan', 'Table']}
+        ]
+    };
     fs.mkdir(root, function(err){
         if(err)console.log(err);
         require('ncp').ncp(path.join(__dirname, 'public/template'), root, function(err) {
             if(err)console.log(err);
-            async.each(dirs, function(dir, cb) {
+            async.each(dirs[process], function(dir, cb) {
                 var src = path.join(root, dir.directory);
                 var exists = fs.existsSync(src);
                 var stats = exists && fs.statSync(src);
@@ -1427,8 +1449,13 @@ function saveScenario(dir, name, callback) {
                                 comFiles[p.ftype].comData.push(comObj.join(' '));
                             }
                             for (var key in comFiles) {
-                                var data = comFiles[key].comData.join('\r\n');
-                                fs.writeFile(path.join(root, dir.directory, comFiles[key].fName), data, function (err) {
+                                var data = comFiles[key].comData.join('\r\n'),
+                                    fileName;
+                                if (dir.suffix) {
+                                    var splitName = comFiles[key].fName.split('.');
+                                    fileName = path.join(root, dir.directory, splitName[0] + dir.suffix + '.dat')
+                                }else{fileName = path.join(root, dir.directory, comFiles[key].fName)}
+                                fs.writeFile(fileName, data, function (err) {
                                     if (err)console.log(err);
                                 });
                             }

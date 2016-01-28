@@ -5,7 +5,8 @@
 (function(exports) {
 
 
-    function Model(model, gdm) {
+    function Model(title, model, gdm) {
+        this.currentModel = '';
         this.data = {
             getMenu: [],
             getLeftUtil: [],
@@ -28,11 +29,11 @@
             weapons: [],
             sensors: []
         };
-        this.init(model, gdm);
+        this.init(title, model, gdm);
     }
 
 
-    Model.prototype.init = function(model, gdm){
+    Model.prototype.init = function(title, model, gdm){
         //Clear Unused Dependencies
         var oldDependencies = $(this.dependencies).not(model.dependencies).get();
         if (oldDependencies.length > 0) {
@@ -47,6 +48,8 @@
         var dataModel = gdm.globalModel();
 
         //Load Model
+        this.currentModel = title;
+
         var menu = fill('menu', model.menu, dataModel);
         this.data.getMenu = menu;
         this.data.getLeftUtil = fill('leftUtil', model.leftUtil, dataModel);

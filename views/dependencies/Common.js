@@ -117,9 +117,10 @@
 
      //SAVING
     Common.prototype.saveFile = function() {
+        var self = this;
         document.getElementById('saveDialog').style.display = 'none';
         var name = document.getElementById('scenarioName').value;
-        socket.emit('saveScenario', name, function(cb){
+        socket.emit('saveScenario', name, self.currentModel, function(cb){
             console.log(cb);
         });
     };

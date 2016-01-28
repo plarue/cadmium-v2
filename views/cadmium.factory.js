@@ -5,12 +5,12 @@ function cadmiumFactory(){
     var _GDM = new GDM();
     var _templateModel = modelTemplates;
     var _template = _templateModel.default;
-    var _model = new Model(_template, _GDM);
+    var _model = new Model('default', _template, _GDM);
     console.log(_model);
 
     function modelInit(template){
         _template = _templateModel[template];
-        _model.init(_template, _GDM);
+        _model.init(template, _template, _GDM);
         console.log(_model);
     }
 

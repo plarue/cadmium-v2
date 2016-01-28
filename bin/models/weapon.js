@@ -27,6 +27,8 @@ var weapon = new Schema({
     maxEl: Number,
     boresightEl: Number,
     latlonalt: [],
+    Fan: String,
+    Table: String,
     cType: String,
     create: String
 });
